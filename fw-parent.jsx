@@ -48,9 +48,10 @@ function ParentGate({ onClose, onSuccess }) {
 const fieldLabel = { fontWeight: 700, fontSize: 13, color: 'var(--ink)', fontFamily: 'var(--font-display)', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 };
 
 function ParentSheet({ onClose }) {
-  const { profile, saveProfile, setParentMode, beep, showToast, fbStatus, fbFamily, fbConnect, fbDisconnect } = useApp();
+  const { profile, saveProfile, setParentMode, beep, showToast, fbStatus, fbFamily, fbConnect, fbDisconnect, exportBackup, importBackup } = useApp();
   const [fbOpen, setFbOpen] = useStatePa(false);
   const [pinDraft, setPinDraft] = useStatePa(profile.pin);
+  const importRef = React.useRef(null);
   const gradeInfo = calcGrade(profile.birthYear);
   const years = [];
   const thisYear = new Date().getFullYear();
@@ -141,6 +142,18 @@ function ParentSheet({ onClose }) {
               <button className="btn block" style={{ marginTop: 10 }} onClick={() => setFbOpen(true)}>☁️ ตั้งค่า Cloud Sync</button>
             </>
           )}
+        </div>
+
+        {/* backup / restore */}
+        <div className="p-card">
+          <div style={fieldLabel}>💾 สำรองข้อมูล · Backup</div>
+          <div className="p-hint">เก็บทุกอย่าง (ภารกิจ ผลงาน ดาว โปรไฟล์ ห้องของเฟรยา) เป็นไฟล์เดียว เอาไว้กู้คืนหรือย้ายเครื่อง</div>
+          <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+            <button className="btn block" style={{ flex: 1 }} onClick={exportBackup}>⬇️ ดาวน์โหลดไฟล์สำรอง</button>
+            <button className="btn ghost block" style={{ flex: 1 }} onClick={() => importRef.current.click()}>⬆️ กู้คืนจากไฟล์</button>
+          </div>
+          <input ref={importRef} type="file" accept=".json,application/json" style={{ display: 'none' }}
+            onChange={e => { const f = e.target.files[0]; if (f) importBackup(f).catch(() => {}); e.target.value = ''; }} />
         </div>
 
         {/* pin */}

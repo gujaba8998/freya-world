@@ -571,6 +571,59 @@ function AppProvider({ children, variant, settings }) {
     prevLevel.current = level;
   }, [level, fireConfetti, beep, showToast]);
 
+  // ---- สำรอง/กู้คืนข้อมูล (Backup / Restore) ----
+  // Adapted from an unshipped draft — only fields that actually exist in
+  // THIS app's state are included (no activityDays/markActivityToday, those
+  // belong to a badge-streak system this codebase doesn't have; `room` is
+  // added since it didn't exist when the draft was written).
+  const exportBackup = useCallback(() => {
+    const data = {
+      app: 'freyas-world', version: 1, exportedAt: new Date().toISOString(),
+      missions, progress, stars, wallet, portfolio, submissions, reviewed, rewards, profile,
+      planDone: [...planDone], room,
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    const d = new Date();
+    a.download = `freya-backup-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.json`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    beep('reward');
+    showToast('ดาวน์โหลดไฟล์สำรองแล้ว · Backup saved', '💾');
+  }, [missions, progress, stars, wallet, portfolio, submissions, reviewed, rewards, profile, planDone, room, beep, showToast]);
+
+  const importBackup = useCallback((file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const d = JSON.parse(reader.result);
+          if (d.app !== 'freyas-world') throw new Error('not a Freya backup');
+          if (Array.isArray(d.missions)) setMissions(d.missions);
+          if (d.progress) setProgress(d.progress);
+          if (typeof d.stars === 'number') setStars(d.stars);
+          if (Array.isArray(d.wallet)) setWallet(d.wallet);
+          if (Array.isArray(d.portfolio)) setPortfolio(d.portfolio);
+          if (Array.isArray(d.submissions)) setSubmissions(d.submissions);
+          if (Array.isArray(d.reviewed)) setReviewed(d.reviewed);
+          if (Array.isArray(d.rewards)) setRewards(d.rewards);
+          if (d.profile) setProfile(p => ({ ...p, ...d.profile }));
+          if (Array.isArray(d.planDone)) setPlanDone(new Set(d.planDone));
+          if (d.room) setRoom(d.room);
+          beep('reward'); fireConfetti();
+          showToast('กู้คืนข้อมูลสำเร็จ! · Restored', '✅');
+          resolve();
+        } catch (e) {
+          showToast('ไฟล์ไม่ถูกต้อง · Invalid backup file', '⚠️');
+          reject(e);
+        }
+      };
+      reader.onerror = reject;
+      reader.readAsText(file);
+    });
+  }, [beep, fireConfetti, showToast]);
+
   const val = {
     variant, settings,
     missions, progress, stars, wallet, portfolio, lifetimeStars, level, levelInto,
@@ -585,6 +638,7 @@ function AppProvider({ children, variant, settings }) {
     reviewed,
     planDone, togglePlan,
     fbStatus, fbFamily, fbConnect, fbDisconnect,
+    exportBackup, importBackup,
   };
   return <AppCtx.Provider value={val}>{children}</AppCtx.Provider>;
 }
