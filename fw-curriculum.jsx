@@ -1,0 +1,373 @@
+/* fw-curriculum.jsx — ข้อมูลหลักสูตรจริงจากแผนการจัดการศึกษาโดยครอบครัว เฟรญ่า
+   อ้างอิง: แผนการจัดการศึกษาขั้นพื้นฐานโดยครอบครัว ป.3-6 ปีการศึกษา 2567-2569
+   สังกัด สพป.ปทุมธานี เขต 2 */
+
+const GRADE_LEVELS = [
+  { id: 'อนุบาล', label: 'อนุบาล',                age: '3–5' },
+  { id: 'ป.1',   label: 'ประถมศึกษาปีที่ 1',     age: '6–7' },
+  { id: 'ป.2',   label: 'ประถมศึกษาปีที่ 2',     age: '7–8' },
+  { id: 'ป.3',   label: 'ประถมศึกษาปีที่ 3',     age: '8–9' },
+  { id: 'ป.4',   label: 'ประถมศึกษาปีที่ 4',     age: '9–10' },
+  { id: 'ป.5',   label: 'ประถมศึกษาปีที่ 5',     age: '10–11' },
+  { id: 'ป.6',   label: 'ประถมศึกษาปีที่ 6',     age: '11–12' },
+  { id: 'ม.1',   label: 'มัธยมศึกษาปีที่ 1',     age: '12–13' },
+  { id: 'ม.2',   label: 'มัธยมศึกษาปีที่ 2',     age: '13–14' },
+  { id: 'ม.3',   label: 'มัธยมศึกษาปีที่ 3',     age: '14–15' },
+  { id: 'ม.4',   label: 'มัธยมศึกษาปีที่ 4',     age: '15–16' },
+  { id: 'ม.5',   label: 'มัธยมศึกษาปีที่ 5',     age: '16–17' },
+  { id: 'ม.6',   label: 'มัธยมศึกษาปีที่ 6',     age: '17–18' },
+];
+const GRADE_LABEL = Object.fromEntries(GRADE_LEVELS.map(g => [g.id, g.label]));
+
+function calcGrade(birthYear) {
+  const now = new Date();
+  const syStart = now.getMonth() >= 4 ? now.getFullYear() : now.getFullYear() - 1;
+  const n = (syStart - birthYear) - 5;
+  if (n < 1) return { id: 'อนุบาล', label: 'อนุบาล' };
+  if (n <= 6) return { id: 'ป.' + n, label: 'ประถมศึกษาปีที่ ' + n };
+  const m = Math.min(n - 6, 6);
+  return { id: 'ม.' + m, label: 'มัธยมศึกษาปีที่ ' + m };
+}
+
+/* =========================================================
+   ตัวชี้วัดตามแผนจริง — แต่ละกลุ่มประสบการณ์ × ป.3–ป.6
+   (อ้างอิงจากกิจกรรมและตัวชี้วัดในแผนฯ ที่ส่ง สพท.)
+   ========================================================= */
+const GRADE_INDICATORS = {
+
+  /* ---------- ป.3 ---------- */
+  'ป.3': {
+    life: [
+      'ปลูกผักสวนครัว · Grow vegetables',
+      'ทำขนมกล้วยมะพร้าวอ่อน · Make Thai dessert',
+      'จัดสรรค่าใช้จ่ายรายวัน · Daily budgeting',
+      'ล้างจานและเก็บให้เรียบร้อย · Wash dishes',
+      'ประดิษฐ์ของใช้จากวัสดุรีไซเคิล · Upcycle craft',
+    ],
+    language: [
+      'แต่งนิทานจากประสบการณ์ · Write a story',
+      'เล่าเรื่องจากภาพ · Tell a story from picture',
+      'เกมทายคำศัพท์ · Vocabulary game',
+      'จัดรายการวิทยุ/พอดแคสต์ · Mini podcast',
+      'ร้องเพลงประกอบท่าทาง · Song with actions',
+    ],
+    math: [
+      'ออกแบบลวดลายเรขาคณิต · Geometric patterns',
+      'วัดระยะทางจากบ้านไปร้าน · Measure distance',
+      'ชั่ง-ตวง-วัดส่วนผสมอาหาร · Measure ingredients',
+      'ดู Number Blocks · Math cartoon',
+      'ทำปฏิทินกิจกรรมประจำวัน · Daily schedule',
+    ],
+    science: [
+      'ปลูกผักในขวดพลาสติก · Bottle planting',
+      'สร้างเครื่องดักยุงรีไซเคิล · DIY mosquito trap',
+      'ทดลองการเคลื่อนที่ของวัตถุ · Motion experiment',
+      'สร้างแผนที่ระบบสุริยะ · Solar system model',
+      'ทดลองแม่เหล็ก · Magnet experiment',
+    ],
+    agri: [
+      'ทำไข่เค็มสมุนไพร · Herb salted eggs',
+      'เลี้ยงปลานิลในบ่อดิน · Fish farming',
+      'ทำปุ๋ยมูลไส้เดือน · Worm compost',
+      'เพาะเห็ดฟางในตะกร้า · Mushroom growing',
+      'ทำน้ำส้มควันไม้ · Wood vinegar',
+    ],
+    social: [
+      'ทำแกงจืดเต้าหู้หมูสับ · Cook Thai soup',
+      'เล่นลูกข่างพื้นบ้าน · Traditional spinning top',
+      'เก็บขยะที่สวนสาธารณะ · Community clean-up',
+      'อ่านนิทานพื้นบ้านเงาะป่า · Thai folk tale',
+      'ทัศนศึกษาบึงฉวาก · Field trip',
+    ],
+    art: [
+      'วาดภาพระบายสีอิสระ · Free painting',
+      'ปั้นดินญี่ปุ่น · Clay modelling',
+      'ฝึกเป่าขลุ่ยรีคอร์เดอร์ · Play recorder',
+      'ถ่ายภาพธรรมชาติ · Nature photography',
+      'ทำผ้าพิมพ์ลาย · Fabric printing',
+    ],
+  },
+
+  /* ---------- ป.4 ---------- */
+  'ป.4': {
+    life: [
+      'ทำความสะอาดบ้านเป็นทีม · House cleaning',
+      'ทำกิจกรรมอาสาสมัคร · Volunteer activity',
+      'ทำอาหารร่วมกันในครอบครัว · Cook together',
+      'ว่ายน้ำและออกกำลังกาย · Swimming & exercise',
+      'วางแผนการเดินทางไปเที่ยว · Plan family trip',
+    ],
+    language: [
+      'ฝึกอ่านและจับใจความ · Reading comprehension',
+      'เกมจับคู่คำศัพท์ไทย-อังกฤษ · Bilingual vocab game',
+      'แปลภาษาไทย-อังกฤษ · Translation practice',
+      'ทำหนังสือนิทานภาษาอังกฤษ · English storybook',
+      'ฟังเพลงและร้องตาม · Listen & sing along',
+    ],
+    math: [
+      'ออกแบบและสร้างโมเดลบ้าน · Build house model',
+      'สร้างเครื่องเล่นพลังงานแสงอาทิตย์ · Solar toy',
+      'สร้างสวนสนุกใน Minecraft · Minecraft build',
+      'คำนวณเงินและทอนเงิน · Money calculation',
+      'สำรวจวงจรชีวิตผีเสื้อ · Butterfly life cycle',
+    ],
+    science: [
+      'ทดลองการลอยตัวของวัตถุ · Floating experiment',
+      'ทดลองการหักเหของแสง · Light refraction',
+      'ทดลองการขยายตัวของวัตถุ · Expansion experiment',
+      'เกมคำศัพท์ระบบสุริยะ · Solar system vocab',
+      'รถแข่งจากวัสดุรีไซเคิล · Recycled race car',
+    ],
+    agri: [
+      'ปลูกผักสวนครัวที่บ้าน · Home vegetable garden',
+      'ทำความสะอาดพื้นที่เกษตร · Clean farm area',
+      'ทำอาหารจากผลผลิตของตนเอง · Cook own harvest',
+      'จัดการขยะและทำปุ๋ยหมัก · Composting',
+      'บันทึกการเจริญเติบโตของพืช · Plant growth log',
+    ],
+    social: [
+      'สมาชิกในครอบครัวของฉัน · My family members',
+      'ชุมชนเล็กๆ ในโลกกว้าง · Local community',
+      'เกมประวัติศาสตร์-วัฒนธรรม-ประเพณี · Culture game',
+      'ทำแกงเขียวหวานไก่ · Cook Thai green curry',
+      'ประดิษฐ์กระปุกออมสิน · Make piggy bank',
+    ],
+    art: [
+      'ใช้เทคโนโลยีสร้างศิลปะและดนตรี · Digital art & music',
+      'ทำโคมไฟจากขวดพลาสติก · Plastic bottle lamp',
+      'ร้องเพลงเพื่อเรียนรู้ · Sing to learn',
+      'ประดิษฐ์กลองจากกล่องกระดาษ · Cardboard drum',
+      'วาดภาพระบายสี · Painting',
+    ],
+  },
+
+  /* ---------- ป.5 ---------- */
+  'ป.5': {
+    life: [
+      'ดูแลตนเอง ฝึกแปรงฟัน · Personal hygiene',
+      'ปลูกผักสวนครัวที่บ้าน · Home garden',
+      'ช่วยงานบ้าน · Household chores',
+      'ออมเงินและวางแผนการเงิน · Saving & budgeting',
+      'การจัดการความเครียด · Stress management',
+    ],
+    language: [
+      'อ่านจับใจความ · Reading comprehension',
+      'เล่าเรื่องจากภาพ · Picture storytelling',
+      'ทำหนังสือนิทานภาพ · Make picture book',
+      'ทำหนังสือเสียงนิทานพื้นบ้าน · Audio folk tale',
+      'เรียนรู้ภาษาไทยผ่านนิทานอีสป · Aesop fables',
+    ],
+    math: [
+      'วางแผนงบประมาณส่วนตัว · Personal budget',
+      'จัดสวนขนาดเล็ก (คำนวณพื้นที่) · Garden layout',
+      'วางแผนการเดินทาง · Trip planning',
+      'วัดและเปรียบเทียบส่วนสูงพืช · Measure plant growth',
+      'จัดการเวลาใช้สื่อออนไลน์ · Screen time management',
+    ],
+    science: [
+      'ปลูกพืชศึกษาการสังเคราะห์แสง · Photosynthesis',
+      'โครงการรีไซเคิลขยะในบ้าน · Home recycling',
+      'พยากรณ์อากาศ สร้างเครื่องวัดอุณหภูมิ · DIY thermometer',
+      'สร้างระบบกรองน้ำ DIY · Water filter',
+      'ปลูกพืชไฮโดรโปนิกส์ · Hydroponics',
+    ],
+    agri: [
+      'ปลูกผักสวนครัว · Grow vegetables',
+      'จัดการขยะอินทรีย์ทำปุ๋ยหมัก · Organic composting',
+      'สร้างระบบน้ำหยดรดสวน · Drip irrigation',
+      'ทำปุ๋ยหมักจากเศษอาหาร · Kitchen compost',
+      'ทำน้ำยาทำความสะอาดจากธรรมชาติ · Natural cleaner',
+    ],
+    social: [
+      'เข้าร่วมงานประเพณีท้องถิ่น · Local tradition',
+      'ส่งเสริมการอ่านในครอบครัว · Family reading',
+      'ไปตลาดซื้อของกับแม่ · Market outing',
+      'เรียนรู้วัฒนธรรมผ่านการทำอาหาร · Culture via cooking',
+      'กิจกรรมชุมชนสัมพันธ์ · Community activity',
+    ],
+    art: [
+      'ทำกระปุกออมสินจากขวดพลาสติก · Piggy bank craft',
+      'สร้างวิดีโอสอนทำอาหาร · Cooking tutorial video',
+      'ออกแบบลายเสื้อยืด · T-shirt design',
+      'วาดภาพระบายสี · Painting',
+      'เขียนนิทานเกี่ยวกับสัตว์เลี้ยง · Pet story',
+    ],
+  },
+
+  /* ---------- ป.6 ---------- */
+  'ป.6': {
+    life: [
+      'จัดการบ้านเรือนและดูแลสวน · Home & garden care',
+      'จัดการขยะและรีไซเคิลในบ้าน · Household recycling',
+      'บริหารการเงินส่วนตัว · Personal finance',
+      'ทำความสะอาดบ้านเป็นทีม · Team house cleaning',
+      'ดูแลตนเองและสุขภาพ · Self & health care',
+    ],
+    language: [
+      'เขียนบันทึกประจำวัน · Daily journal',
+      'สร้างบล็อกส่วนตัว · Personal blog',
+      'เขียนแผนการเดินทางวันหยุด · Holiday planner',
+      'จัดทำคู่มือปลูกพืชสำหรับเด็ก · Kids planting guide',
+      'นำเสนอโครงงานด้วยภาษา · Project presentation',
+    ],
+    math: [
+      'วางแผนงบประมาณส่วนบุคคล · Personal budget plan',
+      'สร้างบ้านโมเดลจากกระดาษ · Paper house model',
+      'คำนวณและเปรียบเทียบราคาสินค้า · Price comparison',
+      'ออกแบบเกมคณิตศาสตร์ · Design math game',
+      'ปลูกผักคำนวณพื้นที่-ผลผลิต · Garden math',
+    ],
+    science: [
+      'สำรวจพลังงานแสงอาทิตย์ · Solar energy survey',
+      'ทดสอบคุณภาพน้ำ · Water quality test',
+      'ทำปุ๋ยหมักจากขยะอินทรีย์ · Organic composting',
+      'ออกแบบระบบกรองน้ำ DIY · DIY water filter',
+      'สร้างเครื่องเรือนจากวัสดุรีไซเคิล · Upcycled furniture',
+    ],
+    agri: [
+      'จัดการสวนผักอินทรีย์ · Organic vegetable garden',
+      'ดูแลบ่อปลาน้ำจืด · Freshwater fish pond',
+      'สร้างระบบปลูกพืชไฮโดรโปนิกส์ · Hydroponics system',
+      'จัดการขยะอินทรีย์และปุ๋ยหมัก · Compost management',
+      'สร้างระบบน้ำหยดสำหรับสวน · Drip irrigation system',
+    ],
+    social: [
+      'กิจกรรมสังคมสร้างสรรค์ · Creative social activity',
+      'เกมทายธงชาติ เรียนรู้วัฒนธรรม · World culture game',
+      'แต่งตัวตามวัฒนธรรมต่างๆ · Cultural dress-up',
+      'สืบสานวัฒนธรรมผ่านเทศกาลไทย · Thai festivals',
+      'รู้จักวัฒนธรรมโลก · Global culture',
+    ],
+    art: [
+      'เรียนรู้อารมณ์ผ่านศิลปะและดนตรี · Art & music emotion',
+      'สร้างเรื่องราวจากเพลง · Story from music',
+      'แต่งบทเพลงจากธรรมชาติ · Nature-inspired song',
+      'เต้นตามเพลง · Dance to music',
+      'ร้องเพลงประกอบท่าทาง · Song with actions',
+    ],
+  },
+};
+
+/* ม.ต้น / ม.ปลาย (แบบทั่วไป) */
+const MATTHAYOM_LOWER = {
+  life:['การวางแผนชีวิต · Life planning','ทักษะอาชีพ · Vocational skills','การเงินส่วนบุคคล · Personal finance','ทำงานร่วมกับผู้อื่น · Teamwork'],
+  language:['วิเคราะห์วรรณกรรม · Literary analysis','เขียนเชิงวิชาการ · Academic writing','ภาษาอังกฤษสื่อสาร · English communication','ค้นคว้าข้อมูล · Research'],
+  math:['พีชคณิต · Algebra','เรขาคณิต · Geometry','สถิติและความน่าจะเป็น · Statistics','การใช้โปรแกรมคำนวณ · Spreadsheet'],
+  science:['ฟิสิกส์เบื้องต้น · Basic physics','เคมีเบื้องต้น · Basic chemistry','ชีววิทยา · Biology','สิ่งแวดล้อม · Environment'],
+  agri:['เทคโนโลยีการเกษตร · Agri-tech','จัดการฟาร์ม · Farm management','เกษตรกับสิ่งแวดล้อม · Agri & environment','แปรรูปผลผลิต · Food processing'],
+  social:['ภูมิศาสตร์โลก · World geography','เศรษฐศาสตร์ · Economics','ประชาธิปไตย · Democracy','สิทธิมนุษยชน · Human rights'],
+  art:['ทฤษฎีศิลป์ · Art theory','ดนตรีวิเคราะห์ · Music analysis','การออกแบบ · Design','ผลิตสื่อ · Media production'],
+};
+const MATTHAYOM_UPPER = {
+  life:['เตรียมเข้ามหาวิทยาลัย · College prep','ผู้ประกอบการ · Entrepreneurship','บริหารโครงการ · Project management','ทักษะภาวะผู้นำ · Leadership'],
+  language:['วิจารณ์วรรณกรรม · Literary criticism','งานวิจัย · Research paper','ภาษาที่สาม · Third language','สื่อสารสาธารณะ · Public communication'],
+  math:['แคลคูลัส · Calculus','ตรีโกณมิติ · Trigonometry','เวกเตอร์ · Vectors','สถิติขั้นสูง · Advanced statistics'],
+  science:['ฟิสิกส์ · Physics','เคมี · Chemistry','ชีววิทยาขั้นสูง · Advanced biology','เทคโนโลยีชีวภาพ · Biotechnology'],
+  agri:['ธุรกิจการเกษตร · Agribusiness','เกษตรยั่งยืน · Sustainability','เทคโนโลยีชีวภาพ · Biotech','ตลาดผลผลิต · Market & trade'],
+  social:['รัฐศาสตร์ · Political science','กฎหมาย · Law','ความสัมพันธ์ระหว่างประเทศ · IR','เศรษฐศาสตร์การเมือง · Political economy'],
+  art:['ประวัติศาสตร์ศิลป์ · Art history','ผลิตสื่อดิจิทัล · Digital media','สุนทรียศาสตร์ · Aesthetics','ออกแบบกราฟิก · Graphic design'],
+};
+
+function getIndicators(group, grade) {
+  if (GRADE_INDICATORS[grade] && GRADE_INDICATORS[grade][group]) return GRADE_INDICATORS[grade][group];
+  if (grade && grade.indexOf('ม.') === 0) {
+    const n = +grade.slice(2);
+    return (n <= 3 ? MATTHAYOM_LOWER : MATTHAYOM_UPPER)[group] || [];
+  }
+  // fallback for ป.1–ป.2 use ป.3 set
+  if (grade === 'ป.1' || grade === 'ป.2') {
+    const g3 = GRADE_INDICATORS['ป.3'][group] || [];
+    return g3.map(i => i); // same base set
+  }
+  return (INDICATORS && INDICATORS[group]) ? INDICATORS[group] : [];
+}
+
+function totalIndicators(grade) {
+  return GROUPS.reduce((s, g) => s + getIndicators(g.id, grade).length, 0);
+}
+
+/* =========================================================
+   COMPETENCIES — โครงสร้างตัวชี้วัดแบบ 3 ขั้น (กลุ่ม → สมรรถนะ → ตัวชี้วัด)
+   อ้างอิงมาตรฐานการเรียนรู้ของหลักสูตรบ้านเรียน
+   ========================================================= */
+const COMPETENCIES = {
+  life: [
+    { id: 'self', th: 'การดูแลตนเองและสุขอนามัย', en: 'Self-care & hygiene', inds: [
+      'ดูแลความสะอาดร่างกายและแต่งกายเองได้', 'เลือกอาหารที่มีประโยชน์ต่อสุขภาพ', 'จัดการอารมณ์และความเครียดเบื้องต้น' ] },
+    { id: 'home', th: 'การจัดการบ้านและความรับผิดชอบ', en: 'Home management', inds: [
+      'ช่วยงานบ้านและดูแลพื้นที่ส่วนตัว', 'ทำอาหารอย่างง่ายอย่างปลอดภัย', 'วางแผนและจัดลำดับงานประจำวัน' ] },
+    { id: 'money', th: 'ความฉลาดทางการเงิน', en: 'Financial literacy', inds: [
+      'แยกความต้องการกับความจำเป็น', 'วางแผนการออมและใช้จ่าย', 'จดบันทึกรายรับ-รายจ่าย' ] },
+  ],
+  language: [
+    { id: 'read', th: 'การอ่านและจับใจความ', en: 'Reading comprehension', inds: [
+      'อ่านออกเสียงได้ถูกต้องชัดเจน', 'จับใจความสำคัญของเรื่องที่อ่าน', 'เดาความหมายคำศัพท์จากบริบท' ] },
+    { id: 'write', th: 'การเขียนและสื่อสาร', en: 'Writing & communication', inds: [
+      'เขียนเล่าเรื่องจากประสบการณ์', 'เขียนสะกดคำได้ถูกต้อง', 'สร้างชิ้นงานสองภาษาไทย-อังกฤษ' ] },
+    { id: 'speak', th: 'การฟัง พูด และนำเสนอ', en: 'Listening & speaking', inds: [
+      'เล่าเรื่องจากภาพหรือประสบการณ์', 'นำเสนอผลงานหน้าชั้น', 'ฟังและตอบคำถามได้ตรงประเด็น' ] },
+  ],
+  math: [
+    { id: 'num', th: 'จำนวนและการคำนวณ', en: 'Numbers & operations', inds: [
+      'บวก ลบ คูณ หารจำนวนได้', 'เข้าใจเศษส่วนและทศนิยมเบื้องต้น', 'แก้โจทย์ปัญหาในชีวิตจริง' ] },
+    { id: 'measure', th: 'การวัดและเรขาคณิต', en: 'Measurement & geometry', inds: [
+      'วัดความยาว น้ำหนัก ปริมาตร', 'คำนวณพื้นที่และเปรียบเทียบขนาด', 'จำแนกรูปเรขาคณิตและลวดลาย' ] },
+    { id: 'data', th: 'การเงินและข้อมูล', en: 'Money & data', inds: [
+      'คำนวณเงินทอนและงบประมาณ', 'อ่านและสร้างตาราง/แผนภูมิ', 'จัดการเวลาและตารางกิจกรรม' ] },
+  ],
+  science: [
+    { id: 'inquiry', th: 'การสังเกตและตั้งคำถาม', en: 'Observation & inquiry', inds: [
+      'สังเกตและบันทึกสิ่งที่พบ', 'ตั้งคำถามและคาดคะเนคำตอบ', 'จำแนกและจัดกลุ่มสิ่งต่างๆ' ] },
+    { id: 'experiment', th: 'การทดลองและกระบวนการ', en: 'Experiment & process', inds: [
+      'ออกแบบและทำการทดลองอย่างง่าย', 'ใช้เครื่องมือวัดอย่างปลอดภัย', 'สรุปผลจากหลักฐานที่ได้' ] },
+    { id: 'nature', th: 'ธรรมชาติและสิ่งแวดล้อม', en: 'Nature & environment', inds: [
+      'เข้าใจวงจรชีวิตและระบบนิเวศ', 'อธิบายปรากฏการณ์ธรรมชาติ', 'ดูแลและอนุรักษ์สิ่งแวดล้อม' ] },
+  ],
+  agri: [
+    { id: 'grow', th: 'การปลูกพืชและเลี้ยงสัตว์', en: 'Growing & raising', inds: [
+      'ปลูกและดูแลพืชผักสวนครัว', 'เลี้ยงสัตว์/สัตว์น้ำเบื้องต้น', 'บันทึกการเจริญเติบโต' ] },
+    { id: 'system', th: 'ดิน น้ำ และระบบ', en: 'Soil, water & systems', inds: [
+      'เตรียมดินและระบบให้น้ำ', 'ทำปุ๋ยหมัก/ปุ๋ยอินทรีย์', 'ออกแบบระบบปลูกอย่างง่าย' ] },
+    { id: 'harvest', th: 'การจัดการผลผลิตและของเสีย', en: 'Harvest & waste', inds: [
+      'เก็บเกี่ยวและแปรรูปผลผลิต', 'จัดการขยะและของเหลือใช้', 'คำนวณต้นทุน-ผลผลิต' ] },
+  ],
+  social: [
+    { id: 'community', th: 'ครอบครัวและชุมชน', en: 'Family & community', inds: [
+      'รู้บทบาทหน้าที่ในครอบครัว', 'มีส่วนร่วมในกิจกรรมชุมชน', 'ทำงานร่วมกับผู้อื่น' ] },
+    { id: 'culture', th: 'วัฒนธรรมและประเพณี', en: 'Culture & tradition', inds: [
+      'เข้าร่วมและสืบสานประเพณีไทย', 'เรียนรู้วัฒนธรรมที่หลากหลาย', 'เห็นคุณค่าภูมิปัญญาท้องถิ่น' ] },
+    { id: 'civic', th: 'ภูมิศาสตร์และพลเมือง', en: 'Geography & citizenship', inds: [
+      'รู้จักแผนที่และท้องถิ่นของตน', 'ปฏิบัติตนเป็นพลเมืองดี', 'เข้าใจสิทธิและหน้าที่' ] },
+  ],
+  art: [
+    { id: 'visual', th: 'ทัศนศิลป์และการสร้างสรรค์', en: 'Visual art', inds: [
+      'วาดภาพและระบายสีอย่างสร้างสรรค์', 'ปั้น/ประดิษฐ์งานจากวัสดุ', 'ออกแบบลวดลายและงานฝีมือ' ] },
+    { id: 'music', th: 'ดนตรีและการเคลื่อนไหว', en: 'Music & movement', inds: [
+      'ร้องเพลงและเล่นเครื่องดนตรีง่ายๆ', 'เคลื่อนไหวประกอบจังหวะ', 'แสดงออกทางอารมณ์ผ่านศิลปะ' ] },
+    { id: 'media', th: 'สื่อและการออกแบบ', en: 'Media & design', inds: [
+      'ถ่ายภาพ/ทำวิดีโออย่างง่าย', 'ใช้เทคโนโลยีสร้างงานศิลป์', 'เล่าเรื่องผ่านสื่อดิจิทัล' ] },
+  ],
+};
+
+/* คืนค่าสมรรถนะของกลุ่ม + แทรกบัคเก็ต "กิจกรรมตามแผน" ของชั้นนั้น */
+function getCompetencies(group, grade) {
+  const base = COMPETENCIES[group] ? COMPETENCIES[group].slice() : [];
+  const plan = getIndicators(group, grade);
+  if (plan && plan.length) {
+    base.unshift({ id: 'plan', th: '📋 กิจกรรมตามแผน · ' + grade, en: 'Planned activities', inds: plan, plan: true });
+  }
+  return base;
+}
+
+/* รายการกิจกรรมตามแผนทั้งหมดของชั้น (สำหรับ Yearly Tracker) */
+function planItems(grade) {
+  const out = [];
+  GROUPS.forEach(g => {
+    getIndicators(g.id, grade).forEach((label, i) => {
+      out.push({ key: grade + '|' + g.id + '|' + i, group: g.id, label });
+    });
+  });
+  return out;
+}
+
+Object.assign(window, { GRADE_LEVELS, GRADE_LABEL, calcGrade, getIndicators, totalIndicators, COMPETENCIES, getCompetencies, planItems });
