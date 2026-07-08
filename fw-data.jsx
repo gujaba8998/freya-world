@@ -317,7 +317,7 @@ function AppProvider({ children, variant, settings }) {
     if (!isDone) {
       setStars(s => s + m.stars);
       setProgress(p => ({ ...p, [m.group]: Math.min(100, (p[m.group] || 0) + 6) }));
-      setWallet(w => [{ id: uid('wm'), label: 'รางวัลภารกิจ · ' + m.en, amount: m.stars, day: 'นี้' }, ...w]);
+      setWallet(w => [{ id: uid('wm'), label: 'รางวัลภารกิจ · ' + m.en, amount: m.stars, ts: Date.now() }, ...w]);
       beep('reward'); fireConfetti();
       showToast(`+${m.stars} ดาว! · ${m.en}`, '⭐');
     } else {
@@ -356,7 +356,7 @@ function AppProvider({ children, variant, settings }) {
     if (!sub) return;
     setStars(s => s + sub.stars);
     setProgress(p => ({ ...p, [sub.group]: Math.min(100, (p[sub.group] || 0) + 5) }));
-    setWallet(w => [{ id: uid('wa'), label: 'อนุมัติกิจกรรม · ' + sub.en, amount: sub.stars, day: 'นี้' }, ...w]);
+    setWallet(w => [{ id: uid('wa'), label: 'อนุมัติกิจกรรม · ' + sub.en, amount: sub.stars, ts: Date.now() }, ...w]);
     setPortfolio(pf => {
       const now = new Date();
       return [{ id: uid('p'), en: sub.en, th: sub.th, group: sub.group,
@@ -391,7 +391,7 @@ function AppProvider({ children, variant, settings }) {
   const redeem = useCallback((reward) => {
     if (stars < reward.cost) { showToast('ดาวไม่พอ · Not enough stars', '😅'); beep('pop'); return; }
     setStars(s => s - reward.cost);
-    setWallet(w => [{ id: uid('wr'), label: 'แลกรางวัล · ' + reward.en, amount: -reward.cost, day: 'นี้' }, ...w]);
+    setWallet(w => [{ id: uid('wr'), label: 'แลกรางวัล · ' + reward.en, amount: -reward.cost, ts: Date.now() }, ...w]);
     beep('reward'); fireConfetti();
     showToast(`แลกสำเร็จ! · ${reward.en}`, reward.emoji);
   }, [stars, beep, fireConfetti, showToast]);
@@ -418,7 +418,7 @@ function AppProvider({ children, variant, settings }) {
     if (room.owned.includes(item.id)) { showToast('มีชิ้นนี้แล้ว · Already owned', '🛋️'); return; }
     if (stars < item.cost) { showToast('ดาวไม่พอ · Not enough stars', '😅'); beep('pop'); return; }
     setStars(s => s - item.cost);
-    setWallet(w => [{ id: uid('wr'), label: 'ซื้อของแต่งห้อง · ' + item.en, amount: -item.cost, day: 'นี้' }, ...w]);
+    setWallet(w => [{ id: uid('wr'), label: 'ซื้อของแต่งห้อง · ' + item.en, amount: -item.cost, ts: Date.now() }, ...w]);
     setRoom(r => ({ ...r, owned: [...r.owned, item.id] }));
     beep('reward'); fireConfetti();
     showToast(`ได้ ${item.th} มาแต่งห้องแล้ว!`, item.emoji);

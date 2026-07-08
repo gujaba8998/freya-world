@@ -111,11 +111,45 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "thaiDate": true
 }/*EDITMODE-END*/;
 
+// Catches any crash in the app tree and shows a friendly message instead of
+// a blank white screen. Does NOT fix the underlying bug — it just makes
+// failures visible and recoverable instead of silent. If this ever shows up,
+// it means something crashed; check the browser console (F12) for the real
+// error and send it to whoever maintains this app.
+class ErrorBoundary extends React.Component {
+  constructor(props) { super(props); this.state = { hasError: false, message: '' }; }
+  static getDerivedStateFromError(err) { return { hasError: true, message: err && err.message ? err.message : String(err) }; }
+  componentDidCatch(err, info) { console.error('FreyaApp crashed:', err, info); }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{
+          minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center',
+          justifyContent: 'center', gap: 14, padding: 24, textAlign: 'center',
+          fontFamily: "'Fredoka', sans-serif", background: '#fff0f6', color: '#5b3a52',
+        }}>
+          <div style={{ fontSize: 44 }}>🛠️</div>
+          <div style={{ fontSize: 17, fontWeight: 700 }}>มีบางอย่างผิดพลาด</div>
+          <div style={{ fontSize: 13, opacity: .8, maxWidth: 320 }}>
+            บอกคุณแม่/คนดูแลแอปด้วยนะ — ลองกดปุ่มด้านล่างเพื่อโหลดใหม่อีกครั้ง
+          </div>
+          <button onClick={() => window.location.reload()}
+            style={{ padding: '10px 22px', borderRadius: 999, border: 'none', background: '#ff6fa5', color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>
+            โหลดหน้าใหม่
+          </button>
+          <div style={{ fontSize: 10.5, opacity: .5, marginTop: 6 }}>({this.state.message})</div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 function Page() {
   const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
   const settings = { confetti: t.confetti, thaiDate: t.thaiDate };
   return (
-    <>
+    <ErrorBoundary>
       <FreyaApp variant="bubble" settings={settings} />
       <TweaksPanel>
         <TweakSection label="ตั้งค่า · Settings" />
@@ -124,7 +158,7 @@ function Page() {
         <TweakToggle label="Thai / Buddhist date" value={t.thaiDate}
           onChange={v => setTweak('thaiDate', v)} />
       </TweaksPanel>
-    </>
+    </ErrorBoundary>
   );
 }
 

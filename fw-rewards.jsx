@@ -1,6 +1,19 @@
 /* fw-rewards.jsx — Reward Store & Wallet tab */
 const { useState: useStateR } = React;
 
+// Computes a display label from a real timestamp. Old wallet entries
+// (created before this fix) only have a frozen `day: 'นี้'` string and no
+// `ts` — fall back to showing that so old history doesn't break or lie.
+function formatWalletDay(w) {
+  if (!w.ts) return w.day || '—';
+  const diffDays = Math.floor((Date.now() - w.ts) / 86400000);
+  if (diffDays <= 0) return 'วันนี้';
+  if (diffDays === 1) return 'เมื่อวาน';
+  if (diffDays < 7) return `${diffDays} วันก่อน`;
+  const d = new Date(w.ts);
+  return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear() + 543}`;
+}
+
 /* =========================================================
    Freya's Room — furniture catalog (client-side only; IDs sync)
    Phase 1 uses emoji art. To upgrade any item to real artwork later,
@@ -233,7 +246,7 @@ function Wallet() {
           <div key={w.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 4px', borderBottom: '1px solid var(--line)' }}>
             <span style={{ width: 30, height: 30, borderRadius: 9, flex: 'none', display: 'grid', placeItems: 'center', background: w.amount > 0 ? 'color-mix(in oklab, var(--good) 22%, transparent)' : 'var(--accent-soft)', fontSize: 13 }}>{w.amount > 0 ? '⬆️' : '⬇️'}</span>
             <span style={{ flex: 1, fontSize: 12.5, color: 'var(--ink)' }}>{w.label}</span>
-            <span style={{ fontSize: 10.5, color: 'var(--ink-soft)' }}>{w.day}</span>
+            <span style={{ fontSize: 10.5, color: 'var(--ink-soft)' }}>{formatWalletDay(w)}</span>
             <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 13.5, color: w.amount > 0 ? 'var(--good)' : 'var(--accent-deep)' }}>{w.amount > 0 ? '+' : ''}{w.amount}</span>
           </div>
         ))}
