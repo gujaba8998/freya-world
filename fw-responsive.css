@@ -1,0 +1,203 @@
+/* fw-responsive.css — Adaptive layout: Mobile / Tablet / Desktop
+   Requires: .bottom-nav on nav, .missions-list, .progress-list,
+             .rewards-grid, .portfolio-grid class hooks in components */
+
+/* =========================================================
+   BASE: all sizes — fluid type scale via clamp()
+   ========================================================= */
+.app {
+  font-size: clamp(13px, 1.8vw, 17px);
+}
+.app .sec-h h3 {
+  font-size: clamp(15px, 2vw, 20px) !important;
+}
+.app .starpill {
+  font-size: clamp(12px, 1.6vw, 16px) !important;
+}
+
+/* =========================================================
+   TABLET  640px – 1023px
+   Wider cards, 2-col grids, slightly larger spacing
+   ========================================================= */
+@media (min-width: 640px) {
+  #app-inner {
+    max-width: 700px !important;
+  }
+
+  /* missions → 2 columns */
+  .missions-list {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+
+  /* progress bars → 2 columns */
+  .progress-list {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 14px 20px !important;
+  }
+
+  /* reward store → 3 columns */
+  .rewards-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  /* portfolio → 3 columns */
+  .portfolio-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  /* cards more breathing room */
+  .card {
+    padding: 20px !important;
+  }
+
+  /* bigger group selector in Activity Builder */
+  .tab-enter > div > .card [style*="grid-template-columns: repeat(4"] {
+    grid-template-columns: repeat(7, 1fr) !important;
+  }
+
+  /* header padding */
+  .app > .app-scroll > div:first-child {
+    padding: 20px 22px 22px !important;
+  }
+
+  /* hub tabs wider */
+  .hub-tabs {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  /* approval cards side-by-side */
+  .appr-card {
+    gap: 16px !important;
+    padding: 16px !important;
+  }
+  .appr-media {
+    width: 90px !important;
+    height: 100px !important;
+  }
+
+  /* tracker grade chips */
+  .trk-grade { font-size: 14px !important; padding: 9px 18px !important; }
+
+  /* SAR preview frame taller */
+  .sar-preview-frame { height: 440px !important; }
+  .sar-preview-scale { transform: scale(0.56) !important; }
+}
+
+/* =========================================================
+   DESKTOP  1024px+
+   Sidebar nav + wider content
+   ========================================================= */
+@media (min-width: 1024px) {
+  #app-wrap {
+    background: linear-gradient(135deg, #fce8f3 0%, #eee8ff 100%) !important;
+  }
+  #app-inner {
+    max-width: 960px !important;
+    height: min(900px, 96vh) !important;
+    border-radius: 28px !important;
+    box-shadow: 0 32px 80px -24px rgba(80,40,90,.45), 0 0 0 6px #1f1b24 !important;
+    overflow: hidden !important;
+  }
+
+  /* App becomes row layout */
+  .app {
+    flex-direction: row !important;
+    align-items: stretch !important;
+  }
+
+  /* Main scroll area */
+  .app-scroll {
+    position: static !important;
+    flex: 1 !important;
+    padding-bottom: 0 !important;
+    overflow-y: auto !important;
+  }
+
+  /* Sidebar nav */
+  .bottom-nav {
+    position: static !important;
+    width: 180px !important;
+    height: auto !important;
+    border-top: none !important;
+    border-right: 1px solid var(--line) !important;
+    box-shadow: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 18px 10px !important;
+    gap: 4px !important;
+    grid-template-columns: none !important;
+    order: -1 !important;
+    flex: none !important;
+  }
+  .bottom-nav button {
+    flex-direction: row !important;
+    justify-content: flex-start !important;
+    padding: 13px 14px !important;
+    border-radius: 14px !important;
+    gap: 10px !important;
+  }
+  .bottom-nav button span:first-child {
+    font-size: 20px !important;
+    transform: none !important;
+  }
+  .bottom-nav button span:last-child {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+  }
+
+  /* content wider → 3-col missions */
+  .missions-list {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  /* rewards 4 col */
+  .rewards-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+
+  /* portfolio 3-4 col */
+  .portfolio-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+
+  /* tab content more padding */
+  .tab-enter {
+    padding: 22px 28px 36px !important;
+    gap: 22px !important;
+  }
+
+  /* hub layout */
+  .hub-tabs { gap: 12px !important; }
+  .hub-tab { font-size: 14px !important; padding: 13px 8px !important; }
+
+  /* SAR preview even bigger */
+  .sar-preview-frame { height: 520px !important; }
+  .sar-preview-scale { transform: scale(0.66) !important; }
+
+  /* Overlay (PIN/settings) positions better on desktop */
+  .overlay { border-radius: 28px !important; overflow: hidden !important; }
+}
+
+/* =========================================================
+   LARGE DESKTOP  1280px+
+   Even more space
+   ========================================================= */
+@media (min-width: 1280px) {
+  #app-inner {
+    max-width: 1100px !important;
+  }
+  .bottom-nav {
+    width: 210px !important;
+  }
+  .missions-list {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+  .rewards-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+}

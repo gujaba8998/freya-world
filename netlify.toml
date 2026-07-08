@@ -1,0 +1,16 @@
+# Netlify config — Freya's World
+# Static site, no build step: everything deploys from the repo root as-is.
+[build]
+  publish = "."
+
+# service worker must never be cached by the CDN/browser HTTP cache,
+# otherwise updates can take a full day to reach devices
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/manifest.webmanifest"
+  [headers.values]
+    Content-Type = "application/manifest+json"

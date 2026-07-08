@@ -1,0 +1,17 @@
+{
+  "name": "Freya's World",
+  "short_name": "Freya",
+  "description": "แอปบ้านเรียนของเฟรยา — ภารกิจ ผลงาน และรางวัล",
+  "lang": "th",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffb3d1",
+  "theme_color": "#ffb3d1",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

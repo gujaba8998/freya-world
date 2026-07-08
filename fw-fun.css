@@ -1,0 +1,110 @@
+/* fw-fun.css — styles for the fun update:
+   adventure map · weekly loot box · sticker album · mascot wardrobe ·
+   praise notes · read-aloud button · SAR photo appendix */
+
+/* 🔊 read-aloud / small utility icon button */
+.tts-btn {
+  border: none; cursor: pointer; font: inherit; font-size: 15px; line-height: 1;
+  background: var(--surface-2); width: 30px; height: 30px; border-radius: 10px;
+  flex: none; display: grid; place-items: center;
+}
+.tts-btn:active { transform: scale(.9); }
+
+/* 🗺️ adventure map */
+.adv-map { position: relative; height: 480px; padding: 0; overflow: hidden; }
+.adv-path {
+  position: absolute; top: 14px; left: 12px;
+  width: calc(100% - 24px); height: calc(100% - 58px);
+}
+.adv-node {
+  position: absolute; transform: translate(-50%, -10px);
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  width: 92px; text-align: center;
+}
+.adv-isle {
+  position: relative; width: 54px; height: 54px; border-radius: 38%;
+  display: grid; place-items: center; font-size: 26px; transition: all .3s;
+}
+.adv-node.locked .adv-isle { filter: grayscale(.55); opacity: .75; }
+.adv-crown { position: absolute; top: -14px; right: -7px; font-size: 16px; transform: rotate(18deg); }
+.adv-me {
+  position: absolute; bottom: -10px; right: -16px;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,.25));
+  animation: adv-bob 1.6s ease-in-out infinite;
+}
+@keyframes adv-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+.adv-name { font-size: 10.5px; font-weight: 700; color: var(--ink); }
+.adv-pct { font-size: 10px; font-weight: 800; }
+
+/* 🎁 weekly loot box */
+.loot-emoji { font-size: 44px; line-height: 1; display: inline-block; flex: none; }
+.loot-emoji.ready { animation: loot-shake 1.1s ease-in-out infinite; }
+@keyframes loot-shake {
+  0%, 58%, 100% { transform: rotate(0); }
+  62% { transform: rotate(-9deg); } 70% { transform: rotate(8deg); }
+  78% { transform: rotate(-6deg); } 86% { transform: rotate(4deg); } 92% { transform: rotate(-2deg); }
+}
+.loot-bar { height: 9px; border-radius: 999px; background: rgba(0,0,0,.07); overflow: hidden; }
+.loot-bar b {
+  display: block; height: 100%; border-radius: 999px;
+  background: var(--gold, #ffb703); transition: width .4s;
+}
+
+/* sticker reveal overlay (anchors to the .app frame) */
+.loot-reveal {
+  position: absolute; inset: 0; z-index: 60; display: grid; place-items: center;
+  background: rgba(40, 20, 50, .55); backdrop-filter: blur(3px);
+}
+.loot-reveal-card {
+  background: var(--surface); border-radius: 24px; padding: 26px 30px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center;
+  animation: loot-pop .45s cubic-bezier(.34, 1.56, .64, 1);
+  box-shadow: 0 20px 50px -18px rgba(0,0,0,.5);
+}
+@keyframes loot-pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.loot-sticker { font-size: 64px; line-height: 1; }
+.rarity-chip { font-size: 10.5px; font-weight: 800; padding: 3px 11px; border-radius: 999px; color: #fff; }
+
+/* 📒 sticker album */
+.sticker-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.sticker-cell {
+  position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 9px 3px; border-radius: 14px; background: var(--surface-2);
+}
+.sticker-cell .st-emoji { font-size: 27px; line-height: 1; }
+.sticker-cell.off .st-emoji { filter: grayscale(1); opacity: .25; }
+.sticker-cell .st-name { font-size: 9px; font-weight: 700; color: var(--ink-soft); }
+.st-count {
+  position: absolute; top: 4px; right: 5px; background: var(--accent); color: #fff;
+  font-size: 9px; font-weight: 800; border-radius: 999px; padding: 1px 6px;
+}
+
+/* 👗 mascot wardrobe */
+.fit-chip {
+  display: inline-flex; align-items: center; gap: 5px; border: 2px solid transparent;
+  background: var(--surface-2); border-radius: 999px; padding: 6px 12px;
+  font: inherit; font-size: 12px; font-weight: 700; color: var(--ink); cursor: pointer;
+}
+.fit-chip.on { border-color: var(--accent); background: var(--accent-soft); }
+
+/* outfit overlays must be allowed to poke out of the round mascot button */
+.mascot { overflow: visible; }
+.cheer-mascot { overflow: visible; }
+
+/* 💬 praise note on the polaroid (polaroid bg is always white — fixed colors ok) */
+.praise-note {
+  margin-top: 6px; background: #fff7fb; border: 1px dashed #ffb3d1; border-radius: 10px;
+  padding: 6px 9px; font-size: 11px; color: #a05577; line-height: 1.45; text-align: left;
+}
+
+/* 📄 SAR appendix photo grid (print-friendly) */
+.sar-photos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+.sar-photo { margin: 0; break-inside: avoid; }
+.sar-photo img { width: 100%; height: 110px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd; }
+.sar-photo figcaption { font-size: 9px; color: #555; margin-top: 3px; line-height: 1.35; }
+
+/* 📊 weekly summary chips (parent hub) */
+.wk-chip {
+  display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700;
+  padding: 4px 10px; border-radius: 999px; background: var(--surface-2); color: var(--ink);
+}

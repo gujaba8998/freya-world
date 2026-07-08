@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="theme-color" content="#ffb3d1" />
+<script>
+// Suppress browser-extension (wallet) promise rejections before they hit console
+(function(){
+  var _ce = console.error.bind(console);
+  console.error = function(){
+    var s = Array.prototype.join.call(arguments,' ');
+    if(s.indexOf('chrome-extension')>-1||s.indexOf('ankr')>-1||s.indexOf('ethereum')>-1) return;
+    _ce.apply(console, arguments);
+  };
+  window.addEventListener('error', function(e){
+    var src = (e.filename || '') + ' ' + String(e.message || '');
+    if (/chrome-extension|ankr|ethereum/i.test(src)) { e.preventDefault(); return false; }
+  }, true);
+  window.addEventListener('unhandledrejection', function(e){
+    var r = e.reason;
+    // suppress extension/wallet noise: real app code only ever rejects with Error
+    // instances (and always .catch()s them) — anything else is injected by a
+    // browser extension racing to patch window.ethereum, etc.
+    if (!(r instanceof Error) || /chrome-extension|ankr|ethereum/i.test(String(r.stack || r.message || ''))) {
+      e.preventDefault();
+    }
+  }, true);
+})();
+</script>
+<title>Freya's World 🌟</title>
+<template id="__bundler_thumbnail" data-bg-color="#ffb3d1">
+  <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+    <rect width="400" height="300" fill="#fff5f8"></rect>
+    <rect x="110" y="20" width="180" height="260" rx="28" fill="#1f1b24"></rect>
+    <rect x="118" y="28" width="164" height="244" rx="20" fill="#ffb3d1"></rect>
+    <rect x="118" y="28" width="164" height="70" rx="20" fill="#ff9ec4"></rect>
+    <circle cx="148" cy="58" r="18" fill="rgba(255,255,255,0.9)"></circle>
+    <text x="148" y="65" text-anchor="middle" font-size="18">🐰</text>
+    <rect x="130" y="112" width="140" height="44" rx="12" fill="#ff9ec4"></rect>
+    <rect x="130" y="164" width="140" height="44" rx="12" fill="rgba(255,255,255,0.85)"></rect>
+    <rect x="130" y="216" width="140" height="44" rx="12" fill="rgba(255,255,255,0.5)"></rect>
+    <text x="200" y="140" text-anchor="middle" font-size="11" fill="#fff" font-weight="700">🎯 กดรับภารกิจ</text>
+    <text x="200" y="192" text-anchor="middle" font-size="11" fill="#ff7eb0" font-weight="700">☁️ อัปโหลดคลาวด์</text>
+    <text x="200" y="244" text-anchor="middle" font-size="11" fill="#c0a000" font-weight="700">⏳ รอตรวจ</text>
+    <rect x="118" y="248" width="164" height="24" rx="0" fill="rgba(255,255,255,0.95)"></rect>
+    <text x="200" y="262" text-anchor="middle" font-size="12" fill="#ff7eb0">🏠 🖼️ 🎁</text>
+  </svg>
+</template>
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<link rel="stylesheet" href="fw-styles.css" />
+<link rel="stylesheet" href="fw-responsive.css" />
+<link rel="stylesheet" href="fw-fun.css" />
+<style>
+  html, body { height: 100%; margin: 0; padding: 0; background: #ffb3d1; overflow: hidden; }
+  #app-wrap {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(160deg, #fef0f5 0%, #f8eeff 50%, #f0fbf3 100%);
+  }
+  #app-inner {
+    width: 100%; max-width: 430px; height: 100%;
+    position: relative;
+  }
+  @media (min-width: 500px) {
+    #app-wrap { background: #e8daf0; }
+    #app-inner { max-width: 390px; height: min(812px, 95vh); border-radius: 40px; overflow: hidden; box-shadow: 0 28px 70px -20px rgba(80,40,90,.55), 0 0 0 8px #1f1b24; }
+  }
+  .app { position: absolute; inset: 0; }
+  .app-scroll { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; padding-bottom: 76px; scrollbar-width: none; }
+  .app-scroll::-webkit-scrollbar { display: none; }
+</style>
+<script src="image-slot.js"></script>
+<!-- Firebase compat SDK (loaded before React so window.firebase is available) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="app-wrap">
+  <div id="app-inner" class="v-bubble">
+    <div id="root"></div>
+  </div>
+</div>
+
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="fw-music.jsx"></script>
+<script type="text/babel" src="fw-cheer.jsx"></script>
+<script type="text/babel" src="fw-mascot.jsx"></script>
+<script type="text/babel" src="fw-curriculum.jsx"></script>
+<script type="text/babel" src="fw-firebase.jsx"></script>
+<script type="text/babel" src="fw-data.jsx"></script>
+<script type="text/babel" src="fw-dashboard.jsx"></script>
+<script type="text/babel" src="fw-activity.jsx"></script>
+<script type="text/babel" src="fw-portfolio.jsx"></script>
+<script type="text/babel" src="fw-rewards.jsx"></script>
+<script type="text/babel" src="fw-parent.jsx"></script>
+<script type="text/babel" src="fw-avatar.jsx"></script>
+<script type="text/babel" src="fw-sar.jsx"></script>
+<script type="text/babel" src="fw-parenthub.jsx"></script>
+<script type="text/babel" src="fw-app.jsx"></script>
+
+<script type="text/babel">
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "confetti": true,
+  "thaiDate": true
+}/*EDITMODE-END*/;
+
+// Catches any crash in the app tree and shows a friendly message instead of
+// a blank white screen. Does NOT fix the underlying bug — it just makes
+// failures visible and recoverable instead of silent. If this ever shows up,
+// it means something crashed; check the browser console (F12) for the real
+// error and send it to whoever maintains this app.
+class ErrorBoundary extends React.Component {
+  constructor(props) { super(props); this.state = { hasError: false, message: '' }; }
+  static getDerivedStateFromError(err) { return { hasError: true, message: err && err.message ? err.message : String(err) }; }
+  componentDidCatch(err, info) { console.error('FreyaApp crashed:', err, info); }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{
+          minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center',
+          justifyContent: 'center', gap: 14, padding: 24, textAlign: 'center',
+          fontFamily: "'Fredoka', sans-serif", background: '#fff0f6', color: '#5b3a52',
+        }}>
+          <div style={{ fontSize: 44 }}>🛠️</div>
+          <div style={{ fontSize: 17, fontWeight: 700 }}>มีบางอย่างผิดพลาด</div>
+          <div style={{ fontSize: 13, opacity: .8, maxWidth: 320 }}>
+            บอกคุณแม่/คนดูแลแอปด้วยนะ — ลองกดปุ่มด้านล่างเพื่อโหลดใหม่อีกครั้ง
+          </div>
+          <button onClick={() => window.location.reload()}
+            style={{ padding: '10px 22px', borderRadius: 999, border: 'none', background: '#ff6fa5', color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>
+            โหลดหน้าใหม่
+          </button>
+          <div style={{ fontSize: 10.5, opacity: .5, marginTop: 6 }}>({this.state.message})</div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+function Page() {
+  const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  const settings = { confetti: t.confetti, thaiDate: t.thaiDate };
+  return (
+    <ErrorBoundary>
+      <FreyaApp variant="bubble" settings={settings} />
+      <TweaksPanel>
+        <TweakSection label="ตั้งค่า · Settings" />
+        <TweakToggle label="Confetti on complete" value={t.confetti}
+          onChange={v => setTweak('confetti', v)} />
+        <TweakToggle label="Thai / Buddhist date" value={t.thaiDate}
+          onChange={v => setTweak('thaiDate', v)} />
+      </TweaksPanel>
+    </ErrorBoundary>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<Page />);
+</script>
+
+<script>
+// PWA: service worker needs https (or localhost) — silently skipped on file://
+if ('serviceWorker' in navigator &&
+    (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js').catch(function (e) { console.error('SW register:', e); });
+  });
+}
+</script>
+</body>
+</html>
