@@ -67,7 +67,10 @@ function MascotBuddy({ tab }) {
   const [hop, setHop] = useStateM(0);
   const hideT = useRefM(null);
 
-  const say = (text, dur = 5000) => {
+  // greeting bubble is fixed-position (bottom-right corner) so on tabs with
+  // taller content it can land on top of a section heading; keep it brief
+  // so that's a flash, not a blocker, for readers taking their time.
+  const say = (text, dur = 2600) => {
     setMsg(text);
     clearTimeout(hideT.current);
     hideT.current = setTimeout(() => setMsg(null), dur);

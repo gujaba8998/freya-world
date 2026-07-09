@@ -212,14 +212,18 @@ const MAP_POS = [
   { x: 24, y: 62 }, { x: 68, y: 76 }, { x: 36, y: 90 },
 ];
 function AdventureMap() {
-  const { progress } = useApp();
+  const { progress, dark } = useApp();
   const firstOpen = GROUPS.findIndex(g => (progress[g.id] || 0) < 100);
   const curIdx = firstOpen === -1 ? GROUPS.length - 1 : firstOpen;
   const pathD = MAP_POS.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+  // low-alpha pastel fills read fine on the light surface but nearly vanish
+  // against the dark theme's near-black card — bump alpha in dark mode so
+  // each island still reads as its own color instead of uniform gray.
+  const isleAlpha = dark ? { locked: '40', open: '70' } : { locked: '22', open: '44' };
   return (
     <div className="adv-map card">
       <svg className="adv-path" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-        <path d={pathD} fill="none" stroke="var(--accent-soft)" strokeWidth="2.2"
+        <path d={pathD} fill="none" stroke={dark ? 'var(--accent)' : 'var(--accent-soft)'} strokeWidth="2.2"
           strokeDasharray="0.1 4.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
       {GROUPS.map((g, i) => {
@@ -230,7 +234,7 @@ function AdventureMap() {
           <div key={g.id} className={'adv-node' + (locked ? ' locked' : '')}
             style={{ left: MAP_POS[i].x + '%', top: MAP_POS[i].y + '%' }}>
             <div className="adv-isle" style={{
-              background: g.c + (locked ? '22' : '44'),
+              background: g.c + (locked ? isleAlpha.locked : isleAlpha.open),
               boxShadow: done ? `0 0 0 3px ${g.c}, 0 0 16px ${g.c}88` : `0 0 0 2px ${g.c}55`,
             }}>
               <span>{locked ? '☁️' : g.emoji}</span>
