@@ -190,6 +190,57 @@ function AppProvider({ children, variant, settings }) {
   const [fbFamily, setFbFamily] = useState(fbLoadFamily());
   // Yearly curriculum tracker: set of completed plan-item keys
   const [planDone, setPlanDone] = useState(() => new Set());
+  // Plan edits: overrides on top of the built-in curriculum plan.
+  // removed = keys hidden from the plan · edited = { key: newLabel } ·
+  // added = [{ key:'custom_...', grade, group, label }] — defaults survive app
+  // updates and only the small diff syncs to Firestore.
+  const [planEdits, setPlanEdits] = useState({ removed: [], edited: {}, added: [] });
+
+  // planItems(grade) + overrides — ทุกหน้าที่แสดงแผนรายปีต้องใช้ตัวนี้แทน planItems ตรงๆ
+  const planItemsFor = useCallback((grade) => {
+    const base = planItems(grade)
+      .filter(it => !planEdits.removed.includes(it.key))
+      .map(it => planEdits.edited[it.key] ? { ...it, label: planEdits.edited[it.key] } : it);
+    const extra = planEdits.added
+      .filter(a => a.grade === grade)
+      .map(a => ({ key: a.key, group: a.group, label: a.label, custom: true }));
+    return [...base, ...extra];
+  }, [planEdits]);
+
+  const addPlanItem = useCallback((grade, group, label) => {
+    const text = (label || '').trim();
+    if (!text) return;
+    setPlanEdits(pe => ({ ...pe, added: [...pe.added, { key: uid('custom_'), grade, group, label: text }] }));
+    beepRef.current && beepRef.current('pop');
+  }, []);
+
+  const editPlanItem = useCallback((key, label) => {
+    const text = (label || '').trim();
+    if (!text) return;
+    setPlanEdits(pe => key.startsWith('custom_')
+      ? { ...pe, added: pe.added.map(a => a.key === key ? { ...a, label: text } : a) }
+      : { ...pe, edited: { ...pe.edited, [key]: text } });
+    beepRef.current && beepRef.current('tab');
+  }, []);
+
+  const removePlanItem = useCallback((key) => {
+    setPlanEdits(pe => key.startsWith('custom_')
+      ? { ...pe, added: pe.added.filter(a => a.key !== key) }
+      : { ...pe, removed: [...pe.removed, key] });
+    // เก็บกวาดเครื่องหมายว่าทำแล้วของรายการที่ลบ
+    setPlanDone(s => { if (!s.has(key)) return s; const n = new Set(s); n.delete(key); return n; });
+    beepRef.current && beepRef.current('tab');
+  }, []);
+
+  // คืนค่าเริ่มต้นของชั้นที่เลือก (ลบ overrides เฉพาะ key ของชั้นนั้น)
+  const resetPlanEdits = useCallback((grade) => {
+    setPlanEdits(pe => ({
+      removed: pe.removed.filter(k => !k.startsWith(grade + '|')),
+      edited: Object.fromEntries(Object.entries(pe.edited).filter(([k]) => !k.startsWith(grade + '|'))),
+      added: pe.added.filter(a => a.grade !== grade),
+    }));
+    beepRef.current && beepRef.current('reward');
+  }, []);
   const togglePlan = useCallback((key) => {
     setPlanDone(s => { const n = new Set(s); n.has(key) ? n.delete(key) : n.add(key); return n; });
     beepRef.current && beepRef.current('tab');
@@ -576,6 +627,7 @@ function AppProvider({ children, variant, settings }) {
     if (s.profile) setProfile(s.profile);
     setPlanDone(s.planDone);
     if (s.room) setRoom(s.room);   // older cloud docs have no room — keep local then
+    if (s.planEdits) setPlanEdits(s.planEdits);
     // fun-layer fields: null = older doc, keep local state
     if (s.streak) setStreak(s.streak);
     if (s.lootbox) setLootbox(s.lootbox);
@@ -635,11 +687,11 @@ function AppProvider({ children, variant, settings }) {
       // per-key here. That mismatch was exactly why a removed room item
       // reappeared: the server kept the "deleted" key and the next
       // snapshot echoed it back into local state.
-      doc.set(stateToFs({ missions, stars, progress, wallet, portfolio, submissions, rewards, profile, planDone, room, streak, lootbox, stickers, mascotFit }))
+      doc.set(stateToFs({ missions, stars, progress, wallet, portfolio, submissions, rewards, profile, planDone, planEdits, room, streak, lootbox, stickers, mascotFit }))
         .catch(e => { console.error('Firestore save:', e); setFbStatus('error'); });
     }, 1200);
     return () => clearTimeout(fbSaveTimer.current);
-  }, [missions, stars, progress, wallet, portfolio, submissions, rewards, profile, planDone, room, streak, lootbox, stickers, mascotFit, fbFamily, fbStatus]);
+  }, [missions, stars, progress, wallet, portfolio, submissions, rewards, profile, planDone, planEdits, room, streak, lootbox, stickers, mascotFit, fbFamily, fbStatus]);
 
   // Called by the setup wizard once config is saved + family code chosen.
   // Waits for anon auth explicitly rather than trusting call order.
@@ -656,7 +708,7 @@ function AppProvider({ children, variant, settings }) {
     doc.get().then(snap => {
       if (!snap.exists) {
         fbReady.current = true;
-        doc.set(stateToFs({ missions, stars, progress, wallet, portfolio, submissions, rewards, profile, planDone, room, streak, lootbox, stickers, mascotFit }));
+        doc.set(stateToFs({ missions, stars, progress, wallet, portfolio, submissions, rewards, profile, planDone, planEdits, room, streak, lootbox, stickers, mascotFit }));
       } else {
         applySnapshot(snap.data());
         fbReady.current = true;
@@ -668,7 +720,7 @@ function AppProvider({ children, variant, settings }) {
       setFbStatus('synced');
     }).catch(e => { console.error(e); setFbStatus('error'); });
     }); // end fbAuthReady().then
-  }, [missions, stars, progress, wallet, portfolio, submissions, rewards, profile, planDone, room, streak, lootbox, stickers, mascotFit, applySnapshot]);
+  }, [missions, stars, progress, wallet, portfolio, submissions, rewards, profile, planDone, planEdits, room, streak, lootbox, stickers, mascotFit, applySnapshot]);
 
   const fbDisconnect = useCallback(() => {
     if (fbUnsub.current) { try { fbUnsub.current(); } catch(e) {} fbUnsub.current = null; }
@@ -700,7 +752,7 @@ function AppProvider({ children, variant, settings }) {
     const data = {
       app: 'freyas-world', version: 2, exportedAt: new Date().toISOString(),
       missions, progress, stars, wallet, portfolio, submissions, reviewed, rewards, profile,
-      planDone: [...planDone], room, streak, lootbox, stickers, mascotFit,
+      planDone: [...planDone], planEdits, room, streak, lootbox, stickers, mascotFit,
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
@@ -711,7 +763,7 @@ function AppProvider({ children, variant, settings }) {
     setTimeout(() => URL.revokeObjectURL(a.href), 5000);
     beep('reward');
     showToast('ดาวน์โหลดไฟล์สำรองแล้ว · Backup saved', '💾');
-  }, [missions, progress, stars, wallet, portfolio, submissions, reviewed, rewards, profile, planDone, room, streak, lootbox, stickers, mascotFit, beep, showToast]);
+  }, [missions, progress, stars, wallet, portfolio, submissions, reviewed, rewards, profile, planDone, planEdits, room, streak, lootbox, stickers, mascotFit, beep, showToast]);
 
   const importBackup = useCallback((file) => {
     return new Promise((resolve, reject) => {
@@ -730,6 +782,7 @@ function AppProvider({ children, variant, settings }) {
           if (Array.isArray(d.rewards)) setRewards(d.rewards);
           if (d.profile) setProfile(p => ({ ...p, ...d.profile }));
           if (Array.isArray(d.planDone)) setPlanDone(new Set(d.planDone));
+          if (d.planEdits) setPlanEdits(d.planEdits);
           if (d.room) setRoom(d.room);
           if (d.streak) setStreak(d.streak);
           if (d.lootbox) setLootbox(d.lootbox);
@@ -763,6 +816,7 @@ function AppProvider({ children, variant, settings }) {
     submissions, submitActivity, approveSubmission, rejectSubmission,
     reviewed,
     planDone, togglePlan,
+    planEdits, planItemsFor, addPlanItem, editPlanItem, removePlanItem, resetPlanEdits,
     fbStatus, fbFamily, fbConnect, fbDisconnect,
     exportBackup, importBackup,
   };
@@ -806,9 +860,18 @@ function PhImg({ label, h = 110, style }) {
   return <div className="ph-img" style={{ height: h, borderRadius: 12, ...style }}>{label}</div>;
 }
 
+/* Renders overlay UI into the .app frame element. Overlays rendered inside
+   .app-scroll are absolutely positioned against the SCROLLER's content origin,
+   so once the page is scrolled they sit off-screen above the viewport — this
+   portal pins them to the phone frame instead. */
+function AppOverlayPortal({ children }) {
+  const host = document.querySelector('.app') || document.body;
+  return ReactDOM.createPortal(children, host);
+}
+
 Object.assign(window, {
   GROUPS, GROUP, INDICATORS, REWARDS, BADGES,
   thaiDate, playSound, AppCtx, useApp, AppProvider,
-  ProgressRing, GroupDot, Bar, PhImg,
+  ProgressRing, GroupDot, Bar, PhImg, AppOverlayPortal,
   dayKey, weekStart, weekKey, LOOT_GOAL, STREAK_BONUS, speakThai,
 });

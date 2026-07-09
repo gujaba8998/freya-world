@@ -133,9 +133,9 @@ function SARDocument({ profile, portfolio, progress, planDoneCount, planTotal })
 
 /* Full-screen printable overlay (portal to document.body so it escapes the phone frame) */
 function SARModal({ onClose }) {
-  const { profile, portfolio, progress, planDone, beep, showToast } = useApp();
-  const planTotal = planItems(profile.grade).length;
-  const planDoneCount = planItems(profile.grade).filter(p => planDone.has(p.key)).length;
+  const { profile, portfolio, progress, planDone, beep, showToast, planItemsFor } = useApp();
+  const planTotal = planItemsFor(profile.grade).length;
+  const planDoneCount = planItemsFor(profile.grade).filter(p => planDone.has(p.key)).length;
 
   const doPrint = () => {
     beep('reward');

@@ -44,6 +44,7 @@ function IndicatorSelector({ initialGroup, grade, selected, onToggle, onClose })
   );
 
   return (
+    <AppOverlayPortal>
     <div className="overlay" onClick={onClose}>
       <div className="sheet sel-sheet" onClick={e => e.stopPropagation()}>
         <div className="sheet-grab"></div>
@@ -111,6 +112,7 @@ function IndicatorSelector({ initialGroup, grade, selected, onToggle, onClose })
         <button className="btn block" style={{ marginTop: 14 }} onClick={onClose}>เสร็จสิ้น · เลือกแล้ว {selected.length} ตัวชี้วัด</button>
       </div>
     </div>
+    </AppOverlayPortal>
   );
 }
 
@@ -118,9 +120,9 @@ function IndicatorSelector({ initialGroup, grade, selected, onToggle, onClose })
    PlanPicker — เลือกกิจกรรมจากแผนการเรียนของชั้น แล้วส่งเป็นภารกิจให้ลูก
    =================================================================== */
 function PlanPicker({ go }) {
-  const { addMission, profile, missions, beep, showToast } = useApp();
+  const { addMission, profile, missions, beep, showToast, planItemsFor } = useApp();
   const grade = profile.grade;
-  const items = planItems(grade);
+  const items = planItemsFor(grade);
   const [sel, setSel] = useStateA([]);
   const [stars, setStars] = useStateA(15);
 

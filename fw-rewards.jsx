@@ -119,6 +119,7 @@ function FreyaRoom() {
 
       {/* slot item picker */}
       {pickSlot && (
+        <AppOverlayPortal>
         <div className="overlay" onClick={() => setPickSlot(null)}>
           <div className="sheet" onClick={e => e.stopPropagation()} style={{ maxHeight: '70vh', overflowY: 'auto' }}>
             <div className="sheet-grab"></div>
@@ -146,6 +147,7 @@ function FreyaRoom() {
             )}
           </div>
         </div>
+        </AppOverlayPortal>
       )}
     </div>
   );
@@ -241,6 +243,7 @@ function LootBox() {
       {ready && <button className="btn" style={{ flex: 'none', padding: '10px 16px' }} onClick={open}>เปิด!</button>}
 
       {reveal && (
+        <AppOverlayPortal>
         <div className="loot-reveal" onClick={() => setReveal(null)}>
           <div className="loot-reveal-card" onClick={e => e.stopPropagation()}>
             <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink-soft)' }}>ได้สติกเกอร์ใหม่!</div>
@@ -250,6 +253,7 @@ function LootBox() {
             <button className="btn" style={{ marginTop: 8, padding: '9px 22px' }} onClick={() => setReveal(null)}>เก็บเข้าอัลบั้ม 📒</button>
           </div>
         </div>
+        </AppOverlayPortal>
       )}
     </div>
   );

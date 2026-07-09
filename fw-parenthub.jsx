@@ -5,7 +5,7 @@ const { useState: useStateH, useEffect: useEffectH, useRef: useRefH } = React;
    สรุปอัตโนมัติของสัปดาห์นี้ (จันทร์–วันนี้) จาก portfolio/wallet ที่มี ts —
    งานที่อนุมัติก่อนอัปเดตนี้ไม่มี ts จะไม่ถูกนับ (ไม่ใช่บั๊ก แค่ข้อมูลเก่า) */
 function WeeklySummary() {
-  const { portfolio, wallet, progress, missions, addMission, profile, streak, showToast, beep } = useApp();
+  const { portfolio, wallet, progress, missions, addMission, profile, streak, showToast, beep, planItemsFor } = useApp();
   const ws = weekStart().getTime();
   const wkItems = portfolio.filter(p => p.ts && p.ts >= ws);
   const counts = {};
@@ -18,7 +18,7 @@ function WeeklySummary() {
     const pool = (quiet.length ? quiet : GROUPS).slice().sort((a, b) => (progress[a.id] || 0) - (progress[b.id] || 0));
     const active = new Set(missions.filter(m => m.planKey && m.status !== 'done').map(m => m.planKey));
     for (const g of pool) {
-      const opts = planItems(profile.grade).filter(it => it.group === g.id && !active.has(it.key));
+      const opts = planItemsFor(profile.grade).filter(it => it.group === g.id && !active.has(it.key));
       if (opts.length) {
         const it = opts[Math.floor(Math.random() * opts.length)];
         const [th, en] = it.label.split(' · ');
@@ -230,16 +230,88 @@ function ApprovalQueue() {
   );
 }
 
-/* ---------------- 2. Yearly Curriculum Tracker ---------------- */
+/* ---------------- 2. Yearly Curriculum Tracker (editable) ---------------- */
+
+/* คู่มือกลุ่มประสบการณ์ — คำอธิบาย จุดเน้น และตัวอย่างกิจกรรมจากแผนจริง */
+function GroupGuideModal({ groupId, grade, onClose }) {
+  const g = GROUP[groupId];
+  const guide = GROUP_GUIDE[groupId];
+  if (!guide) return null;
+  const examples = guideExamples(groupId, grade);
+  return (
+    <AppOverlayPortal>
+    <div className="overlay" onClick={onClose}>
+      <div className="sheet" onClick={e => e.stopPropagation()} style={{ maxHeight: '78vh', overflowY: 'auto' }}>
+        <div className="sheet-grab"></div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+          <GroupDot id={groupId} size={40} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 16, color: 'var(--ink)' }}>{g.th} · {g.en}</div>
+            <div style={{ fontSize: 10.5, color: 'var(--ink-soft)' }}>{guide.full}</div>
+          </div>
+          <button className="x-btn" onClick={onClose}>✕</button>
+        </div>
+        <div style={{ fontSize: 12.5, color: 'var(--ink)', lineHeight: 1.6, marginBottom: 12 }}>{guide.desc}</div>
+
+        <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--accent-deep)', marginBottom: 6 }}>🎯 จุดเน้นของกลุ่มนี้</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 14 }}>
+          {guide.points.map((p, i) => (
+            <div key={i} style={{ fontSize: 11.5, color: 'var(--ink)', lineHeight: 1.5, background: 'var(--surface-2)', borderRadius: 10, padding: '7px 11px' }}>
+              {p}
+            </div>
+          ))}
+        </div>
+
+        <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--accent-deep)', marginBottom: 6 }}>✨ ตัวอย่างกิจกรรมตามแผน {GRADE_LABEL[grade] || grade}</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginBottom: 14 }}>
+          {examples.map((ex, i) => (
+            <div key={i} style={{ fontSize: 11.5, color: 'var(--ink)', display: 'flex', gap: 7 }}>
+              <span style={{ flex: 'none' }}>{g.emoji}</span><span>{ex}</span>
+            </div>
+          ))}
+        </div>
+        <button className="btn block" onClick={onClose}>เข้าใจแล้ว</button>
+      </div>
+    </div>
+    </AppOverlayPortal>
+  );
+}
+
 function YearlyTracker() {
-  const { profile, planDone, togglePlan, beep } = useApp();
+  const { profile, planDone, togglePlan, beep, planItemsFor, planEdits, addPlanItem, editPlanItem, removePlanItem, resetPlanEdits, showToast } = useApp();
   const [grade, setGrade] = useStateH(profile.grade);
   // ตามชั้นเรียนในโปรไฟล์เมื่อคุณแม่เปลี่ยนชั้นในตั้งค่า
   useEffectH(() => { setGrade(profile.grade); }, [profile.grade]);
-  const items = planItems(grade);
+  const items = planItemsFor(grade);
   const doneCount = items.filter(p => planDone.has(p.key)).length;
   const pct = items.length ? Math.round((doneCount / items.length) * 100) : 0;
   const gradeOptions = ['ป.1','ป.2','ป.3','ป.4','ป.5','ป.6'];
+
+  const [guideGroup, setGuideGroup] = useStateH(null);   // groupId ของคู่มือที่เปิดอยู่
+  const [editKey, setEditKey] = useStateH(null);         // key ของรายการที่กำลังแก้ชื่อ
+  const [editText, setEditText] = useStateH('');
+  const [addGroup, setAddGroup] = useStateH(null);       // groupId ที่กำลังพิมพ์เพิ่มกิจกรรม
+  const [addText, setAddText] = useStateH('');
+
+  const hasEdits = planEdits.removed.some(k => k.startsWith(grade + '|'))
+    || Object.keys(planEdits.edited).some(k => k.startsWith(grade + '|'))
+    || planEdits.added.some(a => a.grade === grade);
+
+  const startEdit = (it) => { setEditKey(it.key); setEditText(it.label.split(' · ')[0]); beep('tab'); };
+  const saveEdit = () => {
+    if (editText.trim()) editPlanItem(editKey, editText);
+    setEditKey(null); setEditText('');
+  };
+  const confirmRemove = (it) => {
+    if (window.confirm(`ลบ "${it.label.split(' · ')[0]}" ออกจากแผน${grade}?`)) {
+      removePlanItem(it.key);
+      showToast('ลบออกจากแผนแล้ว · Removed', '🗑️');
+    }
+  };
+  const saveAdd = () => {
+    if (addText.trim()) { addPlanItem(grade, addGroup, addText); showToast('เพิ่มในแผนแล้ว · Added', '✨'); }
+    setAddGroup(null); setAddText('');
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -256,6 +328,22 @@ function YearlyTracker() {
         ))}
       </div>
 
+      {/* 7-group guide menu */}
+      <div className="card" style={{ padding: 12 }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink)', marginBottom: 8 }}>
+          📖 คู่มือกลุ่มประสบการณ์ <span style={{ fontWeight: 400, color: 'var(--ink-soft)' }}>· แตะเพื่อดูคำอธิบายและตัวอย่าง</span>
+        </div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {GROUPS.map(g => (
+            <button key={g.id} onClick={() => { setGuideGroup(g.id); beep('tab'); }}
+              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, border: 'none', background: 'transparent', cursor: 'pointer', font: 'inherit', width: 62 }}>
+              <GroupDot id={g.id} size={38} />
+              <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--ink-soft)', textAlign: 'center', lineHeight: 1.15 }}>{g.th}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* progress summary */}
       <div className="card" style={{ padding: 16, display: 'flex', alignItems: 'center', gap: 14 }}>
         <ProgressRing value={pct} size={62} stroke={8} color="var(--accent)">
@@ -266,48 +354,90 @@ function YearlyTracker() {
             ทำแล้ว {doneCount} / {items.length} กิจกรรม
           </div>
           <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>ตามแผน{GRADE_LABEL[grade] || grade} · {GROUPS.length} กลุ่มประสบการณ์</div>
+          {hasEdits && (
+            <button className="btn ghost" style={{ padding: '4px 10px', fontSize: 10.5, marginTop: 6 }}
+              onClick={() => { if (window.confirm(`คืนแผน${grade}กลับเป็นค่าเริ่มต้น? (รายการที่แก้/ลบ/เพิ่มเองจะหายไป)`)) resetPlanEdits(grade); }}>
+              ↺ คืนค่าเริ่มต้น {grade}
+            </button>
+          )}
         </div>
       </div>
 
-      {/* checklist grouped by experience group */}
+      {/* checklist grouped by experience group — editable */}
       {GROUPS.map(g => {
         const groupItems = items.filter(it => it.group === g.id);
-        if (!groupItems.length) return null;
         const gDone = groupItems.filter(it => planDone.has(it.key)).length;
         return (
           <div className="card" key={g.id} style={{ padding: 14 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 10 }}>
               <GroupDot id={g.id} size={30} />
               <span style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--ink)', flex: 1 }}>{g.th}</span>
-              <span style={{ fontSize: 11.5, fontWeight: 700, color: gDone === groupItems.length ? 'var(--good)' : 'var(--ink-soft)' }}>
+              <button className="tts-btn" style={{ width: 26, height: 26, fontSize: 12 }} title="คำอธิบายกลุ่มนี้"
+                onClick={() => { setGuideGroup(g.id); beep('tab'); }}>ℹ️</button>
+              <span style={{ fontSize: 11.5, fontWeight: 700, color: groupItems.length && gDone === groupItems.length ? 'var(--good)' : 'var(--ink-soft)' }}>
                 {gDone}/{groupItems.length}
               </span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {groupItems.map(it => {
                 const on = planDone.has(it.key);
+                if (editKey === it.key) {
+                  return (
+                    <div key={it.key} className="trk-row" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <input autoFocus value={editText} onChange={e => setEditText(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter') saveEdit(); if (e.key === 'Escape') { setEditKey(null); } }}
+                        style={{ flex: 1, minWidth: 0, border: '1.5px solid var(--accent)', borderRadius: 8, padding: '6px 9px', font: 'inherit', fontSize: 12, color: 'var(--ink)', background: 'var(--surface)', outline: 'none' }} />
+                      <button className="tts-btn" style={{ width: 26, height: 26, fontSize: 12 }} title="บันทึก" onClick={saveEdit}>✅</button>
+                      <button className="tts-btn" style={{ width: 26, height: 26, fontSize: 12 }} title="ยกเลิก" onClick={() => setEditKey(null)}>✕</button>
+                    </div>
+                  );
+                }
                 return (
-                  <button key={it.key} className={'trk-row' + (on ? ' on' : '')} onClick={() => togglePlan(it.key)}>
-                    <span className={'trk-check' + (on ? ' on' : '')}>{on ? '✓' : ''}</span>
-                    <span style={{ flex: 1, textAlign: 'left', fontSize: 12, textDecoration: on ? 'line-through' : 'none', color: on ? 'var(--ink-soft)' : 'var(--ink)' }}>
-                      {it.label.split(' · ')[0]}
-                    </span>
-                  </button>
+                  <div key={it.key} className={'trk-row' + (on ? ' on' : '')} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <button onClick={() => togglePlan(it.key)}
+                      style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, minWidth: 0, border: 'none', background: 'transparent', cursor: 'pointer', font: 'inherit', padding: 0, textAlign: 'left' }}>
+                      <span className={'trk-check' + (on ? ' on' : '')}>{on ? '✓' : ''}</span>
+                      <span style={{ flex: 1, fontSize: 12, textDecoration: on ? 'line-through' : 'none', color: on ? 'var(--ink-soft)' : 'var(--ink)' }}>
+                        {it.label.split(' · ')[0]}{it.custom && <span style={{ fontSize: 9, color: 'var(--accent-deep)', fontWeight: 700 }}> ·เพิ่มเอง</span>}
+                      </span>
+                    </button>
+                    <button className="trk-mini" title="แก้ไขชื่อ" onClick={() => startEdit(it)}>✎</button>
+                    <button className="trk-mini" title="ลบออกจากแผน" onClick={() => confirmRemove(it)}>✕</button>
+                  </div>
                 );
               })}
+
+              {/* add new item to this group */}
+              {addGroup === g.id ? (
+                <div className="trk-row" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <input autoFocus value={addText} onChange={e => setAddText(e.target.value)}
+                    placeholder={`กิจกรรมใหม่ในกลุ่ม${g.th}...`}
+                    onKeyDown={e => { if (e.key === 'Enter') saveAdd(); if (e.key === 'Escape') { setAddGroup(null); setAddText(''); } }}
+                    style={{ flex: 1, minWidth: 0, border: '1.5px solid var(--accent)', borderRadius: 8, padding: '6px 9px', font: 'inherit', fontSize: 12, color: 'var(--ink)', background: 'var(--surface)', outline: 'none' }} />
+                  <button className="tts-btn" style={{ width: 26, height: 26, fontSize: 12 }} title="เพิ่ม" onClick={saveAdd}>✅</button>
+                  <button className="tts-btn" style={{ width: 26, height: 26, fontSize: 12 }} title="ยกเลิก" onClick={() => { setAddGroup(null); setAddText(''); }}>✕</button>
+                </div>
+              ) : (
+                <button className="btn ghost" style={{ padding: '7px', fontSize: 11.5 }}
+                  onClick={() => { setAddGroup(g.id); setAddText(''); beep('tab'); }}>
+                  ＋ เพิ่มกิจกรรมในกลุ่มนี้
+                </button>
+              )}
             </div>
           </div>
         );
       })}
+
+      {guideGroup && <GroupGuideModal groupId={guideGroup} grade={grade} onClose={() => setGuideGroup(null)} />}
     </div>
   );
 }
 
 /* ---------------- 3. SAR Report ---------------- */
 function SARSection({ onOpen }) {
-  const { profile, portfolio, progress, planDone } = useApp();
-  const planTotal = planItems(profile.grade).length;
-  const planDoneCount = planItems(profile.grade).filter(p => planDone.has(p.key)).length;
+  const { profile, portfolio, progress, planDone, planItemsFor } = useApp();
+  const planTotal = planItemsFor(profile.grade).length;
+  const planDoneCount = planItemsFor(profile.grade).filter(p => planDone.has(p.key)).length;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>

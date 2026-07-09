@@ -90,6 +90,7 @@ function stateToFs(s) {
     rewards:     s.rewards.map(r => ({ ...r })),
     profile:     s.profile,
     planDone:    [...s.planDone],          // Set → Array
+    planEdits:   s.planEdits || { removed: [], edited: {}, added: [] },
     room:        s.room || { owned: [], placed: {} },  // Freya's Room: item IDs only — art stays client-side
     // fun layer — streak, weekly loot box, sticker album, mascot outfit (IDs only)
     streak:      s.streak || { count: 0, best: 0, lastDay: '' },
@@ -110,6 +111,7 @@ function fsToState(d) {
     rewards:     d.rewards     || null,   // null = keep seed
     profile:     d.profile     || null,   // null = keep default
     planDone:    new Set(d.planDone || []),
+    planEdits:   d.planEdits   || null,   // null = keep local (older docs)
     room:        d.room        || null,   // null = keep local (older docs have no room field)
     streak:      d.streak      || null,   // null = keep local (pre-fun-update docs)
     lootbox:     d.lootbox     || null,
