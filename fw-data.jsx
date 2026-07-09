@@ -158,8 +158,16 @@ function AppProvider({ children, variant, settings }) {
   const [mascotFit, setMascotFit] = useState({ owned: [], worn: {} });  // worn: { slot: itemId }
   const [dark, setDark] = useState(false);
   const [soundOn, setSoundOn] = useState(true);
-  const [musicOn, setMusicOn] = useState(() => localStorage.getItem('fw_music') === '1');
-  const [musicTrack, setMusicTrack] = useState(() => parseInt(localStorage.getItem('fw_music_track') || '0', 10) || 0);
+  // เพลงเปิดเป็นค่าเริ่มต้น (เล่นเมื่อแตะจอครั้งแรก — เบราว์เซอร์ห้าม autoplay ก่อน gesture)
+  // ถ้าผู้ใช้เคยปิดเอง ('0') จะจำไว้และไม่เปิดให้อีก
+  const [musicOn, setMusicOn] = useState(() => localStorage.getItem('fw_music') !== '0');
+  // แทร็กเริ่มต้น = เพลง 8-บิต (ถ้ายังไม่เคยเลือกเพลงเอง)
+  const [musicTrack, setMusicTrack] = useState(() => {
+    const saved = localStorage.getItem('fw_music_track');
+    if (saved !== null) return parseInt(saved, 10) || 0;
+    const chip = ((window.musicTracks) || []).findIndex(t => t.id === 'chiptune');
+    return chip >= 0 ? chip : 0;
+  });
   const [toast, setToast] = useState(null);
   const [confetti, setConfetti] = useState(0);   // bump to fire
   const [cheer, setCheer] = useState(null);       // { emoji, phrase } shown on Accept Mission
