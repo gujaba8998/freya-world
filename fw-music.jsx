@@ -1,10 +1,12 @@
 /* fw-music.jsx — cute music-box background loop, generated with WebAudio (no audio files)
-   A gentle original lullaby in C pentatonic, 84 BPM, soft triangle "music box" plucks. */
+   A gentle original lullaby in C pentatonic, 84 BPM, soft triangle "music box" plucks.
+   Tracks flagged `chip: true` render with NES-style square/triangle voices instead
+   (original chiptune — NOT the copyrighted Mario melody, just the same vibe). */
 (function () {
   const N = {
     C3: 130.81, F3: 174.61, G3: 196.00, A3: 220.00,
-    C4: 261.63, E4: 329.63, G4: 392.00, A4: 440.00,
-    C5: 523.25, D5: 587.33, E5: 659.25, G5: 783.99, A5: 880.00,
+    C4: 261.63, E4: 329.63, G4: 392.00, A4: 440.00, B4: 493.88,
+    C5: 523.25, D5: 587.33, E5: 659.25, F5: 698.46, G5: 783.99, A5: 880.00,
   };
   // ---- Song library (32 eighth-note steps per loop) ----
   const TRACKS = [
@@ -41,6 +43,18 @@
       bass: { 0: N.C3, 6: N.G3, 12: N.A3, 18: N.G3, 24: N.C3 },
       chime: { 3: N.C4, 15: N.G4, 27: N.E4 },
     },
+    {
+      // original bouncy chiptune — Mario-era NES vibe (square lead, triangle bass)
+      id: 'chiptune', th: '8-บิตผจญภัย', emoji: '🎮', bpm: 150, chip: true,
+      melody: [
+        N.C5, null, N.E5, N.G5, null, N.E5, N.G5, N.A5,
+        N.G5, null, N.E5, N.C5, N.D5, N.E5, N.F5, null,
+        N.E5, null, N.D5, N.B4, null, N.D5, N.F5, N.G5,
+        N.E5, N.C5, null, N.G4, null, N.C5, null, null,
+      ],
+      bass: { 0: N.C3, 4: N.G3, 8: N.C3, 12: N.A3, 16: N.F3, 20: N.G3, 24: N.C3, 28: N.G3 },
+      chime: { 6: N.E4, 14: N.A4, 22: N.G4, 30: N.E4 },
+    },
   ];
   // clean twinkle placeholder
   TRACKS[1].melody[8] = null;
@@ -48,11 +62,13 @@
   let trackIdx = 0;
   let MELODY = TRACKS[0].melody, BASS = TRACKS[0].bass, CHIME = TRACKS[0].chime;
   let STEP = 60 / TRACKS[0].bpm / 2;
+  let CHIP = false;
 
   function applyTrack(i) {
     trackIdx = ((i % TRACKS.length) + TRACKS.length) % TRACKS.length;
     const T = TRACKS[trackIdx];
     MELODY = T.melody; BASS = T.bass; CHIME = T.chime; STEP = 60 / T.bpm / 2;
+    CHIP = !!T.chip;
   }
 
   let ctx = null, master = null, timer = null, step = 0, nextT = 0, on = false;
@@ -87,6 +103,22 @@
     o.onended = () => { const k = voices.indexOf(v); if (k > -1) voices.splice(k, 1); };
   }
 
+  // NES-style chip voice: square (lead/blip) or triangle (bass), snappy staccato envelope.
+  // Square waves are harsh, so gains stay well below the music-box pluck levels.
+  function chip(freq, t, vol, dur, type) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type || 'square'; o.frequency.value = freq;
+    o.connect(g); g.connect(master);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.008);
+    g.gain.setValueAtTime(vol, t + dur * 0.55);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.start(t); o.stop(t + dur + 0.03);
+    const v = { o, o2: o, g };   // o2 aliased so killVoices() can treat both voice kinds the same
+    voices.push(v);
+    o.onended = () => { const k = voices.indexOf(v); if (k > -1) voices.splice(k, 1); };
+  }
+
   // immediately silence every ringing/pending note (prevents overlap on stop or track switch)
   function killVoices() {
     const t = ctx ? ctx.currentTime : 0;
@@ -105,9 +137,17 @@
     if (!on) return;
     while (nextT < ctx.currentTime + 0.6) {
       const i = step % 32;
-      const m = MELODY[i]; if (m) pluck(m, nextT, 0.30, 1.4);
-      const b = BASS[i];   if (b) pluck(b, nextT, 0.16, 2.2);
-      const c = CHIME[i];  if (c) pluck(c, nextT, 0.10, 1.6);
+      const m = MELODY[i], b = BASS[i], c = CHIME[i];
+      if (CHIP) {
+        // chiptune: staccato square lead, triangle bass, quiet echo blips
+        if (m) chip(m, nextT, 0.11, STEP * 0.9, 'square');
+        if (b) chip(b, nextT, 0.13, STEP * 1.8, 'triangle');
+        if (c) chip(c, nextT, 0.05, STEP * 0.8, 'square');
+      } else {
+        if (m) pluck(m, nextT, 0.30, 1.4);
+        if (b) pluck(b, nextT, 0.16, 2.2);
+        if (c) pluck(c, nextT, 0.10, 1.6);
+      }
       nextT += STEP; step++;
     }
   }
