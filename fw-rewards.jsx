@@ -289,9 +289,8 @@ function StickerAlbum() {
    Mascot Wardrobe — ซื้อ/สวมชุดให้มาสคอต (ของแลกไม่มีต้นทุนจริง)
    ========================================================= */
 function MascotWardrobe() {
-  const { stars, level, mascotFit, buyMascotItem, wearMascotItem } = useApp();
+  const { level, mascotFit, wearMascotItem } = useApp();
   const ownedItems = MASCOT_ITEMS.filter(i => mascotFit.owned.includes(i.id));
-  const shopItems = MASCOT_ITEMS.filter(i => !mascotFit.owned.includes(i.id));
   return (
     <div className="card" style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>
       {/* preview */}
@@ -307,7 +306,7 @@ function MascotWardrobe() {
       </div>
 
       {/* owned: tap to wear / take off */}
-      {ownedItems.length > 0 && (
+      {ownedItems.length > 0 ? (
         <div>
           <div style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--ink-soft)', marginBottom: 7 }}>แตะเพื่อใส่/ถอด</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
@@ -321,30 +320,178 @@ function MascotWardrobe() {
             })}
           </div>
         </div>
-      )}
-
-      {/* shop */}
-      {shopItems.length > 0 && (
-        <div>
-          <div style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--ink-soft)', marginBottom: 7 }}>🛍️ ร้านชุดมาสคอต</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
-            {shopItems.map(item => {
-              const can = stars >= item.cost;
-              return (
-                <button key={item.id} className="card" disabled={!can}
-                  style={{ padding: '9px 10px', display: 'flex', alignItems: 'center', gap: 8, cursor: can ? 'pointer' : 'default', opacity: can ? 1 : .55, font: 'inherit', textAlign: 'left' }}
-                  onClick={() => buyMascotItem(item)}>
-                  <span style={{ fontSize: 22, lineHeight: 1 }}>{item.emoji}</span>
-                  <span style={{ flex: 1, minWidth: 0 }}>
-                    <span style={{ display: 'block', fontSize: 11.5, fontWeight: 700, color: 'var(--ink)' }}>{item.th}</span>
-                    <span style={{ fontSize: 10, color: 'var(--ink-soft)' }}>⭐ {item.cost}</span>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+      ) : (
+        <div style={{ fontSize: 11.5, color: 'var(--ink-soft)' }}>
+          ยังไม่มีชุดเลย — แวะดูชั้น "ชุดมาสคอต" ที่ร้านดาวด้านบนได้นะ 🎀
         </div>
       )}
+    </div>
+  );
+}
+
+/* =========================================================
+   Freya's Star Shop — หน้าร้านแฟนตาซีรวมของ 3 หมวดในที่เดียว
+   Reuses buyRoomItem / buyMascotItem / redeem unchanged; the shop is
+   pure presentation: shelves → preview sheet (confirm) → chest celebration.
+   ========================================================= */
+const SHOP_TABS = [
+  { id: 'room', th: 'ของแต่งห้อง', icon: '🛋️' },
+  { id: 'fit',  th: 'ชุดมาสคอต',  icon: '🎀' },
+  { id: 'real', th: 'รางวัลจริง',  icon: '🎁' },
+];
+
+function ItemPreviewSheet({ p, onClose, onBuy }) {
+  const { stars } = useApp();
+  const { kind, item } = p;
+  const afford = stars >= item.cost;
+  const missing = item.cost - stars;
+  const desc = kind === 'room' ? 'ซื้อแล้วนำไปวาง ย้าย จัดมุมในห้องของเฟรยาได้เลย'
+    : kind === 'fit' ? `ชุดของเพื่อนคู่ใจ (${item.slot === 'hat' ? 'สวมบนหัว' : 'ของถือคู่กาย'}) · ซื้อแล้วใส่ให้ทันที`
+    : 'รางวัลพิเศษจากคุณแม่ · แลกแล้วไปบอกคุณแม่ได้เลยนะ';
+  return (
+    <AppOverlayPortal>
+      <div className="overlay" onClick={onClose}>
+        <div className="sheet" onClick={e => e.stopPropagation()}>
+          <div className="sheet-grab"></div>
+          <div className="pv-art">{item.emoji}</div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 17, color: 'var(--ink)' }}>{item.th}</div>
+            <div style={{ fontSize: 11, color: 'var(--ink-soft)' }}>{item.en}</div>
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--ink)', textAlign: 'center', lineHeight: 1.55 }}>{desc}</div>
+          {afford ? (
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button className="btn ghost" style={{ flex: 'none' }} onClick={onClose}>ยกเลิก</button>
+              <button className="btn block" onClick={() => onBuy(p)}>
+                {kind === 'real' ? 'แลกเลย' : 'ซื้อเลย'} · {item.cost} ⭐
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="pv-soft">เก็บดาวอีก {missing} ดวงก็ได้แล้ว สู้ๆ นะ! 💪</div>
+              <button className="btn ghost block" onClick={onClose}>ไว้มาใหม่</button>
+            </>
+          )}
+        </div>
+      </div>
+    </AppOverlayPortal>
+  );
+}
+
+function PurchaseCelebration({ p, onClose }) {
+  const { beep } = useApp();
+  const { kind, item } = p;
+  const goRoom = () => {
+    onClose(); beep('tab');
+    const el = document.getElementById('freya-room');
+    if (!el) return;
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    el.scrollIntoView(reduce ? {} : { behavior: 'smooth', block: 'start' });
+  };
+  return (
+    <AppOverlayPortal>
+      <div className="loot-reveal" onClick={onClose}>
+        <div className="loot-reveal-card" onClick={e => e.stopPropagation()}>
+          <div className="chest-scene" aria-hidden="true">
+            <span className="chest-glow" />
+            <span className="chest-item">{item.emoji}</span>
+            <div className="chest">
+              <div className="chest-lid" />
+              <div className="chest-base" />
+            </div>
+          </div>
+          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 17, color: 'var(--ink)' }}>
+            ได้ {item.th} มาแล้ว!
+          </div>
+          {kind === 'fit' && <div style={{ fontSize: 11.5, color: 'var(--ink-soft)' }}>ใส่ให้เพื่อนคู่ใจเรียบร้อยแล้วนะ</div>}
+          {kind === 'real' && <div style={{ fontSize: 11.5, color: 'var(--ink-soft)' }}>ไปบอกคุณแม่ได้เลยนะ 💛</div>}
+          <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+            {kind === 'room' && <button className="btn" style={{ padding: '9px 18px' }} onClick={goRoom}>ไปจัดห้อง 🏠</button>}
+            <button className={kind === 'room' ? 'btn ghost' : 'btn'} style={{ padding: '9px 18px' }} onClick={onClose}>
+              {kind === 'room' ? 'เก็บไว้ก่อน' : 'เย้! 🎉'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </AppOverlayPortal>
+  );
+}
+
+function StarShop() {
+  const { stars, room, mascotFit, rewards, parentMode, buyRoomItem, buyMascotItem, redeem, addReward, beep, showToast } = useApp();
+  const [tab, setTab] = useStateR('room');
+  const [preview, setPreview] = useStateR(null);   // { kind, item } being inspected
+  const [won, setWon] = useStateR(null);           // { kind, item } just purchased
+
+  const entries = tab === 'room'
+    ? ROOM_ITEMS.map(item => ({ kind: 'room', item, owned: room.owned.includes(item.id) }))
+    : tab === 'fit'
+      ? MASCOT_ITEMS.map(item => ({ kind: 'fit', item, owned: mascotFit.owned.includes(item.id) }))
+      : rewards.map(item => ({ kind: 'real', item, owned: false }));
+
+  const confirmBuy = (p) => {
+    // preview sheet only offers this when affordable; buy fns re-validate anyway
+    if (p.kind === 'room') buyRoomItem(p.item);
+    else if (p.kind === 'fit') buyMascotItem(p.item);
+    else redeem(p.item);
+    setPreview(null);
+    setWon(p);
+  };
+
+  return (
+    <div className="shop-front">
+      <div className="shop-awning" aria-hidden="true"></div>
+      <div className="shop-head">
+        <div className="shop-sign">⭐ ร้านดาวของเฟรยา<span>Freya's Star Shop</span></div>
+        <span className="shop-purse">⭐ {stars}</span>
+      </div>
+      <div className="shop-keeper">
+        <DressedMascot size={38} />
+        <span className="shop-keeper-bubble">ยินดีต้อนรับค่า~ วันนี้รับอะไรดีคะ?</span>
+      </div>
+      <div className="shop-tabs" role="tablist">
+        {SHOP_TABS.map(t => (
+          <button key={t.id} role="tab" aria-selected={tab === t.id}
+            className={'shop-tab' + (tab === t.id ? ' on' : '')}
+            onClick={() => { setTab(t.id); beep('tab'); }}>
+            {t.icon} {t.th}
+          </button>
+        ))}
+      </div>
+
+      {/* คุณแม่จัดการรางวัลจริงได้จากชั้นวางโดยตรง */}
+      {tab === 'real' && parentMode ? (
+        <div style={{ padding: '14px 14px 20px' }}>
+          <div className="rewards-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            {rewards.map(r => <RewardCard key={r.id} r={r} />)}
+            <button className="card rw-add" onClick={addReward}>
+              <span style={{ fontSize: 30 }}>＋</span>
+              <span style={{ fontSize: 12.5, fontWeight: 700 }}>เพิ่มรางวัล</span>
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="shop-shelf">
+          {entries.map(({ kind, item, owned }) => (
+            <button key={item.id} className={'shelf-item' + (owned ? ' owned' : '')}
+              onClick={() => {
+                if (owned) { showToast('มีชิ้นนี้แล้ว · Already owned', item.emoji); beep('tab'); return; }
+                setPreview({ kind, item }); beep('tab');
+              }}>
+              <span className="shelf-art">{item.emoji}</span>
+              <span className="shelf-name">{item.th}</span>
+              {owned
+                ? <span className="shelf-state ok">✓ มีแล้ว</span>
+                : stars >= item.cost
+                  ? <span className="shelf-price">⭐ {item.cost}</span>
+                  : <span className="shelf-state soft">อีก {item.cost - stars} ⭐</span>}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {preview && <ItemPreviewSheet p={preview} onClose={() => setPreview(null)} onBuy={confirmBuy} />}
+      {won && <PurchaseCelebration p={won} onClose={() => setWon(null)} />}
     </div>
   );
 }
@@ -423,17 +570,11 @@ function Wallet() {
 }
 
 function Rewards() {
-  const { stars, rewards, parentMode, addReward } = useApp();
+  const { parentMode } = useApp();
   return (
     <div className="tab-enter" style={{ padding: '16px 16px 28px', display: 'flex', flexDirection: 'column', gap: 18 }}>
-      {/* balance banner */}
-      <div className="card" style={{ padding: 16, background: 'var(--header-grad)', border: 'none', color: '#fff', display: 'flex', alignItems: 'center', gap: 12 }}>
-        <span style={{ fontSize: 36 }} className="floaty">🪙</span>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 12.5, opacity: .92 }}>ดาวสะสมของเฟรยา · My Stars</div>
-          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 28, textShadow: '0 1px 2px rgba(0,0,0,.12)' }}>{stars} ⭐</div>
-        </div>
-      </div>
+      {/* the storefront — all three categories, balance purse, preview + chest */}
+      <StarShop />
 
       <div>
         <div className="sec-h">
@@ -443,25 +584,17 @@ function Rewards() {
         <LootBox />
       </div>
 
-      <div>
+      <div id="freya-room">
         <div className="sec-h">
           <h3>🏠 ห้องของเฟรยา</h3>
-          <span className="sub">My Room · แต่งห้องด้วยดาวที่สะสม</span>
+          <span className="sub">My Room · ของที่ซื้อมาวางที่นี่</span>
         </div>
         <FreyaRoom />
       </div>
 
       <div>
         <div className="sec-h">
-          <h3>🛒 ร้านของแต่งห้อง</h3>
-          <span className="sub">Furniture Shop</span>
-        </div>
-        <RoomShop />
-      </div>
-
-      <div>
-        <div className="sec-h">
-          <h3>👗 แต่งตัวมาสคอต</h3>
+          <h3>🐰 เพื่อนคู่ใจ</h3>
           <span className="sub">Mascot Wardrobe</span>
         </div>
         <MascotWardrobe />
@@ -473,22 +606,6 @@ function Rewards() {
           <span className="sub">Sticker Album</span>
         </div>
         <StickerAlbum />
-      </div>
-
-      <div>
-        <div className="sec-h">
-          <h3>🎁 ร้านแลกรางวัล</h3>
-          <span className="sub">{parentMode ? 'แตะ ✎ แก้ชื่อ · กด +/− ปรับราคา' : 'Reward Store'}</span>
-        </div>
-        <div className="rewards-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-          {rewards.map(r => <RewardCard key={r.id} r={r} />)}
-          {parentMode && (
-            <button className="card rw-add" onClick={addReward}>
-              <span style={{ fontSize: 30 }}>＋</span>
-              <span style={{ fontSize: 12.5, fontWeight: 700 }}>เพิ่มรางวัล</span>
-            </button>
-          )}
-        </div>
       </div>
 
       <div>
