@@ -508,6 +508,16 @@
 .pd-act i { font-style: normal; font-size: 16px; line-height: 1; }
 
 /* =========================================================
+   Icon system alignment — section headers, tabs, nav
+   ========================================================= */
+.sec-h h3 { display: inline-flex; align-items: center; gap: 7px; }
+.sec-h h3 svg { color: var(--accent-deep); flex: none; }
+.shop-tab { display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
+.shop-tab svg { flex: none; }
+.j-cover h2 { display: inline-flex; align-items: center; gap: 7px; }
+.j-cover h2 svg { flex: none; }
+
+/* =========================================================
    Motion accessibility — kill every non-essential transition
    ========================================================= */
 @media (prefers-reduced-motion: reduce) {

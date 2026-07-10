@@ -130,12 +130,12 @@ function KidSettingsSheet({ onClose, onOpenGate, onOpenParentSheet }) {
 }
 
 const TABS = [
-  { id: 'home',      emoji: '🏠', th: 'หน้าหลัก' },
-  { id: 'portfolio', emoji: '🖼️', th: 'ผลงาน' },
-  { id: 'rewards',   emoji: '🎁', th: 'รางวัล' },
+  { id: 'home',      icon: 'home',  th: 'หน้าหลัก' },
+  { id: 'portfolio', icon: 'image', th: 'ผลงาน' },
+  { id: 'rewards',   icon: 'gift',  th: 'รางวัล' },
 ];
-const ACTIVITY_TAB = { id: 'activity', emoji: '✏️', th: 'สร้าง' };
-const PARENT_TAB = { id: 'parent', emoji: '👩‍🏫', th: 'คุณแม่' };
+const ACTIVITY_TAB = { id: 'activity', icon: 'pencil', th: 'สร้าง' };
+const PARENT_TAB = { id: 'parent', icon: 'user', th: 'คุณแม่' };
 
 function BottomNav({ tab, setTab }) {
   const { beep, parentMode, submissions } = useApp();
@@ -161,7 +161,10 @@ function BottomNav({ tab, setTab }) {
             border: 'none', cursor: 'pointer', font: 'inherit', borderRadius: 14,
             background: on ? 'var(--accent-soft)' : 'transparent',
           }}>
-            <span className={'nav-emoji' + (on ? ' on' : '')} style={{ fontSize: 19 }}>{t.emoji}</span>
+            <span className={'nav-emoji' + (on ? ' on' : '')}
+              style={{ display: 'grid', placeItems: 'center', color: on ? 'var(--accent-deep)' : 'var(--ink-soft)' }}>
+              <FwIcon name={t.icon} size={21} />
+            </span>
             <span style={{ fontSize: 9.5, fontWeight: 700, color: on ? 'var(--accent-deep)' : 'var(--ink-soft)' }}>{t.th}</span>
             {showDot && <span className="nav-badge">{submissions.length}</span>}
           </button>

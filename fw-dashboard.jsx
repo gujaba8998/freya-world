@@ -293,7 +293,7 @@ function AchievementPreview({ go }) {
   return (
     <div>
       <div className="sec-h">
-        <h3>🏅 ความสำเร็จล่าสุด</h3>
+        <h3><FwIcon name="award" /> ความสำเร็จล่าสุด</h3>
         <span className="sub">Achievements</span>
       </div>
       <div className="card ach-strip">
@@ -368,7 +368,7 @@ function Dashboard({ go }) {
       {/* quests */}
       <div id="quests">
         <div className="sec-h">
-          <h3>🎯 ภารกิจวันนี้</h3>
+          <h3><FwIcon name="target" /> ภารกิจวันนี้</h3>
           <span className="sub">Today's Quests</span>
         </div>
         {missions.length === 0 ? (
@@ -394,7 +394,7 @@ function Dashboard({ go }) {
       {/* adventure map — progress across the 7 groups as unlockable islands */}
       <div>
         <div className="sec-h">
-          <h3>🗺️ แผนที่ผจญภัย</h3>
+          <h3><FwIcon name="map" /> แผนที่ผจญภัย</h3>
           <span className="sub">Adventure Map · รวม {overall}%</span>
         </div>
         <AdventureMap />

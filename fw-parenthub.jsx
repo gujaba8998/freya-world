@@ -203,7 +203,7 @@ function ApprovalQueue() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <WeeklySummary />
       <div className="sec-h" style={{ marginBottom: 0 }}>
-        <h3 style={{ fontSize: 16 }}>📥 ตะกร้าตรวจงาน</h3>
+        <h3 style={{ fontSize: 16 }}><FwIcon name="inbox" /> ตะกร้าตรวจงาน</h3>
         <span className="sub">{submissions.length} รอตรวจ</span>
       </div>
       {submissions.length === 0 ? (
@@ -316,7 +316,7 @@ function YearlyTracker() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <div className="sec-h" style={{ marginBottom: 0 }}>
-        <h3 style={{ fontSize: 16 }}>🗂️ เช็กลิสต์แผนรายปี</h3>
+        <h3 style={{ fontSize: 16 }}><FwIcon name="list" /> เช็กลิสต์แผนรายปี</h3>
         <span className="sub">Yearly Tracker</span>
       </div>
 
@@ -442,7 +442,7 @@ function SARSection({ onOpen }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <div className="sec-h" style={{ marginBottom: 0 }}>
-        <h3 style={{ fontSize: 16 }}>📄 รายงาน SAR ประจำปี</h3>
+        <h3 style={{ fontSize: 16 }}><FwIcon name="file" /> รายงาน SAR ประจำปี</h3>
         <span className="sub">Self-Assessment Report</span>
       </div>
 
@@ -496,9 +496,9 @@ function ParentDashboard({ go, setSub }) {
         </button>
       </div>
       <div className="pd-actions">
-        <button className="pd-act" onClick={() => { go('activity'); beep('tab'); }}><i>＋</i>สร้างภารกิจ</button>
-        <button className="pd-act" onClick={() => { setSub('tracker'); beep('tab'); }}><i>🗂️</i>แผนรายปี</button>
-        <button className="pd-act" onClick={() => { setSub('sar'); beep('tab'); }}><i>📄</i>รายงาน SAR</button>
+        <button className="pd-act" onClick={() => { go('activity'); beep('tab'); }}><FwIcon name="plus" size={16} />สร้างภารกิจ</button>
+        <button className="pd-act" onClick={() => { setSub('tracker'); beep('tab'); }}><FwIcon name="list" size={16} />แผนรายปี</button>
+        <button className="pd-act" onClick={() => { setSub('sar'); beep('tab'); }}><FwIcon name="file" size={16} />รายงาน SAR</button>
       </div>
     </div>
   );
@@ -506,9 +506,9 @@ function ParentDashboard({ go, setSub }) {
 
 /* ---------------- Parent Hub shell ---------------- */
 const HUB_TABS = [
-  { id: 'approve', emoji: '📥', th: 'ตรวจงาน' },
-  { id: 'tracker', emoji: '🗂️', th: 'แผนรายปี' },
-  { id: 'sar',     emoji: '📄', th: 'รายงาน' },
+  { id: 'approve', icon: 'inbox', th: 'ตรวจงาน' },
+  { id: 'tracker', icon: 'list',  th: 'แผนรายปี' },
+  { id: 'sar',     icon: 'file',  th: 'รายงาน' },
 ];
 
 function ParentHub({ onOpenSettings, go }) {
@@ -535,7 +535,7 @@ function ParentHub({ onOpenSettings, go }) {
       <div className="hub-tabs">
         {HUB_TABS.map(t => (
           <button key={t.id} className={'hub-tab' + (sub === t.id ? ' on' : '')} onClick={() => { setSub(t.id); beep('tab'); }}>
-            <span>{t.emoji}</span> {t.th}
+            <FwIcon name={t.icon} size={14} style={{ verticalAlign: '-2px' }} /> {t.th}
             {t.id === 'approve' && submissions.length > 0 && <span className="hub-dot">{submissions.length}</span>}
           </button>
         ))}

@@ -141,7 +141,7 @@ function Portfolio({ onRequestParent }) {
           {/* journal cover */}
           <div className="j-cover">
             <div className="j-cover-in">
-              <h2>📖 สมุดบันทึกการผจญภัย</h2>
+              <h2><FwIcon name="book-open" style={{ verticalAlign: '-3px', color: 'var(--accent-deep)' }} /> สมุดบันทึกการผจญภัย</h2>
               <p>Adventure Journal · บันทึกแล้ว {filtered.length} ความทรงจำ</p>
             </div>
           </div>
@@ -180,7 +180,7 @@ function Portfolio({ onRequestParent }) {
           )}
 
           {/* badges */}
-          <div className="sec-h"><h3 style={{ fontSize: 15 }}>🏅 เหรียญรางวัล</h3><span className="sub">Badges</span></div>
+          <div className="sec-h"><h3 style={{ fontSize: 15 }}><FwIcon name="award" /> เหรียญรางวัล</h3><span className="sub">Badges</span></div>
           <div className="card" style={{ padding: 16, display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12 }}>
             {BADGES.map(b => (
               <div key={b.en} style={{ textAlign: 'center', opacity: b.got ? 1 : 0.4 }}>

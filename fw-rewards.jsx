@@ -335,9 +335,9 @@ function MascotWardrobe() {
    pure presentation: shelves → preview sheet (confirm) → chest celebration.
    ========================================================= */
 const SHOP_TABS = [
-  { id: 'room', th: 'ของแต่งห้อง', icon: '🛋️' },
-  { id: 'fit',  th: 'ชุดมาสคอต',  icon: '🎀' },
-  { id: 'real', th: 'รางวัลจริง',  icon: '🎁' },
+  { id: 'room', th: 'ของแต่งห้อง', icon: 'bed' },
+  { id: 'fit',  th: 'ชุดมาสคอต',  icon: 'shirt' },
+  { id: 'real', th: 'รางวัลจริง',  icon: 'gift' },
 ];
 
 function ItemPreviewSheet({ p, onClose, onBuy }) {
@@ -454,7 +454,7 @@ function StarShop() {
           <button key={t.id} role="tab" aria-selected={tab === t.id}
             className={'shop-tab' + (tab === t.id ? ' on' : '')}
             onClick={() => { setTab(t.id); beep('tab'); }}>
-            {t.icon} {t.th}
+            <FwIcon name={t.icon} size={14} /> {t.th}
           </button>
         ))}
       </div>
@@ -578,7 +578,7 @@ function Rewards() {
 
       <div>
         <div className="sec-h">
-          <h3>🎁 กล่องสุ่มรางวัล</h3>
+          <h3><FwIcon name="package" /> กล่องสุ่มรางวัล</h3>
           <span className="sub">Weekly Surprise Box</span>
         </div>
         <LootBox />
@@ -586,7 +586,7 @@ function Rewards() {
 
       <div id="freya-room">
         <div className="sec-h">
-          <h3>🏠 ห้องของเฟรยา</h3>
+          <h3><FwIcon name="bed" /> ห้องของเฟรยา</h3>
           <span className="sub">My Room · ของที่ซื้อมาวางที่นี่</span>
         </div>
         <FreyaRoom />
@@ -594,7 +594,7 @@ function Rewards() {
 
       <div>
         <div className="sec-h">
-          <h3>🐰 เพื่อนคู่ใจ</h3>
+          <h3><FwIcon name="shirt" /> เพื่อนคู่ใจ</h3>
           <span className="sub">Mascot Wardrobe</span>
         </div>
         <MascotWardrobe />
@@ -602,14 +602,14 @@ function Rewards() {
 
       <div>
         <div className="sec-h">
-          <h3>📒 อัลบั้มสติกเกอร์</h3>
+          <h3><FwIcon name="star" /> อัลบั้มสติกเกอร์</h3>
           <span className="sub">Sticker Album</span>
         </div>
         <StickerAlbum />
       </div>
 
       <div>
-        <div className="sec-h"><h3>👛 กระเป๋าเงิน</h3><span className="sub">Wallet · เรียนรู้การออม</span></div>
+        <div className="sec-h"><h3><FwIcon name="wallet" /> กระเป๋าเงิน</h3><span className="sub">Wallet · เรียนรู้การออม</span></div>
         <Wallet />
       </div>
     </div>
