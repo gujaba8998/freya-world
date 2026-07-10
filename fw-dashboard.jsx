@@ -128,16 +128,16 @@ function MissionCard({ m }) {
               {m.th}
             </span>
             {st === 'inprogress' && m.returned && (
-              <span className="ms-badge returned">↩️ ส่งกลับมาแก้</span>
+              <span className="ms-badge returned">💪 ลองแก้อีกครั้ง</span>
             )}
             {st === 'inprogress' && !m.returned && (
-              <span className="ms-badge inprogress">🔥 กำลังทำ</span>
+              <span className="ms-badge inprogress">🧭 กำลังผจญภัย</span>
             )}
             {st === 'pending' && (
-              <span className="ms-badge pending">⏳ รอตรวจ</span>
+              <span className="ms-badge pending">💌 ส่งให้คุณแม่แล้ว</span>
             )}
             {st === 'done' && (
-              <span className="ms-badge done">✅ สำเร็จ</span>
+              <span className="ms-badge done">🏆 ผ่านภารกิจ!</span>
             )}
           </div>
           <span style={{ fontSize: 11.5, color: 'var(--ink-soft)' }}>{m.en} · {g.th}</span>
@@ -152,7 +152,7 @@ function MissionCard({ m }) {
       {/* action row */}
       {st === 'available' && (
         <button className="ms-btn accept" onClick={() => acceptMission(m.id)}>
-          <span>🎯</span> กดรับภารกิจ · Accept Mission
+          <span>🗺️</span> ออกผจญภัย · Start Quest
         </button>
       )}
 
@@ -172,14 +172,14 @@ function MissionCard({ m }) {
       {st === 'pending' && (
         <div className="ms-pending-bar">
           <span style={{ fontSize: 14 }}>⏳</span>
-          <span style={{ fontSize: 12, color: 'var(--ink-soft)', fontWeight: 600 }}>ส่งให้คุณแม่ตรวจแล้ว · Awaiting approval</span>
+          <span style={{ fontSize: 12, color: 'var(--ink-soft)', fontWeight: 600 }}>ส่งให้คุณแม่แล้ว รอฟังข่าวดีนะ · Sent to Mum</span>
         </div>
       )}
 
       {st === 'done' && (
         <div className="ms-done-bar">
           <span style={{ fontSize: 14 }}>🌟</span>
-          <span style={{ fontSize: 12, color: 'var(--good)', fontWeight: 700 }}>ผ่านการตรวจแล้ว! +{m.stars} ดาว</span>
+          <span style={{ fontSize: 12, color: 'var(--good)', fontWeight: 700 }}>ผ่านภารกิจ! +{m.stars} ดาว</span>
         </div>
       )}
 
@@ -198,6 +198,110 @@ function MissionCard({ m }) {
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+/* =========================================================
+   HeroAdventure — signature element: หน้าต่างท้องฟ้าที่เปลี่ยนตามเวลาจริง
+   เช้า/บ่าย/เย็น/ค่ำ (CSS ล้วน ไม่มี canvas ไม่มี loop animation)
+   รวม: คำทักทาย · คำคมประจำวัน · แถบเลเวล · ภารกิจแนะนำ · CTA เดียว
+   ========================================================= */
+const QUOTES = [
+  'การผจญภัยที่ยิ่งใหญ่ เริ่มจากก้าวเล็กๆ เสมอ',
+  'ทุกภารกิจคือขุมทรัพย์ความรู้ที่รอให้ค้นพบ',
+  'ผิดพลาดได้ เพราะนักผจญภัยเรียนรู้จากทุกเส้นทาง',
+  'ดาวทุกดวงบนฟ้า เกิดจากความพยายามของหนูเอง',
+  'วันนี้โลกของหนูจะเติบโตขึ้นอีกนิดนะ',
+  'หัวใจของนักสำรวจ คือกล้าลองสิ่งใหม่ๆ',
+  'ความรู้ใหม่ซ่อนอยู่ในทุกๆ วัน',
+];
+function heroPeriod(h) {
+  return h >= 5 && h < 11 ? 'morning' : h < 16 ? 'afternoon' : h < 19 ? 'evening' : 'night';
+}
+const HERO_GREET = { morning: 'สวัสดีตอนเช้า', afternoon: 'สวัสดีตอนบ่าย', evening: 'สวัสดีตอนเย็น', night: 'ค่ำนี้พักผ่อนด้วยนะ' };
+
+function HeroAdventure({ go }) {
+  const { missions, profile, level, levelInto, parentMode, beep, settings } = useApp();
+  const now = new Date();
+  const period = heroPeriod(now.getHours());
+  const name = profile.nickname || profile.firstName || profile.name;
+  const dayOfYear = Math.floor((now - new Date(now.getFullYear(), 0, 0)) / 86400000);
+  const quote = QUOTES[dayOfYear % QUOTES.length];
+  const doing = missions.find(m => m.status === 'inprogress');
+  const avail = missions.find(m => (m.status || (m.done ? 'done' : 'available')) === 'available');
+  const target = doing || avail;
+  const nDone = missions.filter(m => m.status === 'done').length;
+  const nPending = missions.filter(m => m.status === 'pending').length;
+  const scrollToQuests = () => {
+    beep('tab');
+    const el = document.getElementById('quests');
+    if (!el) return;
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    el.scrollIntoView(reduce ? {} : { behavior: 'smooth', block: 'start' });
+  };
+  return (
+    <section className={'hero ' + period}>
+      <div className="hero-sky" aria-hidden="true">
+        {period === 'night'
+          ? <><span className="hero-moon" /><span className="hero-stars" /></>
+          : <span className="hero-sun" />}
+        <span className="hero-cloud c1" /><span className="hero-cloud c2" />
+      </div>
+      <div className="hero-hill" aria-hidden="true" />
+      <div className="hero-body">
+        {settings.thaiDate !== false && <div className="hero-date">{thaiDate(now).full}</div>}
+        <h2 className="hero-greet">{HERO_GREET[period]} {name}!</h2>
+        <p className="hero-quote">“{quote}”</p>
+        <div className="hero-lvl">
+          <div className="hero-lvl-bar"><b style={{ width: levelInto + '%' }}></b></div>
+          <span>อีก {100 - levelInto} ⭐ ถึง Level {level + 1}</span>
+        </div>
+        {missions.length > 0 && (
+          <div className="hero-counts">
+            <span className="k-chip">🏆 {nDone} สำเร็จ</span>
+            {nPending > 0 && <span className="k-chip">💌 {nPending} รอคุณแม่</span>}
+          </div>
+        )}
+        {target ? (
+          <button className="btn hero-cta" onClick={scrollToQuests}>
+            {doing ? '🧭 ผจญภัยต่อ · Continue' : '🗺️ เริ่มภารกิจวันนี้ · Start'}
+            <small>{target.th}</small>
+          </button>
+        ) : parentMode ? (
+          <button className="btn hero-cta" onClick={() => { beep('tab'); go('activity'); }}>
+            ＋ เพิ่มภารกิจแรกของวันนี้
+          </button>
+        ) : (
+          <div className="hero-wait">วันนี้ยังไม่มีภารกิจ รอคุณแม่ส่งมานะ 💌</div>
+        )}
+      </div>
+      <div className="hero-mascot"><DressedMascot size={58} /></div>
+    </section>
+  );
+}
+
+/* =========================================================
+   AchievementPreview — สติกเกอร์/ความสำเร็จล่าสุด + ลิงก์ไปดูทั้งหมด
+   ========================================================= */
+function AchievementPreview({ go }) {
+  const { stickers, beep } = useApp();
+  const catalog = (typeof window !== 'undefined' && window.STICKERS) || [];
+  if (!stickers.length || !catalog.length) return null;
+  const recent = stickers.slice(-4).reverse()
+    .map(id => catalog.find(s => s.id === id)).filter(Boolean);
+  return (
+    <div>
+      <div className="sec-h">
+        <h3>🏅 ความสำเร็จล่าสุด</h3>
+        <span className="sub">Achievements</span>
+      </div>
+      <div className="card ach-strip">
+        {recent.map((s, i) => (
+          <span key={i} className="ach-cell" title={s.th}>{s.emoji}</span>
+        ))}
+        <button className="ach-more" onClick={() => { beep('tab'); go('rewards'); }}>ดูทั้งหมด ›</button>
+      </div>
     </div>
   );
 }
@@ -241,8 +345,9 @@ function AdventureMap() {
               {done && <span className="adv-crown">👑</span>}
               {i === curIdx && <span className="adv-me"><DressedMascot size={20} /></span>}
             </div>
+            <span className="adv-terr">{(TERRITORY[g.id] || {}).th || g.th}</span>
             <span className="adv-name">{g.th}</span>
-            <span className="adv-pct" style={{ color: g.c }}>{locked ? 'ยังไม่เริ่ม' : pct + '%'}</span>
+            <span className="adv-pct" style={{ color: g.c }}>{locked ? 'ยังไม่สำรวจ' : done ? 'พิชิตแล้ว!' : 'สำรวจแล้ว ' + pct + '%'}</span>
           </div>
         );
       })}
@@ -251,39 +356,20 @@ function AdventureMap() {
 }
 
 function Dashboard({ go }) {
-  const { missions, progress, beep, parentMode, streak } = useApp();
-  // for progress ring: count done + pending as "active"
-  const activeCount = missions.filter(m => ['done','pending'].includes(m.status || (m.done ? 'done' : 'available'))).length;
-  const todayPct = missions.length ? Math.round((activeCount / missions.length) * 100) : 0;
+  const { missions, progress, beep, parentMode } = useApp();
   const overall = Math.round(GROUPS.reduce((s, g) => s + (progress[g.id] || 0), 0) / GROUPS.length);
 
   return (
     <div className="tab-enter" style={{ padding: '16px 16px 24px', display: 'flex', flexDirection: 'column', gap: 18 }}>
 
-      {/* today summary */}
-      <div className="card" style={{ padding: 16, display: 'flex', alignItems: 'center', gap: 14, background: 'var(--header-grad)', border: 'none', color: '#fff' }}>
-        <ProgressRing value={todayPct} size={66} stroke={8} color="#fff" track="rgba(255,255,255,0.3)">
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 17, color: 'var(--accent-deep)' }}>{todayPct}%</span>
-        </ProgressRing>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 17, textShadow: '0 1px 2px rgba(0,0,0,.12)' }}>ภารกิจวันนี้</div>
-          <div style={{ fontSize: 12.5, opacity: .92 }}>
-            {missions.filter(m => m.status === 'done').length} สำเร็จ ·{' '}
-            {missions.filter(m => m.status === 'pending').length} รอตรวจ ·{' '}
-            {missions.filter(m => m.status === 'inprogress').length} กำลังทำ
-            {streak && streak.count > 0 && <> · 🔥 {streak.count} วันติด</>}
-          </div>
-        </div>
-        <span style={{ fontSize: 40 }} className="floaty">
-          {todayPct === 100 ? '🌟' : missions.some(m=>m.status==='inprogress') ? '⚡' : '🐰'}
-        </span>
-      </div>
+      {/* signature hero — the sky window into Freya's world */}
+      <HeroAdventure go={go} />
 
-      {/* missions */}
-      <div>
+      {/* quests */}
+      <div id="quests">
         <div className="sec-h">
           <h3>🎯 ภารกิจวันนี้</h3>
-          <span className="sub">Today's Missions</span>
+          <span className="sub">Today's Quests</span>
         </div>
         {missions.length === 0 ? (
           <div className="hub-empty">
@@ -314,8 +400,11 @@ function Dashboard({ go }) {
         <AdventureMap />
       </div>
 
+      {/* recently unlocked achievements */}
+      <AchievementPreview go={go} />
+
     </div>
   );
 }
 
-Object.assign(window, { Dashboard, AdventureMap });
+Object.assign(window, { Dashboard, AdventureMap, HeroAdventure, AchievementPreview });

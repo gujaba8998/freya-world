@@ -272,7 +272,8 @@ function FbStatusBadge({ status }) {
   if (status === 'idle' || status === 'offline') return null;
   return (
     <span style={{ fontSize: 10, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 3,
-      background: 'rgba(255,255,255,0.22)', padding: '2px 8px', borderRadius: 999, color: '#fff' }}>
+      background: 'var(--surface-2, rgba(255,255,255,0.22))', padding: '2px 8px', borderRadius: 999,
+      color: 'var(--ink-soft, #fff)' }}>
       {map[status]} {label[status]}
     </span>
   );

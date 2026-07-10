@@ -35,75 +35,99 @@ function ConfettiLayer() {
   );
 }
 
-function Header({ onOpenGate, onOpenSheet, onOpenAvatar }) {
-  const { stars, level, levelInto, streak, dark, setDark, soundOn, setSoundOn, musicOn, setMusicOn, musicTrack, setMusicTrack, beep, settings, profile, parentMode, setParentMode, fbStatus } = useApp();
-  const tracks = (typeof window !== 'undefined' && window.musicTracks) || [];
-  const curTrack = tracks[musicTrack] || tracks[0] || { th: '', emoji: '🎵' };
-  const today = thaiDate(new Date());
+/* Compact header — avatar · name · level+streak · stars · settings.
+   Every auxiliary control (theme, sound, music, parent mode) lives in
+   KidSettingsSheet so the header stays calm and the hero carries the scene. */
+function Header({ onOpenAvatar, onOpenSettings }) {
+  const { stars, level, levelInto, streak, profile, parentMode, fbStatus } = useApp();
   return (
-    <div style={{ background: 'var(--header-grad)', padding: '16px 16px 18px', color: '#fff', borderBottomLeftRadius: 26, borderBottomRightRadius: 26 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <AvatarDisplay profile={profile} size={50} onClick={onOpenAvatar} />
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 19, textShadow: '0 1px 2px rgba(0,0,0,.12)' }}>สวัสดี {profile.nickname || profile.firstName || profile.name}! <span className="wave">👋</span></div>
-          <div style={{ display: 'flex', gap: 6, marginTop: 3, flexWrap: 'wrap' }}>
-            <span className="lvl-chip" title={levelInto + '/100 ดาวสะสมในเลเวลนี้'}>
-              ⭐ Level {level}
-              <i className="lvl-bar"><b style={{ width: levelInto + '%' }}></b></i>
+    <header className="kid-head">
+      <AvatarDisplay profile={profile} size={44} onClick={onOpenAvatar} />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div className="kid-head-name">{profile.nickname || profile.firstName || profile.name}</div>
+        <div className="kid-head-chips">
+          <span className="k-chip" title={levelInto + '/100 ดาวสะสมในเลเวลนี้'}>
+            Lv {level} <i className="lvl-mini"><b style={{ width: levelInto + '%' }}></b></i>
+          </span>
+          {streak && streak.count > 0 && (
+            <span className="k-chip streak" title={`ทำภารกิจต่อเนื่อง ${streak.count} วัน · สถิติสูงสุด ${streak.best} วัน`}>
+              🔥 {streak.count}
             </span>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11.5, background: 'rgba(255,255,255,0.32)', padding: '2px 9px', borderRadius: 999, fontWeight: 700 }}>📘 {profile.grade}</span>
-            {streak && streak.count > 0 && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11.5, background: 'rgba(255,255,255,0.32)', padding: '2px 9px', borderRadius: 999, fontWeight: 700 }}
-                title={`ทำภารกิจต่อเนื่อง ${streak.count} วัน · สถิติสูงสุด ${streak.best} วัน`}>
-                🔥 {streak.count} วัน
-              </span>
-            )}
-            <FbStatusBadge status={fbStatus} />
-          </div>
+          )}
+          {parentMode && <span className="k-chip" title="โหมดคุณแม่เปิดอยู่">🔓 คุณแม่</span>}
+          <FbStatusBadge status={fbStatus} />
         </div>
-        <span className="starpill star-pop" key={stars} style={{ fontSize: 14 }}>⭐ {stars}</span>
       </div>
-
-      {settings.thaiDate !== false && (
-        <div style={{ marginTop: 12, fontSize: 11.5, opacity: .94, display: 'flex', alignItems: 'center', gap: 6 }}>
-          📅 {today.full}
-        </div>
-      )}
-
-      <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
-        <button onClick={() => { setDark(d => !d); beep('tab'); }} style={pillBtn}>
-          {dark ? '🌙' : '☀️'} <span>{dark ? 'มืด' : 'สว่าง'}</span>
-        </button>
-        <button onClick={() => { setSoundOn(s => !s); }} style={pillBtn}>
-          {soundOn ? '🔊' : '🔇'} <span>เสียง</span>
-        </button>
-        <button onClick={() => { setMusicOn(m => !m); }}
-          style={{ ...pillBtn, background: musicOn ? 'rgba(255,255,255,0.42)' : pillBtn.background, fontWeight: musicOn ? 700 : 600 }}>
-          {musicOn ? '🎶' : '🎵'} <span>เพลง</span>
-        </button>
-        {musicOn && (
-          <button onClick={() => { setMusicTrack(t => (t + 1) % (tracks.length || 1)); beep('tab'); }}
-            style={pillBtn} title="เปลี่ยนเพลง">
-            {curTrack.emoji} <span>{curTrack.th}</span>
-          </button>
-        )}
-        {parentMode ? (
-          <>
-            <button onClick={onOpenSheet} style={{ ...pillBtn, background: 'rgba(255,255,255,0.42)', fontWeight: 700 }}>⚙️ <span>ตั้งค่า</span></button>
-            <button onClick={() => { setParentMode(false); beep('tab'); }} style={pillBtn}>🔒 <span>ล็อก</span></button>
-          </>
-        ) : (
-          <button onClick={onOpenGate} style={pillBtn}>🔐 <span>โหมดคุณแม่</span></button>
-        )}
-      </div>
-    </div>
+      <span className="k-stars star-pop" key={stars}>⭐ {stars}</span>
+      <button className="k-gear" aria-label="ตั้งค่า" title="ตั้งค่า" onClick={onOpenSettings}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="3.2" />
+          <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.11-1.56 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.56-1.11 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.08A1.7 1.7 0 0 0 10 4.09V4a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1.03 1.56h.08a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.08A1.7 1.7 0 0 0 21 12h.09a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.6-.97z" />
+        </svg>
+      </button>
+    </header>
   );
 }
-const pillBtn = {
-  display: 'inline-flex', alignItems: 'center', gap: 5, cursor: 'pointer', font: 'inherit',
-  background: 'rgba(255,255,255,0.22)', color: '#fff', border: '1.5px solid rgba(255,255,255,0.35)',
-  borderRadius: 999, padding: '5px 12px', fontSize: 12, fontWeight: 600,
-};
+
+/* Settings bottom sheet — the auxiliary controls that used to crowd the header */
+function KidSettingsSheet({ onClose, onOpenGate, onOpenParentSheet }) {
+  const { dark, setDark, soundOn, setSoundOn, musicOn, setMusicOn, musicTrack, setMusicTrack, parentMode, setParentMode, beep } = useApp();
+  const tracks = (typeof window !== 'undefined' && window.musicTracks) || [];
+  return (
+    <AppOverlayPortal>
+      <div className="overlay" onClick={onClose}>
+        <div className="sheet" onClick={e => e.stopPropagation()}>
+          <div className="sheet-grab"></div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 2 }}>
+            <span style={{ fontSize: 20 }}>⚙️</span>
+            <div style={{ flex: 1, fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 16, color: 'var(--ink)' }}>ตั้งค่า · Settings</div>
+            <button className="x-btn" onClick={onClose} aria-label="ปิด">✕</button>
+          </div>
+
+          <div>
+            <div className="set-row">
+              <span className="set-ico">{dark ? '🌙' : '☀️'}</span>
+              <span className="set-label"><b>ธีมหน้าจอ</b><span>{dark ? 'โหมดกลางคืน' : 'โหมดกลางวัน'}</span></span>
+              <button className={'k-switch' + (dark ? ' on' : '')} role="switch" aria-checked={dark} aria-label="โหมดกลางคืน"
+                onClick={() => { setDark(d => !d); beep('tab'); }} />
+            </div>
+            <div className="set-row">
+              <span className="set-ico">{soundOn ? '🔊' : '🔇'}</span>
+              <span className="set-label"><b>เสียงเอฟเฟกต์</b><span>เสียงติ๊ง เสียงแตร ตอนได้ดาว</span></span>
+              <button className={'k-switch' + (soundOn ? ' on' : '')} role="switch" aria-checked={soundOn} aria-label="เสียงเอฟเฟกต์"
+                onClick={() => setSoundOn(s => !s)} />
+            </div>
+            <div className="set-row">
+              <span className="set-ico">{musicOn ? '🎶' : '🎵'}</span>
+              <span className="set-label"><b>เพลงพื้นหลัง</b><span>{musicOn ? (tracks[musicTrack] || {}).th || '' : 'ปิดอยู่'}</span></span>
+              <button className={'k-switch' + (musicOn ? ' on' : '')} role="switch" aria-checked={musicOn} aria-label="เพลงพื้นหลัง"
+                onClick={() => setMusicOn(m => !m)} />
+            </div>
+            {musicOn && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, padding: '4px 4px 12px 49px' }}>
+                {tracks.map((t, i) => (
+                  <button key={t.id} className={'fit-chip' + (musicTrack === i ? ' on' : '')}
+                    onClick={() => { setMusicTrack(i); beep('tab'); }}>
+                    {t.emoji} {t.th}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {parentMode ? (
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button className="btn block" onClick={() => { onClose(); onOpenParentSheet(); }}>⚙️ ตั้งค่าโหมดคุณแม่</button>
+              <button className="btn ghost" style={{ flex: 'none' }} onClick={() => { setParentMode(false); beep('tab'); onClose(); }}>🔒 ล็อก</button>
+            </div>
+          ) : (
+            <button className="btn ghost block" onClick={() => { onClose(); onOpenGate(); }}>🔐 โหมดคุณแม่ · Parent Mode</button>
+          )}
+        </div>
+      </div>
+    </AppOverlayPortal>
+  );
+}
 
 const TABS = [
   { id: 'home',      emoji: '🏠', th: 'หน้าหลัก' },
@@ -152,6 +176,7 @@ function Shell() {
   const [tab, setTab] = useStateS('home');
   const [gate, setGate] = useStateS(false);
   const [sheet, setSheet] = useStateS(false);
+  const [kidSet, setKidSet] = useStateS(false);
   const [avOpen, setAvOpen] = useStateS(false);
   const requestParent = () => { if (parentMode) setSheet(true); else setGate(true); };
   // ถ้าออกจากโหมดคุณแม่ และอยู่ที่แท็บเฉพาะแม่ → เด้งกลับหน้าหลัก
@@ -162,7 +187,7 @@ function Shell() {
         <span>⭐</span><span>☁️</span><span>🌸</span><span>✨</span><span>🌈</span><span>☁️</span>
       </div>
       <div className="app-scroll" style={{ paddingBottom: 76 }}>
-        <Header onOpenGate={() => setGate(true)} onOpenSheet={() => setSheet(true)} onOpenAvatar={() => setAvOpen(true)} />
+        <Header onOpenAvatar={() => setAvOpen(true)} onOpenSettings={() => { setKidSet(true); beep('tab'); }} />
         {tab === 'home' && <Dashboard go={setTab} />}
         {tab === 'activity' && <ActivityBuilder go={setTab} />}
         {tab === 'portfolio' && <Portfolio onRequestParent={requestParent} />}
@@ -175,6 +200,7 @@ function Shell() {
       {!parentMode && <MascotBuddy tab={tab} />}
       <BottomNav tab={tab} setTab={setTab} />
       {avOpen && <AvatarPicker onClose={() => setAvOpen(false)} />}
+      {kidSet && <KidSettingsSheet onClose={() => setKidSet(false)} onOpenGate={() => setGate(true)} onOpenParentSheet={() => setSheet(true)} />}
       {gate && <ParentGate onClose={() => setGate(false)} onSuccess={() => { setParentMode(true); setGate(false); setTab('parent'); }} />}
       {sheet && <ParentSheet onClose={() => setSheet(false)} />}
     </div>

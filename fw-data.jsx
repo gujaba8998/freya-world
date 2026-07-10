@@ -24,6 +24,17 @@ const GROUPS = [
 ];
 const GROUP = Object.fromEntries(GROUPS.map(g => [g.id, g]));
 
+/* ดินแดนบนแผนที่ผจญภัย — แต่ละกลุ่มสาระคือหนึ่งดินแดนในโลกของเฟรยา */
+const TERRITORY = {
+  life:     { th: 'หมู่บ้านอุ่นใจ',      en: 'Cozy Village' },
+  language: { th: 'ห้องสมุดเวทมนตร์',   en: 'Magical Library' },
+  math:     { th: 'เมืองรูปทรง',         en: 'City of Shapes' },
+  science:  { th: 'หอดูดาวบนเมฆ',       en: 'Cloud Observatory' },
+  agri:     { th: 'สวนมหัศจรรย์',        en: 'Enchanted Garden' },
+  social:   { th: 'ป้อมปราการโลกกว้าง', en: 'World Citadel' },
+  art:      { th: 'เกาะสายรุ้ง',          en: 'Rainbow Island' },
+};
+
 /* learning indicators (มาตรฐานตัวชี้วัด) per group — short bilingual */
 const INDICATORS = {
   life:     ['ดูแลตนเอง · Self-care', 'ความปลอดภัย · Safety', 'การวางแผน · Planning', 'มารยาท · Manners'],
@@ -870,7 +881,7 @@ function AppOverlayPortal({ children }) {
 }
 
 Object.assign(window, {
-  GROUPS, GROUP, INDICATORS, REWARDS, BADGES,
+  GROUPS, GROUP, TERRITORY, INDICATORS, REWARDS, BADGES,
   thaiDate, playSound, AppCtx, useApp, AppProvider,
   ProgressRing, GroupDot, Bar, PhImg, AppOverlayPortal,
   dayKey, weekStart, weekKey, LOOT_GOAL, STREAK_BONUS, speakThai,

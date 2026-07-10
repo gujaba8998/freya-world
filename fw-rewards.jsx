@@ -499,4 +499,4 @@ function Rewards() {
   );
 }
 
-Object.assign(window, { Rewards });
+Object.assign(window, { Rewards, STICKERS, RARITY });
