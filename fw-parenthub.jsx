@@ -472,6 +472,38 @@ function SARSection({ onOpen }) {
   );
 }
 
+/* ---------------- 0.5 Parent Dashboard — งานค้าง + ทางลัด ---------------- */
+function ParentDashboard({ go, setSub }) {
+  const { submissions, missions, portfolio, beep } = useApp();
+  const returned = missions.filter(m => m.status === 'inprogress' && m.returned).length;
+  const unstarted = missions.filter(m => (m.status || (m.done ? 'done' : 'available')) === 'available').length;
+  const ws = weekStart().getTime();
+  const wkDone = portfolio.filter(p => p.ts && p.ts >= ws).length;
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <div className="pd-grid">
+        <button className="pd-tile hot" onClick={() => { setSub('approve'); beep('tab'); }}>
+          <b>{submissions.length}</b><span>รอตรวจ</span>
+        </button>
+        <button className="pd-tile warn" onClick={() => { go('home'); beep('tab'); }}>
+          <b>{returned}</b><span>ส่งกลับแก้</span>
+        </button>
+        <button className="pd-tile" onClick={() => { go('home'); beep('tab'); }}>
+          <b>{unstarted}</b><span>ยังไม่เริ่มทำ</span>
+        </button>
+        <button className="pd-tile ok" onClick={() => { setSub('approve'); beep('tab'); }}>
+          <b>{wkDone}</b><span>สำเร็จสัปดาห์นี้</span>
+        </button>
+      </div>
+      <div className="pd-actions">
+        <button className="pd-act" onClick={() => { go('activity'); beep('tab'); }}><i>＋</i>สร้างภารกิจ</button>
+        <button className="pd-act" onClick={() => { setSub('tracker'); beep('tab'); }}><i>🗂️</i>แผนรายปี</button>
+        <button className="pd-act" onClick={() => { setSub('sar'); beep('tab'); }}><i>📄</i>รายงาน SAR</button>
+      </div>
+    </div>
+  );
+}
+
 /* ---------------- Parent Hub shell ---------------- */
 const HUB_TABS = [
   { id: 'approve', emoji: '📥', th: 'ตรวจงาน' },
@@ -479,13 +511,13 @@ const HUB_TABS = [
   { id: 'sar',     emoji: '📄', th: 'รายงาน' },
 ];
 
-function ParentHub({ onOpenSettings }) {
+function ParentHub({ onOpenSettings, go }) {
   const { submissions, beep } = useApp();
   const [sub, setSub] = useStateH('approve');
   const [sarOpen, setSarOpen] = useStateH(false);
 
   return (
-    <div className="tab-enter" style={{ padding: '16px 16px 28px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div className="tab-enter pro-zone" style={{ padding: '16px 16px 28px', display: 'flex', flexDirection: 'column', gap: 14 }}>
       {/* hub header */}
       <div className="card hub-head">
         <span style={{ fontSize: 24 }}>👩‍🏫</span>
@@ -495,6 +527,9 @@ function ParentHub({ onOpenSettings }) {
         </div>
         <button className="btn ghost" style={{ padding: '8px 12px', fontSize: 12.5 }} onClick={onOpenSettings}>⚙️ ตั้งค่า</button>
       </div>
+
+      {/* dashboard: pending work + quick actions */}
+      <ParentDashboard go={go || (() => {})} setSub={setSub} />
 
       {/* sub-tab switcher */}
       <div className="hub-tabs">

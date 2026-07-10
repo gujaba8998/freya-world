@@ -234,7 +234,7 @@ function ActivityBuilder({ go }) {
   };
 
   return (
-    <div className="tab-enter" style={{ padding: '16px 16px 28px', display: 'flex', flexDirection: 'column', gap: 18 }}>
+    <div className="tab-enter pro-zone" style={{ padding: '16px 16px 28px', display: 'flex', flexDirection: 'column', gap: 18 }}>
       <div className="sec-h" style={{ marginBottom: 0 }}>
         <h3>✏️ สร้างกิจกรรม</h3>
         <span className="sub">{GRADE_LABEL[profile.grade] || profile.grade}</span>

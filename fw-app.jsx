@@ -182,7 +182,7 @@ function Shell() {
   // ถ้าออกจากโหมดคุณแม่ และอยู่ที่แท็บเฉพาะแม่ → เด้งกลับหน้าหลัก
   useEffectS(() => { if (!parentMode && (tab === 'parent' || tab === 'activity')) setTab('home'); }, [parentMode, tab]);
   return (
-    <div className={'app' + (dark ? ' is-dark' : '')} style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column' }}>
+    <div className={'app' + (dark ? ' is-dark' : '') + (parentMode ? ' parent-on' : '')} style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column' }}>
       <div className="bg-doodles" aria-hidden="true">
         <span>⭐</span><span>☁️</span><span>🌸</span><span>✨</span><span>🌈</span><span>☁️</span>
       </div>
@@ -192,7 +192,7 @@ function Shell() {
         {tab === 'activity' && <ActivityBuilder go={setTab} />}
         {tab === 'portfolio' && <Portfolio onRequestParent={requestParent} />}
         {tab === 'rewards' && <Rewards />}
-        {tab === 'parent' && <ParentHub onOpenSettings={() => setSheet(true)} />}
+        {tab === 'parent' && <ParentHub onOpenSettings={() => setSheet(true)} go={setTab} />}
       </div>
       {toast && <div className="toast"><span style={{ fontSize: 17 }}>{toast.emoji}</span>{toast.msg}</div>}
       <ConfettiLayer />
