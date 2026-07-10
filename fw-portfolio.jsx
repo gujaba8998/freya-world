@@ -39,6 +39,68 @@ function Polaroid({ item, i }) {
   );
 }
 
+/* =========================================================
+   Adventure Journal — หนึ่งหน้าความทรงจำต่อหนึ่งผลงาน
+   masking tape + paper card + สิ่งที่ได้เรียนรู้ + คำชมคุณแม่
+   ========================================================= */
+function JournalEntry({ item, i }) {
+  const g = GROUP[item.group];
+  const video = (item.evidence || []).find(e => e.type === 'video');
+  const audio = (item.evidence || []).find(e => e.type === 'audio');
+  const learned = (item.inds || []).slice(0, 3);
+  return (
+    <article className="mem-card">
+      <span className={'mem-tape t' + (i % 3)} aria-hidden="true"></span>
+      {i % 4 === 1 && <span className="mem-sticker" aria-hidden="true">⭐</span>}
+      {i % 4 === 3 && <span className="mem-sticker" aria-hidden="true">🌸</span>}
+
+      {item.thumb ? (
+        <img className="mem-photo" src={item.thumb} alt={item.th} loading="lazy" />
+      ) : video && video.url ? (
+        <video className="mem-photo" src={video.url} controls playsInline preload="metadata" />
+      ) : null}
+
+      <div className="mem-title-row">
+        <h4 className="mem-title">{item.th}</h4>
+        <span className="mem-badge" style={{ background: g.c }}>{g.emoji} {g.th}</span>
+      </div>
+      {item.desc && <p className="mem-desc">{item.desc}</p>}
+
+      {audio && audio.url && (
+        <audio controls src={audio.url} style={{ width: '100%', height: 28, marginTop: 8 }} />
+      )}
+
+      {learned.length > 0 && (
+        <div className="mem-learn">
+          {learned.map((ind, k) => <span key={k} className="mem-skill">✓ {ind.split(' · ')[0]}</span>)}
+        </div>
+      )}
+
+      {item.praise && <div className="praise-note">💬 คุณแม่บอกว่า: {item.praise}</div>}
+      {item.praiseAudio && (
+        <audio controls src={item.praiseAudio} style={{ width: '100%', height: 26, marginTop: 4 }} title="เสียงชมจากคุณแม่" />
+      )}
+
+      <div className="mem-foot">
+        <span>{item.date}</span>
+        <span className="mem-star">⭐ {item.stars}</span>
+      </div>
+    </article>
+  );
+}
+
+/* จัดกลุ่มผลงานตามวัน (ใหม่→เก่า ตามลำดับใน state ซึ่ง prepend อยู่แล้ว) */
+function journalDays(items) {
+  const days = [];
+  const byDate = new Map();
+  items.forEach(p => {
+    const key = p.date || 'ไม่ระบุวัน';
+    if (!byDate.has(key)) { byDate.set(key, []); days.push(key); }
+    byDate.get(key).push(p);
+  });
+  return days.map(d => ({ date: d, items: byDate.get(d) }));
+}
+
 function Portfolio({ onRequestParent }) {
   const { portfolio, progress, showToast, beep, parentMode, profile } = useApp();
   const admin = parentMode;
@@ -76,9 +138,12 @@ function Portfolio({ onRequestParent }) {
 
       {!admin ? (
         <>
-          <div className="sec-h" style={{ marginBottom: 0 }}>
-            <h3>🖼️ ผลงานของเฟรยา</h3>
-            <span className="sub">{filtered.length} ชิ้น</span>
+          {/* journal cover */}
+          <div className="j-cover">
+            <div className="j-cover-in">
+              <h2>📖 สมุดบันทึกการผจญภัย</h2>
+              <p>Adventure Journal · บันทึกแล้ว {filtered.length} ความทรงจำ</p>
+            </div>
           </div>
 
           {/* academic-year range picker */}
@@ -97,13 +162,20 @@ function Portfolio({ onRequestParent }) {
 
           {filtered.length === 0 ? (
             <div className="hub-empty">
-              <div style={{ fontSize: 38 }}>🌱</div>
-              <div style={{ fontWeight: 700, color: 'var(--ink)' }}>ยังไม่มีผลงานในช่วงนี้</div>
-              <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>ทำภารกิจแล้วส่งให้คุณแม่อนุมัติ ผลงานจะขึ้นตรงนี้</div>
+              <div style={{ fontSize: 38 }}>📖</div>
+              <div style={{ fontWeight: 700, color: 'var(--ink)' }}>หน้าแรกของสมุดยังว่างอยู่</div>
+              <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>ทำภารกิจแรกให้สำเร็จ แล้วความทรงจำจะถูกบันทึกที่นี่</div>
             </div>
           ) : (
-            <div className="portfolio-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, padding: '4px 4px 0' }}>
-              {filtered.map((p, i) => <Polaroid key={p.id} item={p} i={i} />)}
+            <div className="journal">
+              {journalDays(filtered).map(day => (
+                <div key={day.date}>
+                  <div className="j-day">📌 {day.date}</div>
+                  <div className="j-entries">
+                    {day.items.map((p, i) => <JournalEntry key={p.id} item={p} i={i} />)}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
 
