@@ -10,18 +10,20 @@
 
 /* ---------- master tokens ---------- */
 .app {
-  /* palette — cozy fantasy, low fatigue */
-  --c-blueberry:      #7B68DB;
-  --c-blueberry-deep: #5D4BC4;
-  --c-blueberry-soft: #E9E3FC;
-  --c-peach:          #FFAD9E;
-  --c-peach-soft:     #FFE4DA;
-  --c-star:           #FFC94D;
-  --c-cream:          #FFF6EC;
-  --c-mint:           #4FBF97;
-  --c-coral:          #FF7A66;
-  --c-ink:            #3B3350;
-  --c-ink-soft:       #8A8099;
+  /* palette — cozy fantasy, aligned to the official art reference sheet
+     (F:\Codex\...\references) so code UI and illustrations share one world */
+  --c-blueberry:      #6C5CE7;
+  --c-blueberry-deep: #5546C8;
+  --c-blueberry-soft: #E6E1FC;
+  --c-peach:          #FF8FA3;
+  --c-peach-soft:     #FFE0E7;
+  --c-star:           #FFD166;
+  --c-cream:          #FFF7E8;
+  --c-mint:           #3FB389;
+  --c-mint-soft:      #A8E6CF;
+  --c-coral:          #FF7A7A;
+  --c-ink:            #2D2D4F;
+  --c-ink-soft:       #666A8C;
 
   /* surface levels */
   --surface-base:     var(--c-cream);
@@ -66,7 +68,7 @@
   --gold: var(--c-star);
   --good: var(--c-mint);
   --coral: var(--c-coral);
-  --header-grad: linear-gradient(135deg, #7B68DB 0%, #9D85E8 70%, #C39BE0 100%);
+  --header-grad: linear-gradient(135deg, #6C5CE7 0%, #9181EC 70%, #C39BE0 100%);
   --radius: var(--r-lg);
   --radius-sm: var(--r-md);
   --shadow: var(--sh-2);
@@ -506,6 +508,29 @@
 }
 .pd-act:active { background: var(--surface-2); }
 .pd-act i { font-style: normal; font-size: 16px; line-height: 1; }
+
+/* =========================================================
+   Adventure map backdrop — the official world illustration
+   (assets/world-map.jpg, from the art reference sheet).
+   A translucent wash keeps island nodes + dotted path readable.
+   ========================================================= */
+.adv-map {
+  background:
+    linear-gradient(rgba(255, 247, 232, 0.72), rgba(255, 247, 232, 0.84)),
+    url('assets/world-map.jpg') center / cover no-repeat;
+}
+.is-dark .adv-map {
+  background:
+    linear-gradient(rgba(30, 25, 48, 0.8), rgba(30, 25, 48, 0.88)),
+    url('assets/world-map.jpg') center / cover no-repeat;
+}
+/* island nodes get a soft chip so labels stay readable over the art */
+.adv-node {
+  background: rgba(255, 247, 232, 0.66);
+  border-radius: 16px;
+  padding: 5px 4px 6px;
+}
+.is-dark .adv-node { background: rgba(30, 25, 48, 0.66); }
 
 /* =========================================================
    Icon system alignment — section headers, tabs, nav
