@@ -133,6 +133,7 @@
     grid-template-columns: none !important;
     order: -1 !important;
     flex: none !important;
+    overflow-y: auto !important;
   }
   .bottom-nav button {
     flex-direction: row !important;
@@ -141,14 +142,31 @@
     border-radius: 14px !important;
     gap: 10px !important;
   }
-  .bottom-nav button span:first-child {
+  .bottom-nav button .nav-icon {
     font-size: 20px !important;
     transform: none !important;
   }
-  .bottom-nav button span:last-child {
+  .bottom-nav button .nav-label {
     font-size: 13px !important;
     font-weight: 700 !important;
   }
+  .bottom-nav .nav-group-label {
+    display: block !important;
+    padding: 14px 12px 5px !important;
+    color: var(--ink-soft) !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    letter-spacing: .04em !important;
+  }
+  .bottom-nav .nav-group-label:first-child { padding-top: 4px !important; }
+  .bottom-nav .nav-settings-label { margin-top: auto !important; }
+  .bottom-nav .nav-settings {
+    display: flex !important;
+    color: var(--ink-soft) !important;
+    background: transparent !important;
+  }
+  .bottom-nav .nav-icon { color: inherit !important; }
+  .bottom-nav button[aria-current="page"] { box-shadow: inset 3px 0 0 var(--accent); }
 
   /* content wider → 3-col missions */
   .missions-list {
@@ -170,6 +188,7 @@
     padding: 22px 28px 36px !important;
     gap: 22px !important;
   }
+  .shell-page { max-width: 840px; margin: 0 auto; }
 
   /* hub layout */
   .hub-tabs { gap: 12px !important; }

@@ -239,17 +239,16 @@ function GroupGuideModal({ groupId, grade, onClose }) {
   if (!guide) return null;
   const examples = guideExamples(groupId, grade);
   return (
-    <AppOverlayPortal>
-    <div className="overlay" onClick={onClose}>
-      <div className="sheet" onClick={e => e.stopPropagation()} style={{ maxHeight: '78vh', overflowY: 'auto' }}>
+    <AccessibleOverlay onClose={onClose} labelledBy="group-guide-title"
+      surfaceStyle={{ maxHeight: '78vh', overflowY: 'auto' }}>
         <div className="sheet-grab"></div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
           <GroupDot id={groupId} size={40} />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 16, color: 'var(--ink)' }}>{g.th} · {g.en}</div>
+            <div id="group-guide-title" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 16, color: 'var(--ink)' }}>{g.th} · {g.en}</div>
             <div style={{ fontSize: 10.5, color: 'var(--ink-soft)' }}>{guide.full}</div>
           </div>
-          <button className="x-btn" onClick={onClose}>✕</button>
+          <button className="x-btn" onClick={onClose} aria-label="ปิดคู่มือกลุ่มประสบการณ์">✕</button>
         </div>
         <div style={{ fontSize: 12.5, color: 'var(--ink)', lineHeight: 1.6, marginBottom: 12 }}>{guide.desc}</div>
 
@@ -271,9 +270,7 @@ function GroupGuideModal({ groupId, grade, onClose }) {
           ))}
         </div>
         <button className="btn block" onClick={onClose}>เข้าใจแล้ว</button>
-      </div>
-    </div>
-    </AppOverlayPortal>
+    </AccessibleOverlay>
   );
 }
 
@@ -485,12 +482,12 @@ function ParentHub({ onOpenSettings }) {
   const [sarOpen, setSarOpen] = useStateH(false);
 
   return (
-    <div className="tab-enter" style={{ padding: '16px 16px 28px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <main className="tab-enter" aria-labelledby="parent-hub-title" style={{ padding: '16px 16px 28px', display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* hub header */}
       <div className="card hub-head">
         <span style={{ fontSize: 24 }}>👩‍🏫</span>
         <div style={{ flex: 1 }}>
-          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 16, color: 'var(--ink)' }}>โหมดคุณแม่</div>
+          <h2 id="parent-hub-title" style={{ margin: 0, fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 16, color: 'var(--ink)' }}>โหมดคุณแม่</h2>
           <div style={{ fontSize: 11.5, color: 'var(--ink-soft)' }}>จัดการหลักสูตร · ตรวจงาน · ออกรายงาน</div>
         </div>
         <button className="btn ghost" style={{ padding: '8px 12px', fontSize: 12.5 }} onClick={onOpenSettings}>⚙️ ตั้งค่า</button>
@@ -511,7 +508,7 @@ function ParentHub({ onOpenSettings }) {
       {sub === 'sar' && <SARSection onOpen={() => { setSarOpen(true); beep('reward'); }} />}
 
       {sarOpen && <SARModal onClose={() => setSarOpen(false)} />}
-    </div>
+    </main>
   );
 }
 

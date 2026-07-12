@@ -22,10 +22,9 @@ function ParentGate({ onClose, onSuccess }) {
   const del = () => { setEntry(e => e.slice(0, -1)); setErr(false); };
 
   return (
-    <div className="overlay" onClick={onClose}>
-      <div className="gate" onClick={e => e.stopPropagation()}>
+    <AccessibleOverlay onClose={onClose} labelledBy="parent-gate-title" surfaceClassName="gate">
         <div style={{ fontSize: 40 }}>🔐</div>
-        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, color: 'var(--ink)' }}>โหมดคุณแม่</div>
+        <div id="parent-gate-title" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 18, color: 'var(--ink)' }}>โหมดคุณแม่</div>
         <div style={{ fontSize: 12.5, color: 'var(--ink-soft)', marginBottom: 4 }}>ใส่ PIN เพื่อเข้าจัดการหลักสูตร</div>
         <div className={'pin-dots' + (err ? ' err' : '')}>
           {[0,1,2,3].map(i => <span key={i} className={'pin-dot' + (entry.length > i ? ' on' : '')}></span>)}
@@ -39,8 +38,7 @@ function ParentGate({ onClose, onSuccess }) {
         </div>
         <div style={{ fontSize: 11, color: 'var(--ink-soft)' }}>เดโม PIN: <b>1234</b></div>
         <button className="btn ghost" style={{ marginTop: 4 }} onClick={onClose}>ยกเลิก</button>
-      </div>
-    </div>
+    </AccessibleOverlay>
   );
 }
 
@@ -58,16 +56,15 @@ function ParentSheet({ onClose }) {
   for (let y = thisYear; y >= thisYear - 18; y--) years.push(y);
 
   return (
-    <div className="overlay" onClick={onClose}>
-      <div className="sheet" onClick={e => e.stopPropagation()}>
+    <AccessibleOverlay onClose={onClose} labelledBy="parent-settings-title">
         <div className="sheet-grab"></div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
           <span style={{ fontSize: 26 }}>👩‍🏫</span>
           <div style={{ flex: 1 }}>
-            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 17, color: 'var(--ink)' }}>ตั้งค่าหลักสูตร</div>
+            <div id="parent-settings-title" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 17, color: 'var(--ink)' }}>ตั้งค่าหลักสูตร</div>
             <div style={{ fontSize: 11.5, color: 'var(--ink-soft)' }}>Parent settings · เฉพาะคุณแม่</div>
           </div>
-          <button className="x-btn" onClick={onClose}>✕</button>
+          <button className="x-btn" onClick={onClose} aria-label="ปิดการตั้งค่าผู้ปกครอง">✕</button>
         </div>
 
         {/* profile */}
@@ -178,8 +175,7 @@ function ParentSheet({ onClose }) {
           onClick={() => { setParentMode(false); beep('tab'); showToast('ออกจากโหมดคุณแม่', '🔒'); onClose(); }}>
           🔒 ออกจากโหมดคุณแม่
         </button>
-      </div>
-    </div>
+    </AccessibleOverlay>
   );
 }
 

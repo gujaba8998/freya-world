@@ -119,11 +119,10 @@ function FreyaRoom() {
 
       {/* slot item picker */}
       {pickSlot && (
-        <AppOverlayPortal>
-        <div className="overlay" onClick={() => setPickSlot(null)}>
-          <div className="sheet" onClick={e => e.stopPropagation()} style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+        <AccessibleOverlay onClose={() => setPickSlot(null)} labelledBy="room-item-picker-title"
+          surfaceStyle={{ maxHeight: '70vh', overflowY: 'auto' }}>
             <div className="sheet-grab"></div>
-            <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--ink)', marginBottom: 10 }}>เลือกของมาวางตรงนี้</div>
+            <div id="room-item-picker-title" style={{ fontWeight: 700, fontSize: 15, color: 'var(--ink)', marginBottom: 10 }}>เลือกของมาวางตรงนี้</div>
             {ownedItems.length === 0 ? (
               <div style={{ fontSize: 12.5, color: 'var(--ink-soft)', padding: '14px 0', textAlign: 'center' }}>
                 ยังไม่มีของเลย — สะสมดาวไปซื้อที่ร้านด้านล่างก่อนนะ 🛒
@@ -145,9 +144,7 @@ function FreyaRoom() {
                 เก็บของชิ้นนี้ออก
               </button>
             )}
-          </div>
-        </div>
-        </AppOverlayPortal>
+        </AccessibleOverlay>
       )}
     </div>
   );
@@ -243,17 +240,14 @@ function LootBox() {
       {ready && <button className="btn" style={{ flex: 'none', padding: '10px 16px' }} onClick={open}>เปิด!</button>}
 
       {reveal && (
-        <AppOverlayPortal>
-        <div className="loot-reveal" onClick={() => setReveal(null)}>
-          <div className="loot-reveal-card" onClick={e => e.stopPropagation()}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink-soft)' }}>ได้สติกเกอร์ใหม่!</div>
+        <AccessibleOverlay onClose={() => setReveal(null)} labelledBy="loot-reveal-title"
+          className="loot-reveal" surfaceClassName="loot-reveal-card">
+            <div id="loot-reveal-title" style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink-soft)' }}>ได้สติกเกอร์ใหม่!</div>
             <span className="loot-sticker">{reveal.emoji}</span>
             <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 17, color: 'var(--ink)' }}>{reveal.th}</div>
             <span className="rarity-chip" style={{ background: RARITY[reveal.rarity].color }}>{RARITY[reveal.rarity].th}</span>
             <button className="btn" style={{ marginTop: 8, padding: '9px 22px' }} onClick={() => setReveal(null)}>เก็บเข้าอัลบั้ม 📒</button>
-          </div>
-        </div>
-        </AppOverlayPortal>
+        </AccessibleOverlay>
       )}
     </div>
   );
@@ -349,13 +343,11 @@ function ItemPreviewSheet({ p, onClose, onBuy }) {
     : kind === 'fit' ? `ชุดของเพื่อนคู่ใจ (${item.slot === 'hat' ? 'สวมบนหัว' : 'ของถือคู่กาย'}) · ซื้อแล้วใส่ให้ทันที`
     : 'รางวัลพิเศษจากคุณแม่ · แลกแล้วไปบอกคุณแม่ได้เลยนะ';
   return (
-    <AppOverlayPortal>
-      <div className="overlay" onClick={onClose}>
-        <div className="sheet" onClick={e => e.stopPropagation()}>
+    <AccessibleOverlay onClose={onClose} labelledBy="shop-item-preview-title">
           <div className="sheet-grab"></div>
           <div className="pv-art">{item.emoji}</div>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 17, color: 'var(--ink)' }}>{item.th}</div>
+            <div id="shop-item-preview-title" style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 17, color: 'var(--ink)' }}>{item.th}</div>
             <div style={{ fontSize: 11, color: 'var(--ink-soft)' }}>{item.en}</div>
           </div>
           <div style={{ fontSize: 12, color: 'var(--ink)', textAlign: 'center', lineHeight: 1.55 }}>{desc}</div>
@@ -372,9 +364,7 @@ function ItemPreviewSheet({ p, onClose, onBuy }) {
               <button className="btn ghost block" onClick={onClose}>ไว้มาใหม่</button>
             </>
           )}
-        </div>
-      </div>
-    </AppOverlayPortal>
+    </AccessibleOverlay>
   );
 }
 
@@ -389,9 +379,8 @@ function PurchaseCelebration({ p, onClose }) {
     el.scrollIntoView(reduce ? {} : { behavior: 'smooth', block: 'start' });
   };
   return (
-    <AppOverlayPortal>
-      <div className="loot-reveal" onClick={onClose}>
-        <div className="loot-reveal-card" onClick={e => e.stopPropagation()}>
+    <AccessibleOverlay onClose={onClose} labelledBy="purchase-celebration-title"
+      className="loot-reveal" surfaceClassName="loot-reveal-card">
           <div className="chest-scene" aria-hidden="true">
             <span className="chest-glow" />
             <span className="chest-item">{item.emoji}</span>
@@ -400,7 +389,7 @@ function PurchaseCelebration({ p, onClose }) {
               <div className="chest-base" />
             </div>
           </div>
-          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 17, color: 'var(--ink)' }}>
+          <div id="purchase-celebration-title" style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 17, color: 'var(--ink)' }}>
             ได้ {item.th} มาแล้ว!
           </div>
           {kind === 'fit' && <div style={{ fontSize: 11.5, color: 'var(--ink-soft)' }}>ใส่ให้เพื่อนคู่ใจเรียบร้อยแล้วนะ</div>}
@@ -411,9 +400,7 @@ function PurchaseCelebration({ p, onClose }) {
               {kind === 'room' ? 'เก็บไว้ก่อน' : 'เย้! 🎉'}
             </button>
           </div>
-        </div>
-      </div>
-    </AppOverlayPortal>
+    </AccessibleOverlay>
   );
 }
 

@@ -46,19 +46,17 @@ function Header({ onOpenAvatar, onOpenSettings }) {
       <div style={{ flex: 1, minWidth: 0 }}>
         <div className="kid-head-name">{profile.nickname || profile.firstName || profile.name}</div>
         <div className="kid-head-chips">
-          <span className="k-chip" title={levelInto + '/100 ดาวสะสมในเลเวลนี้'}>
-            Lv {level} <i className="lvl-mini"><b style={{ width: levelInto + '%' }}></b></i>
-          </span>
+          <LevelProgress level={level} value={levelInto} />
           {streak && streak.count > 0 && (
             <span className="k-chip streak" title={`ทำภารกิจต่อเนื่อง ${streak.count} วัน · สถิติสูงสุด ${streak.best} วัน`}>
               🔥 {streak.count}
             </span>
           )}
-          {parentMode && <span className="k-chip" title="โหมดคุณแม่เปิดอยู่">🔓 คุณแม่</span>}
+          {parentMode && <StatusBadge tone="parent">โหมดคุณแม่</StatusBadge>}
           <FbStatusBadge status={fbStatus} />
         </div>
       </div>
-      <span className="k-stars star-pop" key={stars}>⭐ {stars}</span>
+      <StarCounter value={stars} className="star-pop" key={stars} />
       <button className="k-gear" aria-label="ตั้งค่า" title="ตั้งค่า" onClick={onOpenSettings}>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <circle cx="12" cy="12" r="3.2" />
@@ -74,13 +72,11 @@ function KidSettingsSheet({ onClose, onOpenGate, onOpenParentSheet }) {
   const { dark, setDark, soundOn, setSoundOn, musicOn, setMusicOn, musicTrack, setMusicTrack, parentMode, setParentMode, beep } = useApp();
   const tracks = (typeof window !== 'undefined' && window.musicTracks) || [];
   return (
-    <AppOverlayPortal>
-      <div className="overlay" onClick={onClose}>
-        <div className="sheet" onClick={e => e.stopPropagation()}>
+    <AccessibleOverlay onClose={onClose} labelledBy="kid-settings-title">
           <div className="sheet-grab"></div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 2 }}>
-            <span style={{ fontSize: 20 }}>⚙️</span>
-            <div style={{ flex: 1, fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 16, color: 'var(--ink)' }}>ตั้งค่า · Settings</div>
+            <AppIcon name="settings" size={20} />
+            <div id="kid-settings-title" style={{ flex: 1, fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 16, color: 'var(--ink)' }}>ตั้งค่า · Settings</div>
             <button className="x-btn" onClick={onClose} aria-label="ปิด">✕</button>
           </div>
 
@@ -123,51 +119,60 @@ function KidSettingsSheet({ onClose, onOpenGate, onOpenParentSheet }) {
           ) : (
             <button className="btn ghost block" onClick={() => { onClose(); onOpenGate(); }}>🔐 โหมดคุณแม่ · Parent Mode</button>
           )}
-        </div>
-      </div>
-    </AppOverlayPortal>
+    </AccessibleOverlay>
   );
 }
 
 const TABS = [
-  { id: 'home',      emoji: '🏠', th: 'หน้าหลัก' },
-  { id: 'portfolio', emoji: '🖼️', th: 'ผลงาน' },
-  { id: 'rewards',   emoji: '🎁', th: 'รางวัล' },
+  { id: 'home',      icon: 'home',    th: 'หน้าหลัก', group: 'learning' },
+  { id: 'quests',    icon: 'quests',  th: 'ภารกิจ', group: 'learning' },
+  { id: 'world',     icon: 'world',   th: 'โลกของฉัน', group: 'learning' },
+  { id: 'portfolio', icon: 'memory',  th: 'ผลงาน', group: 'collection' },
+  { id: 'rewards',   icon: 'rewards', th: 'รางวัล', group: 'collection' },
 ];
-const ACTIVITY_TAB = { id: 'activity', emoji: '✏️', th: 'สร้าง' };
-const PARENT_TAB = { id: 'parent', emoji: '👩‍🏫', th: 'คุณแม่' };
+const ACTIVITY_TAB = { id: 'activity', icon: 'create', th: 'สร้างภารกิจ', group: 'learning' };
+const PARENT_TAB = { id: 'parent', icon: 'parent', th: 'ผู้ปกครอง', group: 'parent' };
 
-function BottomNav({ tab, setTab }) {
+function BottomNav({ tab, setTab, onOpenSettings }) {
   const { beep, parentMode, submissions } = useApp();
   // แท็บ "สร้าง" และ "คุณแม่" แสดงเฉพาะโหมดคุณแม่
   const tabs = parentMode
-    ? [TABS[0], ACTIVITY_TAB, TABS[1], TABS[2], PARENT_TAB]
+    ? [TABS[0], ACTIVITY_TAB, TABS[3], TABS[4], PARENT_TAB]
     : TABS;
+  const groupLabel = { learning: 'การเรียนรู้', collection: 'การสะสม', parent: 'ผู้ปกครอง' };
   return (
-    <div style={{
+    <nav aria-label={parentMode ? 'เมนูโหมดผู้ปกครอง' : 'เมนูหลัก'} style={{
       position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 40,
       background: 'var(--surface)', borderTop: '1px solid var(--line)',
       padding: '8px 6px calc(8px + env(safe-area-inset-bottom))',
       display: 'grid', gridTemplateColumns: `repeat(${tabs.length},1fr)`, gap: 2,
       boxShadow: '0 -6px 18px -10px rgba(0,0,0,0.2)',
     }} className="bottom-nav">
-      {tabs.map(t => {
+      {tabs.map((t, index) => {
         const on = tab === t.id;
         const showDot = t.id === 'parent' && submissions && submissions.length > 0;
         return (
-          <button key={t.id} onClick={() => { setTab(t.id); beep('tab'); }} style={{
+          <React.Fragment key={t.id}>
+          {(index === 0 || tabs[index - 1].group !== t.group) && <span className="nav-group-label">{groupLabel[t.group]}</span>}
+          <button onClick={() => { setTab(t.id); beep('tab'); }} style={{
             position: 'relative',
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, padding: '7px 2px',
             border: 'none', cursor: 'pointer', font: 'inherit', borderRadius: 14,
             background: on ? 'var(--accent-soft)' : 'transparent',
-          }}>
-            <span className={'nav-emoji' + (on ? ' on' : '')} style={{ fontSize: 19 }}>{t.emoji}</span>
-            <span style={{ fontSize: 9.5, fontWeight: 700, color: on ? 'var(--accent-deep)' : 'var(--ink-soft)' }}>{t.th}</span>
+          }} aria-current={on ? 'page' : undefined}>
+            <span className={'nav-icon' + (on ? ' on' : '')}><AppIcon name={t.icon} size={20} /></span>
+            <span className="nav-label" style={{ color: on ? 'var(--accent-deep)' : 'var(--ink-soft)' }}>{t.th}</span>
             {showDot && <span className="nav-badge">{submissions.length}</span>}
           </button>
+          </React.Fragment>
         );
       })}
-    </div>
+      <span className="nav-group-label nav-settings-label">การตั้งค่า</span>
+      <button className="nav-settings" onClick={onOpenSettings}>
+        <span className="nav-icon"><AppIcon name="settings" size={20} /></span>
+        <span className="nav-label">ตั้งค่า</span>
+      </button>
+    </nav>
   );
 }
 
@@ -180,25 +185,27 @@ function Shell() {
   const [avOpen, setAvOpen] = useStateS(false);
   const requestParent = () => { if (parentMode) setSheet(true); else setGate(true); };
   // ถ้าออกจากโหมดคุณแม่ และอยู่ที่แท็บเฉพาะแม่ → เด้งกลับหน้าหลัก
-  useEffectS(() => { if (!parentMode && (tab === 'parent' || tab === 'activity')) setTab('home'); }, [parentMode, tab]);
+  useEffectS(() => {
+    if (!parentMode && (tab === 'parent' || tab === 'activity')) setTab('home');
+    if (parentMode && (tab === 'quests' || tab === 'world')) setTab('home');
+  }, [parentMode, tab]);
   return (
     <div className={'app' + (dark ? ' is-dark' : '')} style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column' }}>
-      <div className="bg-doodles" aria-hidden="true">
-        <span>⭐</span><span>☁️</span><span>🌸</span><span>✨</span><span>🌈</span><span>☁️</span>
-      </div>
       <div className="app-scroll" style={{ paddingBottom: 76 }}>
         <Header onOpenAvatar={() => setAvOpen(true)} onOpenSettings={() => { setKidSet(true); beep('tab'); }} />
         {tab === 'home' && <Dashboard go={setTab} />}
+        {tab === 'quests' && <QuestsPage go={setTab} />}
+        {tab === 'world' && <WorldPage />}
         {tab === 'activity' && <ActivityBuilder go={setTab} />}
         {tab === 'portfolio' && <Portfolio onRequestParent={requestParent} />}
         {tab === 'rewards' && <Rewards />}
         {tab === 'parent' && <ParentHub onOpenSettings={() => setSheet(true)} />}
       </div>
-      {toast && <div className="toast"><span style={{ fontSize: 17 }}>{toast.emoji}</span>{toast.msg}</div>}
+      {toast && <div className="toast" role="status" aria-live="polite"><span style={{ fontSize: 17 }} aria-hidden="true">{toast.emoji}</span>{toast.msg}</div>}
       <ConfettiLayer />
       <CheerPopup />
       {!parentMode && <MascotBuddy tab={tab} />}
-      <BottomNav tab={tab} setTab={setTab} />
+      <BottomNav tab={tab} setTab={setTab} onOpenSettings={() => { setKidSet(true); beep('tab'); }} />
       {avOpen && <AvatarPicker onClose={() => setAvOpen(false)} />}
       {kidSet && <KidSettingsSheet onClose={() => setKidSet(false)} onOpenGate={() => setGate(true)} onOpenParentSheet={() => setSheet(true)} />}
       {gate && <ParentGate onClose={() => setGate(false)} onSuccess={() => { setParentMode(true); setGate(false); setTab('parent'); }} />}

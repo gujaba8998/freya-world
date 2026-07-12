@@ -355,6 +355,71 @@ function AdventureMap() {
   );
 }
 
+/* Direct shell destinations reuse the same mission/map components and state.
+   They intentionally add no new workflow logic; Phase 3 will own quest detail. */
+function QuestsPage({ go }) {
+  const { missions, parentMode, beep } = useApp();
+  const active = missions.filter(m => ['available', 'inprogress', 'pending'].includes(m.status || 'available')).length;
+  return (
+    <main className="tab-enter shell-page" aria-labelledby="quests-page-title">
+      <header className="page-intro">
+        <span className="page-intro-icon"><AppIcon name="quests" size={24} /></span>
+        <div>
+          <p>บันทึกการเดินทางวันนี้</p>
+          <h2 id="quests-page-title">ภารกิจของฉัน</h2>
+          <span>{active} ภารกิจกำลังรอการสำรวจ</span>
+        </div>
+      </header>
+      {missions.length === 0 ? (
+        <EmptyState icon="quests" title="ยังไม่มีภารกิจ"
+          description={parentMode ? 'เพิ่มกิจกรรมแรกจากแผนการเรียนหรือสร้างภารกิจใหม่' : 'เมื่อผู้ปกครองส่งภารกิจมา รายการจะปรากฏตรงนี้'}
+          action={parentMode ? <button className="btn" onClick={() => { beep('pop'); go('activity'); }}>เพิ่มภารกิจแรก</button> : null} />
+      ) : (
+        <div className="missions-list" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {missions.map(m => <MissionCard key={m.id} m={m} />)}
+        </div>
+      )}
+      {parentMode && missions.length > 0 && (
+        <button className="btn ghost block" onClick={() => { beep('pop'); go('activity'); }}>เพิ่มกิจกรรม</button>
+      )}
+    </main>
+  );
+}
+
+function WorldPage() {
+  const { progress } = useApp();
+  const overall = Math.round(GROUPS.reduce((sum, group) => sum + (progress[group.id] || 0), 0) / GROUPS.length);
+  return (
+    <main className="tab-enter shell-page" aria-labelledby="world-page-title">
+      <header className="page-intro">
+        <span className="page-intro-icon"><AppIcon name="world" size={24} /></span>
+        <div>
+          <p>แผนที่นักสำรวจ</p>
+          <h2 id="world-page-title">โลกการเรียนรู้ของฉัน</h2>
+          <span>สำรวจรวมแล้ว {overall}%</span>
+        </div>
+      </header>
+      <AdventureMap />
+      <section className="world-ledger" aria-label="ความก้าวหน้าแต่ละโลก">
+        {GROUPS.map(group => {
+          const value = progress[group.id] || 0;
+          return (
+            <div className="world-ledger-row" key={group.id}>
+              <span className="world-ledger-mark" style={{ '--world-color': group.c }} aria-hidden="true" />
+              <div>
+                <strong>{(TERRITORY[group.id] || {}).th || group.th}</strong>
+                <span>{group.th}</span>
+              </div>
+              <div className="world-ledger-progress"><Bar value={value} color={group.c} /></div>
+              <b>{value}%</b>
+            </div>
+          );
+        })}
+      </section>
+    </main>
+  );
+}
+
 function Dashboard({ go }) {
   const { missions, progress, beep, parentMode } = useApp();
   const overall = Math.round(GROUPS.reduce((s, g) => s + (progress[g.id] || 0), 0) / GROUPS.length);
@@ -372,13 +437,8 @@ function Dashboard({ go }) {
           <span className="sub">Today's Quests</span>
         </div>
         {missions.length === 0 ? (
-          <div className="hub-empty">
-            <div style={{ fontSize: 38 }}>🗓️</div>
-            <div style={{ fontWeight: 700, color: 'var(--ink)' }}>ยังไม่มีภารกิจ</div>
-            <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>
-              {parentMode ? 'กดปุ่มด้านล่างเพื่อเพิ่มกิจกรรมแรก' : 'รอคุณแม่เพิ่มภารกิจให้นะ'}
-            </div>
-          </div>
+          <EmptyState icon="quests" title="ยังไม่มีภารกิจ"
+            description={parentMode ? 'เพิ่มกิจกรรมแรกจากแผนการเรียนได้เลย' : 'เมื่อผู้ปกครองส่งภารกิจมา รายการจะปรากฏตรงนี้'} />
         ) : (
           <div className="missions-list" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {missions.map(m => <MissionCard key={m.id} m={m} />)}
@@ -407,4 +467,4 @@ function Dashboard({ go }) {
   );
 }
 
-Object.assign(window, { Dashboard, AdventureMap, HeroAdventure, AchievementPreview });
+Object.assign(window, { Dashboard, AdventureMap, HeroAdventure, AchievementPreview, QuestsPage, WorldPage });

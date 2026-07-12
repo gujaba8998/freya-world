@@ -1,5 +1,5 @@
 /* fw-sar.jsx — Self-Assessment Report (SAR) document + printable full-screen overlay */
-const { useState: useStateSar } = React;
+const { useState: useStateSar, useEffect: useEffectSar, useRef: useRefSar } = React;
 
 /* The actual report body — reused in mini-preview and full overlay.
    Maps portfolio activities + indicators into a structured SAR layout. */
@@ -136,6 +136,22 @@ function SARModal({ onClose }) {
   const { profile, portfolio, progress, planDone, beep, showToast, planItemsFor } = useApp();
   const planTotal = planItemsFor(profile.grade).length;
   const planDoneCount = planItemsFor(profile.grade).filter(p => planDone.has(p.key)).length;
+  const dialogRef = useRefSar(null);
+  useEffectSar(() => {
+    const opener = document.activeElement;
+    const dialog = dialogRef.current;
+    const buttons = dialog ? [...dialog.querySelectorAll('button:not([disabled])')] : [];
+    requestAnimationFrame(() => (buttons[0] || dialog)?.focus());
+    const onKey = (event) => {
+      if (event.key === 'Escape') { event.preventDefault(); onClose(); }
+      if (event.key !== 'Tab' || !buttons.length) return;
+      const first = buttons[0], last = buttons[buttons.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => { document.removeEventListener('keydown', onKey); if (opener && document.contains(opener)) opener.focus(); };
+  }, [onClose]);
 
   const doPrint = () => {
     beep('reward');
@@ -148,10 +164,11 @@ function SARModal({ onClose }) {
   };
 
   const node = (
-    <div className="sar-portal" id="sar-portal">
+    <div ref={dialogRef} className="sar-portal" id="sar-portal" role="dialog" aria-modal="true"
+      aria-labelledby="sar-dialog-title" tabIndex="-1">
       <div className="sar-toolbar">
-        <button className="sar-tb-btn ghost" onClick={onClose}>✕ ปิด</button>
-        <div className="sar-tb-title">ตัวอย่างรายงาน SAR · {GRADE_LABEL[profile.grade] || profile.grade}</div>
+        <button className="sar-tb-btn ghost" onClick={onClose} aria-label="ปิดตัวอย่างรายงาน SAR">✕ ปิด</button>
+        <div id="sar-dialog-title" className="sar-tb-title">ตัวอย่างรายงาน SAR · {GRADE_LABEL[profile.grade] || profile.grade}</div>
         <button className="sar-tb-btn" onClick={doPrint}>🖨️ พิมพ์ / บันทึก PDF</button>
       </div>
       <div className="sar-scroll">

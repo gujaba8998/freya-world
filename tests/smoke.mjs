@@ -6,7 +6,7 @@ const root = resolve(import.meta.dirname, '..');
 const read = (file) => readFileSync(resolve(root, file), 'utf8');
 
 const requiredFiles = [
-  'index.html', 'manifest.webmanifest', 'sw.js', 'fw-app.jsx', 'fw-data.jsx',
+  'index.html', 'manifest.webmanifest', 'sw.js', 'fw-assets.js', 'fw-app.jsx', 'fw-data.jsx', 'fw-ui.jsx',
   'fw-firebase.jsx', 'fw-dashboard.jsx', 'fw-activity.jsx', 'fw-portfolio.jsx',
   'fw-rewards.jsx', 'fw-parent.jsx', 'fw-parenthub.jsx', 'fw-curriculum.jsx',
   'fw-styles.css', 'fw-responsive.css', 'fw-theme.css',
@@ -31,7 +31,10 @@ const position = (file) => {
 
 assert.ok(position('fw-curriculum.jsx') < position('fw-data.jsx'), 'curriculum must load before app state');
 assert.ok(position('fw-firebase.jsx') < position('fw-data.jsx'), 'Firebase helpers must load before app state');
+assert.ok(position('fw-assets.js') < position('fw-data.jsx'), 'asset registry must load before app state');
 assert.ok(position('fw-data.jsx') < position('fw-dashboard.jsx'), 'app state must load before feature components');
+assert.ok(position('fw-data.jsx') < position('fw-ui.jsx'), 'app state must load before shared UI primitives');
+assert.ok(position('fw-ui.jsx') < position('fw-dashboard.jsx'), 'shared UI primitives must load before feature components');
 assert.ok(position('fw-parenthub.jsx') < position('fw-app.jsx'), 'feature components must load before app shell');
 
 const data = read('fw-data.jsx');
@@ -64,6 +67,16 @@ const styles = read('fw-styles.css');
 assert.match(theme, /:focus-visible/, 'visible keyboard focus styles are required');
 assert.match(`${styles}\n${theme}`, /prefers-reduced-motion:\s*reduce/, 'reduced-motion support is required');
 
+const appShell = read('fw-app.jsx');
+const sharedUi = read('fw-ui.jsx');
+for (const destination of ['home', 'quests', 'world', 'portfolio', 'rewards']) {
+  assert.match(appShell, new RegExp(`id: '${destination}'`), `child navigation is missing ${destination}`);
+}
+assert.match(appShell, /<nav aria-label=/, 'app shell navigation needs an accessible name');
+assert.match(sharedUi, /role="dialog" aria-modal="true"/, 'shared overlays must expose dialog semantics');
+assert.match(sharedUi, /event\.key === 'Escape'/, 'shared overlays must close with Escape');
+assert.match(sharedUi, /openerRef\.current\.focus\(\)/, 'shared overlays must restore focus');
+
 const manifest = JSON.parse(read('manifest.webmanifest'));
 assert.equal(manifest.start_url, './');
 for (const icon of manifest.icons ?? []) {
@@ -74,5 +87,7 @@ const serviceWorker = read('sw.js');
 assert.match(serviceWorker, /const sameOrigin = url\.origin === location\.origin/, 'service worker origin boundary is missing');
 assert.match(serviceWorker, /if \(!sameOrigin && !cdnRuntime\) return;/, 'Firebase and Storage traffic must bypass the service worker');
 assert.doesNotMatch(serviceWorker, /['"]https:\/\/firestore\.googleapis\.com/, 'Firestore API must not be precached');
+assert.match(serviceWorker, /'fw-assets\.js'/, 'asset registry must be precached');
+assert.match(serviceWorker, /'fw-ui\.jsx'/, 'shared UI primitives must be precached');
 
 console.log(`Smoke checks passed (${requiredFiles.length} required files, ${localScripts.length} local scripts).`);
