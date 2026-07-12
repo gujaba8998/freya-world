@@ -300,3 +300,20 @@ Commit subject: `feat(rewards): refine the star shop and asset fallbacks`
 Validation: source smoke ผ่านและตรวจ field consumers สำคัญ; cache bump เป็น `freya-world-v12`
 
 Commit subject: `feat(portfolio): turn achievements into a magical memory book`
+
+---
+
+## Phase 6 — Parent Experience
+
+วันที่: 12 กรกฎาคม 2569 (2026-07-12)
+
+- เพิ่ม Parent Overview เป็นหน้าแรกของ hub
+- สรุป pending reviews, needs revision, not started และ completed จาก state เดิม
+- เพิ่ม learning progress, portfolio/review counts และ quick actions ไป Reviews/Curriculum/SAR
+- เปลี่ยน hub tabs/header เป็น shared SVG icon language และใช้ shared EmptyState ใน review queue
+- รองรับ 2×2 บนมือถือ, 4 metrics และสองคอลัมน์บน tablet/desktop
+- ไม่แตะ PIN, anonymous auth, Firebase schema, approval/rejection actions หรือ curriculum IDs
+
+Validation: source smoke ตรวจ overview/status contracts ผ่าน; cache bump เป็น `freya-world-v13`
+
+Commit subject: `feat(parent): add a focused learning overview and review hub`
