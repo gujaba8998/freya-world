@@ -72,6 +72,7 @@ const appShell = read('fw-app.jsx');
 const sharedUi = read('fw-ui.jsx');
 const dashboard = read('fw-dashboard.jsx');
 const rewardsUi = read('fw-rewards.jsx');
+const portfolioUi = read('fw-portfolio.jsx');
 for (const destination of ['home', 'quests', 'world', 'portfolio', 'rewards']) {
   assert.match(appShell, new RegExp(`id: '${destination}'`), `child navigation is missing ${destination}`);
 }
@@ -102,5 +103,8 @@ assert.match(rewardsUi, /function RewardGlyph/, 'shop must provide code-native a
 assert.match(rewardsUi, /buyRoomItem\(p\.item\)/, 'room purchases must keep the existing guarded action');
 assert.match(rewardsUi, /buyMascotItem\(p\.item\)/, 'wardrobe purchases must keep the existing guarded action');
 assert.match(rewardsUi, /else redeem\(p\.item\)/, 'real rewards must keep the existing guarded action');
+assert.match(portfolioUi, /function MemoryCard/, 'portfolio must render learning entries as memory-book cards');
+assert.match(portfolioUi, /item\.praiseAudio/, 'memory cards must preserve parent audio feedback');
+assert.match(portfolioUi, /item\.indicators/, 'memory cards must expose curriculum indicators when present');
 
 console.log(`Smoke checks passed (${requiredFiles.length} required files, ${localScripts.length} local scripts).`);

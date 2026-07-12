@@ -1,41 +1,35 @@
 /* fw-portfolio.jsx — Digital Portfolio & Reports tab */
 const { useState: useStateP } = React;
 
-function Polaroid({ item, i }) {
+function MemoryCard({ item, i }) {
   const g = GROUP[item.group];
-  const rot = [-2.5, 1.8, -1.4, 2.2, -2][i % 5];
   const video = (item.evidence || []).find(e => e.type === 'video');
   const audio = (item.evidence || []).find(e => e.type === 'audio');
   return (
-    <div style={{
-      background: '#fff', padding: '10px 10px 0', borderRadius: 8, transform: `rotate(${rot}deg)`,
-      boxShadow: '0 8px 18px -8px rgba(0,0,0,0.35)', border: '1px solid rgba(0,0,0,0.05)',
-    }}>
-      <div style={{ position: 'relative' }}>
+    <article className="memory-card" style={{ '--memory-color': g.c }}>
+      <div className="memory-index" aria-hidden="true">{String(i + 1).padStart(2, '0')}</div>
+      <div className="memory-media">
         {item.thumb ? (
-          <img src={item.thumb} alt={item.en} style={{ width: '100%', height: 104, objectFit: 'cover', borderRadius: 4, display: 'block' }} />
+          <img src={item.thumb} alt={`ผลงาน ${item.th}`} />
         ) : video ? (
-          <video src={video.url} controls playsInline style={{ width: '100%', height: 104, objectFit: 'cover', borderRadius: 4, display: 'block' }} />
+          <video src={video.url} controls playsInline aria-label={`วิดีโอผลงาน ${item.th}`} />
         ) : (
-          <PhImg label={`📷 ${item.en}`} h={104} style={{ borderRadius: 4 }} />
+          <div className="memory-media-fallback"><AppIcon name="memory" size={34} /><span>บันทึกการเรียนรู้</span></div>
         )}
-        <span style={{ position: 'absolute', top: -8, right: -8, fontSize: 26, filter: 'drop-shadow(0 2px 3px rgba(0,0,0,.25))' }}>{item.badge}</span>
-        <span style={{ position: 'absolute', bottom: 6, left: 6, background: g.c + 'ee', color: '#fff', fontSize: 9.5, fontWeight: 700, padding: '2px 7px', borderRadius: 999 }}>{g.emoji} {g.th}</span>
+        <span className="memory-category">{g.th}</span>
       </div>
-      {audio && audio.url && (
-        <audio controls src={audio.url} style={{ width: '100%', height: 26, marginTop: 6 }} />
-      )}
-      {item.praise && <div className="praise-note">💬 คุณแม่: {item.praise}</div>}
-      {item.praiseAudio && (
-        <audio controls src={item.praiseAudio} style={{ width: '100%', height: 26, marginTop: 4 }} title="เสียงชมจากคุณแม่" />
-      )}
-      <div style={{ padding: '8px 4px 12px', textAlign: 'center' }}>
-        <div style={{ fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: 13, color: '#4a3d4e' }}>{item.th}</div>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 3, fontSize: 10.5, color: '#9a8ba0' }}>
-          <span>{item.date}</span><span>·</span><span style={{ color: '#d99000', fontWeight: 700 }}>⭐ {item.stars}</span>
-        </div>
+      <div className="memory-copy">
+        <div className="memory-meta"><span>{item.date}</span><StarCounter value={item.stars} /></div>
+        <h3>{item.th}</h3><p className="memory-en">{item.en}</p>
+        {(item.reflection || item.desc) && <p className="memory-reflection"><b>สิ่งที่ฉันค้นพบ</b>{item.reflection || item.desc}</p>}
+        {item.praise && <blockquote><AppIcon name="sparkle" size={15} /><span><b>ข้อความจากผู้ปกครอง</b>{item.praise}</span></blockquote>}
+        {audio && audio.url && <audio controls src={audio.url} aria-label={`เสียงประกอบผลงาน ${item.th}`} />}
+        {item.praiseAudio && <audio controls src={item.praiseAudio} aria-label="เสียงชมจากผู้ปกครอง" />}
+        {item.indicators && item.indicators.length > 0 && (
+          <div className="memory-indicators">{item.indicators.slice(0, 3).map(code => <span key={code}>{code}</span>)}</div>
+        )}
       </div>
-    </div>
+    </article>
   );
 }
 
@@ -64,7 +58,7 @@ function Portfolio({ onRequestParent }) {
     <div className="tab-enter" style={{ padding: '16px 16px 28px', display: 'flex', flexDirection: 'column', gap: 18 }}>
       {/* mode card */}
       <div className="card" style={{ padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12 }}>
-        <span style={{ fontSize: 22 }}>{admin ? '👩‍🏫' : '🐰'}</span>
+        <span className="page-intro-icon"><AppIcon name={admin ? 'parent' : 'memory'} size={22} /></span>
         <div style={{ flex: 1 }}>
           <div style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--ink)', fontFamily: 'var(--font-display)' }}>{admin ? 'มุมมองคุณแม่ (Admin)' : 'มุมมองเฟรยา'}</div>
           <div style={{ fontSize: 11, color: 'var(--ink-soft)' }}>{admin ? 'Curriculum & reports · ' + profile.grade : 'Freya\'s gallery'}</div>
@@ -77,7 +71,7 @@ function Portfolio({ onRequestParent }) {
       {!admin ? (
         <>
           <div className="sec-h" style={{ marginBottom: 0 }}>
-            <h3>🖼️ ผลงานของเฟรยา</h3>
+            <h3>สมุดความทรงจำมหัศจรรย์</h3>
             <span className="sub">{filtered.length} ชิ้น</span>
           </div>
 
@@ -96,14 +90,10 @@ function Portfolio({ onRequestParent }) {
           </div>
 
           {filtered.length === 0 ? (
-            <div className="hub-empty">
-              <div style={{ fontSize: 38 }}>🌱</div>
-              <div style={{ fontWeight: 700, color: 'var(--ink)' }}>ยังไม่มีผลงานในช่วงนี้</div>
-              <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>ทำภารกิจแล้วส่งให้คุณแม่อนุมัติ ผลงานจะขึ้นตรงนี้</div>
-            </div>
+            <EmptyState icon="memory" title="ยังไม่มีผลงานในช่วงนี้" description="ทำภารกิจแล้วส่งให้ผู้ปกครองอนุมัติ เรื่องราวการเรียนรู้จะถูกบันทึกไว้ตรงนี้" />
           ) : (
-            <div className="portfolio-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, padding: '4px 4px 0' }}>
-              {filtered.map((p, i) => <Polaroid key={p.id} item={p} i={i} />)}
+            <div className="portfolio-grid memory-book">
+              {filtered.map((p, i) => <MemoryCard key={p.id} item={p} i={i} />)}
             </div>
           )}
 
@@ -165,4 +155,4 @@ function Portfolio({ onRequestParent }) {
   );
 }
 
-Object.assign(window, { Portfolio });
+Object.assign(window, { Portfolio, MemoryCard });

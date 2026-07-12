@@ -284,3 +284,19 @@ Commit subject: `feat(quests): separate quest list detail and evidence flow`
 Validation: smoke assertions ตรวจ action contracts และ asset fallback ผ่าน; cache bump เป็น `freya-world-v11`
 
 Commit subject: `feat(rewards): refine the star shop and asset fallbacks`
+
+---
+
+## Phase 5 — Magical Memory Book
+
+วันที่: 12 กรกฎาคม 2569 (2026-07-12)
+
+- เปลี่ยน kid portfolio จาก tilted polaroid grid เป็น chronological memory-book journal
+- mobile ใช้ timeline แนวตั้ง; desktop ใช้สมุดสองคอลัมน์
+- แสดงภาพ/วิดีโอ/เสียง, ชื่อภารกิจ, วันที่, ดาว, หมวด, reflection/description, parent text/audio feedback และ indicators เมื่อมีข้อมูล
+- ใช้ shared EmptyState และเพิ่ม alt/aria-label ให้ media
+- รักษา portfolio fields, year filter, admin curriculum summary และ SAR consumer เดิม
+
+Validation: source smoke ผ่านและตรวจ field consumers สำคัญ; cache bump เป็น `freya-world-v12`
+
+Commit subject: `feat(portfolio): turn achievements into a magical memory book`
