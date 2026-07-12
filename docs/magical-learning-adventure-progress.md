@@ -206,3 +206,47 @@ Hash: ดูจาก Git history ของ branch หลัง commit
 ### Phase gate
 
 Phase 1 ต้องผ่าน final diff/smoke/browser check และ commit แยกก่อนเริ่ม Phase 2
+
+---
+
+## Phase 2 — Kid Home and My World
+
+วันที่: 12 กรกฎาคม 2569 (2026-07-12)
+
+### สิ่งที่ทำ
+
+- รักษา time-aware Hero, CTA เดียว, level progress, ภารกิจวันนี้ และ achievement preview ที่มีอยู่แล้ว
+- เปลี่ยนแผนที่จากภาพสถานะเป็น navigation 7 โลกที่กดดูรายละเอียดได้
+- เพิ่มชื่อ presentation ภาษาอังกฤษตามทิศทางใหม่โดยไม่เปลี่ยน group ID หรือข้อมูลหลัก
+- เพิ่ม world detail sheet พร้อมคำอธิบาย, progress, จำนวนภารกิจทั้งหมด/สำเร็จ และ focus lifecycle จาก `AccessibleOverlay`
+- ใช้ SVG line icons และ CSS island shapes เป็น production-safe fallback เพราะไฟล์ต้นฉบับใน `F:\Codex` ยังเป็น asset sheets ซึ่งห้ามนำมาใช้ทั้งแผ่น
+- เพิ่ม cache busting สำหรับไฟล์ UI ที่แก้และ bump Service Worker เป็น `freya-world-v9`
+
+### Logic ที่ตั้งใจไม่แตะ
+
+- mission state machine, star/level/reward transactions และ Firebase schema/sync
+- group IDs, progress calculation และ curriculum mapping
+- Hero recommendation logic, evidence upload และ Parent Mode actions
+
+### Validation
+
+| รายการ | ผล |
+|---|---|
+| Smoke test | ผ่าน: 18 required files, 19 local scripts |
+| World destinations | 7 ปุ่ม พร้อมชื่อไทย/อังกฤษและ accessible label |
+| Detail sheet | เปิดได้, `role=dialog`, Escape close และ focus lifecycle ใช้ shared overlay |
+| 360×800 | ผ่าน; ไม่มี horizontal overflow |
+| 768×1024 | ผ่าน; ไม่มี horizontal overflow |
+| 1024×768 | ผ่าน; ไม่มี horizontal overflow |
+| 1440×900 | ผ่าน; ไม่มี horizontal overflow |
+| Console | ไม่มี app error; มี Babel Standalone warning เดิม |
+
+Frontend Design guidance ทำให้โลกทั้ง 7 เป็นจุดหมายที่มีข้อมูลและการโต้ตอบจริงในสมุดแผนที่ แทนการเพิ่มของตกแต่งแฟนตาซีที่ไม่ช่วยการใช้งาน
+
+### Commit
+
+Subject: `feat(home): redesign kid home as a magical learning adventure`
+
+### Phase gate
+
+Phase 2 ผ่าน smoke/browser/responsive validation และพร้อม commit แยกก่อนเริ่ม Phase 3

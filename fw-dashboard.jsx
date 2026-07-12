@@ -315,8 +315,18 @@ const MAP_POS = [
   { x: 20, y: 8 }, { x: 68, y: 20 }, { x: 24, y: 34 }, { x: 70, y: 48 },
   { x: 24, y: 62 }, { x: 68, y: 76 }, { x: 36, y: 90 },
 ];
+const WORLD_PRESENTATION = {
+  life:     { en: 'Life Village',       hint: 'ฝึกดูแลตัวเองและคนรอบข้าง', mark: 'home' },
+  language: { en: 'Library of Words',   hint: 'เปิดประตูสู่เรื่องเล่าและภาษา', mark: 'book' },
+  math:     { en: 'Shape Town',         hint: 'ค้นหารูปแบบ ตัวเลข และเหตุผล', mark: 'shapes' },
+  science:  { en: 'Sky Laboratory',     hint: 'ทดลอง ตั้งคำถาม และมองท้องฟ้า', mark: 'science' },
+  agri:     { en: 'Wonder Garden',      hint: 'เรียนรู้จากดิน น้ำ และการเติบโต', mark: 'leaf' },
+  social:   { en: 'World City',         hint: 'เข้าใจผู้คน ชุมชน และโลกกว้าง', mark: 'world' },
+  art:      { en: 'Art Island',         hint: 'สร้างสรรค์สี เสียง และจินตนาการ', mark: 'sparkle' },
+};
 function AdventureMap() {
-  const { progress, dark } = useApp();
+  const { progress, dark, missions, beep } = useApp();
+  const [selected, setSelected] = useStateDash(null);
   const firstOpen = GROUPS.findIndex(g => (progress[g.id] || 0) < 100);
   const curIdx = firstOpen === -1 ? GROUPS.length - 1 : firstOpen;
   const pathD = MAP_POS.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
@@ -335,22 +345,49 @@ function AdventureMap() {
         const locked = pct === 0;
         const done = pct >= 100;
         return (
-          <div key={g.id} className={'adv-node' + (locked ? ' locked' : '')}
+          <button type="button" key={g.id} className={'adv-node' + (locked ? ' locked' : '')}
+            onClick={() => { beep('pop'); setSelected(g); }}
+            aria-label={`${(TERRITORY[g.id] || {}).th || g.th} ${pct}% กดเพื่อดูรายละเอียด`}
             style={{ left: MAP_POS[i].x + '%', top: MAP_POS[i].y + '%' }}>
             <div className="adv-isle" style={{
               background: g.c + (locked ? isleAlpha.locked : isleAlpha.open),
               boxShadow: done ? `0 0 0 3px ${g.c}, 0 0 16px ${g.c}88` : `0 0 0 2px ${g.c}55`,
             }}>
-              <span>{locked ? '☁️' : g.emoji}</span>
-              {done && <span className="adv-crown">👑</span>}
+              <span className="adv-landmark" aria-hidden="true"><AppIcon name={(WORLD_PRESENTATION[g.id] || {}).mark || 'world'} size={24} /></span>
+              {done && <span className="adv-crown" aria-label="พิชิตแล้ว"><AppIcon name="check" size={12} /></span>}
               {i === curIdx && <span className="adv-me"><DressedMascot size={20} /></span>}
             </div>
             <span className="adv-terr">{(TERRITORY[g.id] || {}).th || g.th}</span>
-            <span className="adv-name">{g.th}</span>
+            <span className="adv-name">{(WORLD_PRESENTATION[g.id] || {}).en || g.en || g.th}</span>
             <span className="adv-pct" style={{ color: g.c }}>{locked ? 'ยังไม่สำรวจ' : done ? 'พิชิตแล้ว!' : 'สำรวจแล้ว ' + pct + '%'}</span>
-          </div>
+          </button>
         );
       })}
+      {selected && (() => {
+        const pct = progress[selected.id] || 0;
+        const worldMissions = missions.filter(m => m.group === selected.id);
+        const completed = worldMissions.filter(m => m.status === 'done' || m.done).length;
+        const copy = WORLD_PRESENTATION[selected.id] || {};
+        return (
+          <AccessibleOverlay onClose={() => setSelected(null)} labelledBy="world-detail-title"
+            describedBy="world-detail-description" surfaceClassName="sheet world-detail-sheet">
+            <button className="x-btn" aria-label="ปิดรายละเอียดโลก" onClick={() => setSelected(null)}>×</button>
+            <div className="world-detail-art" style={{ '--world-color': selected.c }} aria-hidden="true">
+              <AppIcon name={copy.mark || 'world'} size={38} />
+            </div>
+            <span className="world-detail-kicker">บันทึกพื้นที่สำรวจ · {pct}%</span>
+            <h2 id="world-detail-title">{(TERRITORY[selected.id] || {}).th || selected.th}</h2>
+            <p className="world-detail-en">{copy.en}</p>
+            <p id="world-detail-description">{copy.hint}</p>
+            <div className="world-detail-progress"><Bar value={pct} color={selected.c} /></div>
+            <div className="world-detail-stats">
+              <span><b>{completed}</b> ภารกิจสำเร็จ</span>
+              <span><b>{worldMissions.length}</b> ภารกิจทั้งหมด</span>
+            </div>
+            <button className="btn block" onClick={() => setSelected(null)}>กลับไปที่แผนที่</button>
+          </AccessibleOverlay>
+        );
+      })()}
     </div>
   );
 }

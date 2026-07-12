@@ -20,11 +20,12 @@ const index = read('index.html');
 const scriptSources = [...index.matchAll(/<script[^>]+src="([^"]+)"/g)].map((match) => match[1]);
 const localScripts = scriptSources.filter((src) => !/^https?:/.test(src));
 for (const src of localScripts) {
-  assert.ok(existsSync(resolve(root, src)), `index references missing script: ${src}`);
+  const file = src.split('?')[0];
+  assert.ok(existsSync(resolve(root, file)), `index references missing script: ${src}`);
 }
 
 const position = (file) => {
-  const found = scriptSources.indexOf(file);
+  const found = scriptSources.findIndex((src) => src.split('?')[0] === file);
   assert.notEqual(found, -1, `index does not load ${file}`);
   return found;
 };
@@ -69,6 +70,7 @@ assert.match(`${styles}\n${theme}`, /prefers-reduced-motion:\s*reduce/, 'reduced
 
 const appShell = read('fw-app.jsx');
 const sharedUi = read('fw-ui.jsx');
+const dashboard = read('fw-dashboard.jsx');
 for (const destination of ['home', 'quests', 'world', 'portfolio', 'rewards']) {
   assert.match(appShell, new RegExp(`id: '${destination}'`), `child navigation is missing ${destination}`);
 }
@@ -89,5 +91,8 @@ assert.match(serviceWorker, /if \(!sameOrigin && !cdnRuntime\) return;/, 'Fireba
 assert.doesNotMatch(serviceWorker, /['"]https:\/\/firestore\.googleapis\.com/, 'Firestore API must not be precached');
 assert.match(serviceWorker, /'fw-assets\.js'/, 'asset registry must be precached');
 assert.match(serviceWorker, /'fw-ui\.jsx'/, 'shared UI primitives must be precached');
+assert.match(dashboard, /WORLD_PRESENTATION/, 'kid world map must keep presentation names separate from learning data');
+assert.match(dashboard, /aria-label={`\$\{\(TERRITORY/, 'world destinations must expose descriptive accessible labels');
+assert.match(dashboard, /world-detail-sheet/, 'world destinations must open an accessible detail sheet');
 
 console.log(`Smoke checks passed (${requiredFiles.length} required files, ${localScripts.length} local scripts).`);

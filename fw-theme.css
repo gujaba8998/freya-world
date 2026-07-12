@@ -235,6 +235,36 @@
 .adv-terr { font-family: var(--font-display); font-weight: 600; font-size: 11px; color: var(--ink); line-height: 1.2; }
 .adv-name { font-weight: 600; font-size: 9px; color: var(--ink-soft); }
 
+/* Phase 2: tactile explorer-map destinations */
+.adv-node {
+  appearance: none; border: 0; background: transparent; font: inherit; color: inherit;
+  cursor: pointer; padding: 3px; border-radius: 16px;
+}
+.adv-node:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+.adv-node:hover .adv-isle { transform: translateY(-2px); }
+.adv-isle { transition: transform var(--dur-fast), box-shadow var(--dur-fast); }
+.adv-landmark { display: grid; place-items: center; color: var(--ink); }
+.adv-crown {
+  display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%;
+  color: #725400; background: var(--c-star); border: 2px solid var(--surface);
+}
+.world-detail-sheet { text-align: center; }
+.world-detail-sheet .x-btn { position: absolute; top: 10px; right: 10px; }
+.world-detail-art {
+  width: 92px; height: 72px; display: grid; place-items: center; margin: 2px auto 12px;
+  color: var(--ink); background: color-mix(in oklab, var(--world-color) 34%, var(--surface));
+  border: 2px solid color-mix(in oklab, var(--world-color) 58%, transparent);
+  border-radius: 48% 52% 43% 57% / 57% 42% 58% 43%; box-shadow: var(--sh-1);
+}
+.world-detail-kicker { color: var(--accent-deep); font-size: 10px; font-weight: 800; letter-spacing: .04em; }
+.world-detail-sheet h2 { margin: 5px 0 0; color: var(--ink); font-family: var(--font-display); font-size: 21px; }
+.world-detail-en { margin: 1px 0 12px !important; color: var(--accent-deep) !important; font-weight: 700; }
+.world-detail-sheet > p:not(.world-detail-en) { margin: 0 auto 14px; max-width: 32ch; color: var(--ink-soft); font-size: 12px; }
+.world-detail-progress { margin: 0 2px 12px; }
+.world-detail-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+.world-detail-stats span { padding: 10px 5px; border-radius: 13px; color: var(--ink-soft); background: var(--surface-2); font-size: 10.5px; }
+.world-detail-stats b { display: block; color: var(--ink); font-family: var(--font-display); font-size: 18px; }
+
 /* achievement preview strip */
 .ach-strip { display: flex; align-items: center; gap: 8px; padding: 12px 14px; }
 .ach-cell {
