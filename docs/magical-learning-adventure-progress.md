@@ -317,3 +317,43 @@ Commit subject: `feat(portfolio): turn achievements into a magical memory book`
 Validation: source smoke ตรวจ overview/status contracts ผ่าน; cache bump เป็น `freya-world-v13`
 
 Commit subject: `feat(parent): add a focused learning overview and review hub`
+
+---
+
+## Phase 7 — Polish and Validation
+
+วันที่: 12 กรกฎาคม 2569 (2026-07-12)
+
+- เพิ่ม shared `ErrorState`, ปรับ quest filter เป็น touch target 44 px และหยุด ambient room-walker/map-marker motion
+- ยืนยัน EmptyState, LoadingSkeleton, ErrorState, dialog focus/Escape และ native reduced-motion coverage
+- ทดสอบ app mount, Quest destination, Memory Book empty state, Parent PIN 1234/Overview และ Star Shop จริงใน browser
+- Service Worker cache รุ่นสุดท้าย `freya-world-v14`; Firestore/Auth/Storage bypass rules ไม่เปลี่ยน
+
+### Final validation
+
+| รายการ | ผล |
+|---|---|
+| Smoke test | ผ่าน: 18 required files, 19 local scripts |
+| Diff check | ผ่าน |
+| App console | ไม่มี app error; มี Babel Standalone production warning เดิม |
+| Quest destination | mount และ heading ผ่าน; empty state ถูกต้องเมื่อไม่มี mission fixture |
+| Memory Book | empty state และ year range ผ่าน; field contracts ตรวจด้วย smoke |
+| Parent Mode | PIN 1234 ผ่าน; Overview 4 metrics และ 4 sub-tabs แสดงครบ |
+| Star Shop | storefront แสดง; code-native glyph 16 รายการใน default room catalog |
+| 360×800 | ไม่มี horizontal overflow |
+| 390×844 | ไม่มี horizontal overflow |
+| 768×1024 | ไม่มี horizontal overflow |
+| 1024×768 | ไม่มี horizontal overflow |
+| 1440×900 | ไม่มี horizontal overflow |
+| Firebase live/two-client | ไม่รัน เพราะไม่มี isolated family/config fixture; schema/sync files ไม่ถูกแก้ |
+| Evidence camera/mic/upload | ไม่อนุญาต browser permission และไม่มี test Firebase; action/outbox contracts คงเดิม |
+
+### ข้อจำกัดที่ยังทราบ
+
+- Runtime ยังเป็น React/Babel Standalone ผ่าน CDN; production precompile ควรเป็น migration แยก
+- external artwork ยังเป็น asset sheets จึงใช้ central registry + SVG/CSS fallback ตามข้อห้ามไม่ใช้ sheet ทั้งแผ่น
+- Firebase concurrency/reviewed-history/empty-snapshot risks จาก Phase 0 ยังเป็นงานระบบแยกและไม่ได้แอบแก้ใน redesign
+
+Commit subject: `chore(ui): polish accessibility motion and release validation`
+
+สถานะ: Phase 0–7 เสร็จใน branch local และยังไม่ push GitHub ตามคำสั่งผู้ใช้

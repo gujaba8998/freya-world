@@ -64,25 +64,11 @@ function RoomWalker() {
   const isCustom = profile.avatar === 'custom';
   return (
     <>
-      <style>{`
-        @keyframes fw-walk-cycle {
-          0%   { left: 6%;  transform: scaleX(1); }
-          45%  { left: 80%; transform: scaleX(1); }
-          50%  { left: 80%; transform: scaleX(-1); }
-          95%  { left: 6%;  transform: scaleX(-1); }
-          100% { left: 6%;  transform: scaleX(1); }
-        }
-        @keyframes fw-walk-bob {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-4px); }
-        }
-      `}</style>
       <div style={{
         position: 'absolute', bottom: 8, left: '6%', zIndex: 5, pointerEvents: 'none',
-        animation: 'fw-walk-cycle 16s ease-in-out infinite',
         filter: 'drop-shadow(0 3px 3px rgba(0,0,0,.28))',
       }}>
-        <div style={{ animation: 'fw-walk-bob 0.55s ease-in-out infinite' }}>
+        <div>
           {isCustom
             ? <image-slot id="avatar-photo" shape="circle" style={{ width: 30, height: 30, display: 'block' }} placeholder="📷" />
             : <span style={{ fontSize: 30, lineHeight: 1 }}>{profile.avatar || '🐰'}</span>}

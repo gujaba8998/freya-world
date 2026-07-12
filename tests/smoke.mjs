@@ -110,5 +110,7 @@ assert.match(portfolioUi, /item\.indicators/, 'memory cards must expose curricul
 assert.match(parentHubUi, /function ParentOverview/, 'parent mode must provide an overview dashboard');
 assert.match(parentHubUi, /Pending reviews/, 'parent overview must expose pending review status');
 assert.match(parentHubUi, /Needs revision/, 'parent overview must expose revision status');
+assert.match(sharedUi, /function ErrorState/, 'shared UI must provide a reusable error state');
+assert.doesNotMatch(rewardsUi, /fw-walk-cycle/, 'reward room must not run ambient walking motion');
 
 console.log(`Smoke checks passed (${requiredFiles.length} required files, ${localScripts.length} local scripts).`);
