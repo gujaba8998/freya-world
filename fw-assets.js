@@ -21,7 +21,10 @@
     ready: false,
     characters: Object.freeze({ lumi: pending('lumi-mark'), freya: pending('freya-mark') }),
     worlds: Object.freeze(worlds),
-    shop: Object.freeze({ scene: pending('shop-scene'), chest: pending('reward-chest') }),
+    shop: Object.freeze({
+      scene: pending('shop-scene'), chest: pending('reward-chest'),
+      item: (id) => pending(`shop-item-${id}`),
+    }),
     memory: Object.freeze({ paper: pending('memory-paper'), tape: pending('memory-tape') }),
   });
 })();

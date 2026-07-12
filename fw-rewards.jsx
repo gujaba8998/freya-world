@@ -45,9 +45,18 @@ const roomItemById = (id) => ROOM_ITEMS.find(i => i.id === id);
 
 function RoomItemArt({ item, size = 34 }) {
   if (!item) return null;
-  return item.img
-    ? <img src={item.img} alt={item.th} style={{ width: size, height: size, objectFit: 'contain' }} />
-    : <span style={{ fontSize: size, lineHeight: 1 }}>{item.emoji}</span>;
+  const mapped = window.FW_ASSETS && window.FW_ASSETS.shop.item(item.id);
+  return item.img || (mapped && mapped.src)
+    ? <img src={item.img || mapped.src} alt={item.th} width={size} height={size} style={{ objectFit: 'contain' }} />
+    : <RewardGlyph item={item} size={size} />;
+}
+
+function RewardGlyph({ item, kind = 'room', size = 42 }) {
+  const icon = kind === 'fit' ? 'sparkle' : kind === 'real' ? 'rewards' : 'home';
+  const letters = (item.en || item.th || '?').split(/\s+/).map(word => word[0]).join('').slice(0, 2).toUpperCase();
+  return <span className={'reward-glyph ' + kind} style={{ width: size, height: size }} aria-hidden="true">
+    <AppIcon name={icon} size={Math.max(16, Math.round(size * .42))} /><b>{letters}</b>
+  </span>;
 }
 
 function RoomWalker() {
@@ -345,7 +354,7 @@ function ItemPreviewSheet({ p, onClose, onBuy }) {
   return (
     <AccessibleOverlay onClose={onClose} labelledBy="shop-item-preview-title">
           <div className="sheet-grab"></div>
-          <div className="pv-art">{item.emoji}</div>
+          <div className="pv-art"><RewardGlyph item={item} kind={kind} size={72} /></div>
           <div style={{ textAlign: 'center' }}>
             <div id="shop-item-preview-title" style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 17, color: 'var(--ink)' }}>{item.th}</div>
             <div style={{ fontSize: 11, color: 'var(--ink-soft)' }}>{item.en}</div>
@@ -383,7 +392,7 @@ function PurchaseCelebration({ p, onClose }) {
       className="loot-reveal" surfaceClassName="loot-reveal-card">
           <div className="chest-scene" aria-hidden="true">
             <span className="chest-glow" />
-            <span className="chest-item">{item.emoji}</span>
+            <span className="chest-item"><RewardGlyph item={item} kind={kind} size={48} /></span>
             <div className="chest">
               <div className="chest-lid" />
               <div className="chest-base" />
@@ -465,7 +474,7 @@ function StarShop() {
                 if (owned) { showToast('มีชิ้นนี้แล้ว · Already owned', item.emoji); beep('tab'); return; }
                 setPreview({ kind, item }); beep('tab');
               }}>
-              <span className="shelf-art">{item.emoji}</span>
+              <span className="shelf-art"><RewardGlyph item={item} kind={kind} size={50} /></span>
               <span className="shelf-name">{item.th}</span>
               {owned
                 ? <span className="shelf-state ok">✓ มีแล้ว</span>
@@ -491,9 +500,9 @@ function RewardCard({ r }) {
   return (
     <div className="card reward-card" style={{ padding: 14, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, textAlign: 'center', position: 'relative' }}>
       {parentMode && (
-        <button className="rw-del" title="ลบรางวัล" onClick={() => removeReward(r.id)}>✕</button>
+        <button className="rw-del" title="ลบรางวัล" aria-label={`ลบรางวัล ${r.th}`} onClick={() => removeReward(r.id)}>✕</button>
       )}
-      <div style={{ fontSize: 38, lineHeight: 1 }}>{r.emoji}</div>
+      <RewardGlyph item={r} kind="real" size={54} />
       <div style={{ width: '100%' }}>
         {parentMode && editing ? (
           <input className="rw-name-input" value={r.th} autoFocus

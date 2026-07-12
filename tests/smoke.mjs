@@ -71,6 +71,7 @@ assert.match(`${styles}\n${theme}`, /prefers-reduced-motion:\s*reduce/, 'reduced
 const appShell = read('fw-app.jsx');
 const sharedUi = read('fw-ui.jsx');
 const dashboard = read('fw-dashboard.jsx');
+const rewardsUi = read('fw-rewards.jsx');
 for (const destination of ['home', 'quests', 'world', 'portfolio', 'rewards']) {
   assert.match(appShell, new RegExp(`id: '${destination}'`), `child navigation is missing ${destination}`);
 }
@@ -97,5 +98,9 @@ assert.match(dashboard, /world-detail-sheet/, 'world destinations must open an a
 assert.match(dashboard, /QUEST_STATUS/, 'quest UI must use a consistent status taxonomy');
 assert.match(dashboard, /quest-filters/, 'quest destination must provide status filters');
 assert.match(dashboard, /compact onOpen={setSelectedMission}/, 'quest list must separate scanning from the detail and evidence flow');
+assert.match(rewardsUi, /function RewardGlyph/, 'shop must provide code-native artwork when prepared assets are unavailable');
+assert.match(rewardsUi, /buyRoomItem\(p\.item\)/, 'room purchases must keep the existing guarded action');
+assert.match(rewardsUi, /buyMascotItem\(p\.item\)/, 'wardrobe purchases must keep the existing guarded action');
+assert.match(rewardsUi, /else redeem\(p\.item\)/, 'real rewards must keep the existing guarded action');
 
 console.log(`Smoke checks passed (${requiredFiles.length} required files, ${localScripts.length} local scripts).`);
