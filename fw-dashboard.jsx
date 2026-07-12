@@ -95,13 +95,34 @@ function EvidencePicker({ items, setItems, accent }) {
    pending    → muted, hourglass badge
    done       → strikethrough, green check
    ========================================================= */
-function MissionCard({ m }) {
+const QUEST_STATUS = {
+  available: { th: 'พร้อมเริ่ม', en: 'Ready', tone: 'ready' },
+  inprogress: { th: 'กำลังผจญภัย', en: 'In progress', tone: 'active' },
+  pending: { th: 'รอผู้ปกครอง', en: 'Waiting for review', tone: 'pending' },
+  done: { th: 'สำเร็จแล้ว', en: 'Complete', tone: 'done' },
+};
+
+function MissionCard({ m, compact = false, onOpen }) {
   const { acceptMission, submitMission, toggleMission, repeatMission, parentMode, beep, showToast } = useApp();
   const g = GROUP[m.group];
   const st = m.status || (m.done ? 'done' : 'available');
   const [evidence, setEvidence] = useStateDash([]); // attached files
   const [uploading, setUploading] = useStateDash(false);
   const hasEvidence = evidence.length > 0;
+  const statusCopy = QUEST_STATUS[st] || QUEST_STATUS.available;
+
+  if (compact) return (
+    <button type="button" className="quest-ledger-card" onClick={() => onOpen && onOpen(m)}
+      style={{ '--quest-color': g.c }} aria-label={`${m.th} สถานะ${statusCopy.th} ดูรายละเอียด`}>
+      <span className="quest-ledger-mark"><AppIcon name="quests" size={20} /></span>
+      <span className="quest-ledger-copy">
+        <b>{m.th}</b><small>{m.en} · {g.th}</small>
+      </span>
+      <span className={'quest-state ' + statusCopy.tone}>{statusCopy.th}<small>{statusCopy.en}</small></span>
+      <StarCounter value={m.stars} />
+      <AppIcon name="chevron" size={16} />
+    </button>
+  );
 
   const handleSubmit = async () => {
     setUploading(true);
@@ -396,7 +417,15 @@ function AdventureMap() {
    They intentionally add no new workflow logic; Phase 3 will own quest detail. */
 function QuestsPage({ go }) {
   const { missions, parentMode, beep } = useApp();
+  const [filter, setFilter] = useStateDash('active');
+  const [selectedMission, setSelectedMission] = useStateDash(null);
   const active = missions.filter(m => ['available', 'inprogress', 'pending'].includes(m.status || 'available')).length;
+  const visible = missions.filter(m => {
+    const status = m.status || (m.done ? 'done' : 'available');
+    if (filter === 'all') return true;
+    if (filter === 'active') return status !== 'done';
+    return status === filter;
+  });
   return (
     <main className="tab-enter shell-page" aria-labelledby="quests-page-title">
       <header className="page-intro">
@@ -407,17 +436,38 @@ function QuestsPage({ go }) {
           <span>{active} ภารกิจกำลังรอการสำรวจ</span>
         </div>
       </header>
+      {missions.length > 0 && (
+        <div className="quest-filters" role="group" aria-label="กรองภารกิจ">
+          {[
+            ['active', 'กำลังทำ'], ['available', 'พร้อมเริ่ม'], ['pending', 'รอตรวจ'], ['done', 'สำเร็จ'], ['all', 'ทั้งหมด'],
+          ].map(([id, label]) => (
+            <button key={id} className={filter === id ? 'on' : ''} aria-pressed={filter === id}
+              onClick={() => setFilter(id)}>{label}</button>
+          ))}
+        </div>
+      )}
       {missions.length === 0 ? (
         <EmptyState icon="quests" title="ยังไม่มีภารกิจ"
           description={parentMode ? 'เพิ่มกิจกรรมแรกจากแผนการเรียนหรือสร้างภารกิจใหม่' : 'เมื่อผู้ปกครองส่งภารกิจมา รายการจะปรากฏตรงนี้'}
           action={parentMode ? <button className="btn" onClick={() => { beep('pop'); go('activity'); }}>เพิ่มภารกิจแรก</button> : null} />
-      ) : (
-        <div className="missions-list" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {missions.map(m => <MissionCard key={m.id} m={m} />)}
+      ) : visible.length ? (
+        <div className="quest-ledger-list">
+          {visible.map(m => <MissionCard key={m.id} m={m} compact onOpen={setSelectedMission} />)}
         </div>
-      )}
+      ) : <EmptyState icon="quests" title="ไม่มีภารกิจในหมวดนี้" description="เลือกสถานะอื่นเพื่อดูภารกิจที่เหลือ" />}
       {parentMode && missions.length > 0 && (
         <button className="btn ghost block" onClick={() => { beep('pop'); go('activity'); }}>เพิ่มกิจกรรม</button>
+      )}
+      {selectedMission && (
+        <AccessibleOverlay onClose={() => setSelectedMission(null)} labelledBy="quest-detail-title"
+          surfaceClassName="sheet quest-detail-sheet">
+          <div className="quest-detail-head">
+            <div><span>บันทึกภารกิจ</span><h2 id="quest-detail-title">{selectedMission.th}</h2></div>
+            <button className="x-btn" aria-label="ปิดรายละเอียดภารกิจ" onClick={() => setSelectedMission(null)}>×</button>
+          </div>
+          {selectedMission.desc && <p className="quest-detail-desc">{selectedMission.desc}</p>}
+          <MissionCard m={selectedMission} />
+        </AccessibleOverlay>
       )}
     </main>
   );

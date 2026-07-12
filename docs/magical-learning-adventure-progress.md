@@ -250,3 +250,20 @@ Subject: `feat(home): redesign kid home as a magical learning adventure`
 ### Phase gate
 
 Phase 2 ผ่าน smoke/browser/responsive validation และพร้อม commit แยกก่อนเริ่ม Phase 3
+
+---
+
+## Phase 3 — Quest Experience
+
+วันที่: 12 กรกฎาคม 2569 (2026-07-12)
+
+- เพิ่ม status taxonomy กลางสำหรับ Ready, In progress, Waiting for review และ Complete
+- เพิ่มตัวกรอง กำลังทำ/พร้อมเริ่ม/รอตรวจ/สำเร็จ/ทั้งหมด
+- เปลี่ยนหน้า Quests เป็น ledger cards แบบกะทัดรัด และย้าย action/evidence ไป detail sheet
+- detail sheet ใช้ `AccessibleOverlay`; action ทั้งหมดเรียก `acceptMission`, `submitMission`, `toggleMission`, `repeatMission` เดิม
+- ไม่แก้ upload, IndexedDB outbox, Firebase serializer หรือ mission state machine
+- เพิ่ม responsive compact layout, keyboard focus และ empty filtered state
+
+Validation: smoke test ผ่าน 18 required files/19 local scripts, diff check ผ่าน และ cache bump เป็น `freya-world-v10`
+
+Commit subject: `feat(quests): separate quest list detail and evidence flow`

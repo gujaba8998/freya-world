@@ -94,5 +94,8 @@ assert.match(serviceWorker, /'fw-ui\.jsx'/, 'shared UI primitives must be precac
 assert.match(dashboard, /WORLD_PRESENTATION/, 'kid world map must keep presentation names separate from learning data');
 assert.match(dashboard, /aria-label={`\$\{\(TERRITORY/, 'world destinations must expose descriptive accessible labels');
 assert.match(dashboard, /world-detail-sheet/, 'world destinations must open an accessible detail sheet');
+assert.match(dashboard, /QUEST_STATUS/, 'quest UI must use a consistent status taxonomy');
+assert.match(dashboard, /quest-filters/, 'quest destination must provide status filters');
+assert.match(dashboard, /compact onOpen={setSelectedMission}/, 'quest list must separate scanning from the detail and evidence flow');
 
 console.log(`Smoke checks passed (${requiredFiles.length} required files, ${localScripts.length} local scripts).`);
