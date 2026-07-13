@@ -36,8 +36,20 @@
     base: BASE,
     ready: true,
     characters: Object.freeze({
-      lumi: image('characters/lumi/lumi-happy.webp', 512, 512, 'lumi-mark'),
-      freya: image('characters/freya/freya-standing-wave.webp', 640, 640, 'freya-mark'),
+      lumi: Object.freeze({
+        normal: image('characters/lumi/lumi-normal.webp', 512, 512, 'lumi-normal'),
+        happy: image('characters/lumi/lumi-happy.webp', 512, 512, 'lumi-happy'),
+        thinking: image('characters/lumi/lumi-thinking.webp', 512, 512, 'lumi-thinking'),
+        surprised: image('characters/lumi/lumi-surprised.webp', 512, 512, 'lumi-surprised'),
+        excited: image('characters/lumi/lumi-excited.webp', 512, 512, 'lumi-excited'),
+      }),
+      freya: Object.freeze({
+        wave: image('characters/freya/freya-standing-wave.webp', 640, 640, 'freya-wave'),
+        reading: image('characters/freya/freya-reading.webp', 640, 640, 'freya-reading'),
+        celebrating: image('characters/freya/freya-celebrating.webp', 640, 640, 'freya-celebrating'),
+        treasure: image('characters/freya/freya-opening-treasure.webp', 640, 640, 'freya-treasure'),
+        wand: image('characters/freya/freya-magic-wand.webp', 640, 640, 'freya-wand'),
+      }),
     }),
     worlds: Object.freeze(worlds),
     missions: Object.freeze(missions),

@@ -255,6 +255,7 @@ function HeroAdventure({ go }) {
   const doing = missions.find(m => m.status === 'inprogress');
   const avail = missions.find(m => (m.status || (m.done ? 'done' : 'available')) === 'available');
   const target = doing || avail;
+  const freyaArt = window.FW_ASSETS && window.FW_ASSETS.characters && window.FW_ASSETS.characters.freya.wave;
   const nDone = missions.filter(m => m.status === 'done').length;
   const nPending = missions.filter(m => m.status === 'pending').length;
   const scrollToQuests = () => {
@@ -300,7 +301,12 @@ function HeroAdventure({ go }) {
           <div className="hero-wait">วันนี้ยังไม่มีภารกิจ รอคุณแม่ส่งมานะ 💌</div>
         )}
       </div>
-      <div className="hero-mascot"><DressedMascot size={58} /></div>
+      <div className="hero-character" aria-hidden="true">
+        {freyaArt && freyaArt.src
+          ? <img src={freyaArt.src} alt="" width="150" height="188" />
+          : <DressedMascot size={58} />}
+        <span>Freya · นักสำรวจตัวน้อย</span>
+      </div>
     </section>
   );
 }

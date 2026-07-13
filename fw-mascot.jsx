@@ -43,18 +43,22 @@ const MASCOT_ITEMS = [
 const MASCOT_ITEM = Object.fromEntries(MASCOT_ITEMS.map(i => [i.id, i]));
 
 /* Mascot + worn outfit, grows slightly with level (caps at +40%). */
-function DressedMascot({ size = 30, style }) {
+function DressedMascot({ size = 30, style, mood = 'happy' }) {
   const { profile, mascotFit, level } = useApp();
   const grow = 1 + Math.min((level || 1) - 1, 10) * 0.04;
   const s = Math.round(size * grow);
   const isCustom = profile.avatar === 'custom';
   const worn = (mascotFit && mascotFit.worn) || {};
   const hat = MASCOT_ITEM[worn.hat], held = MASCOT_ITEM[worn.held];
+  const lumi = window.FW_ASSETS && window.FW_ASSETS.characters && window.FW_ASSETS.characters.lumi;
+  const lumiArt = lumi && (lumi[mood] || lumi.happy || lumi.normal);
   return (
-    <span style={{ position: 'relative', display: 'inline-block', lineHeight: 1, fontSize: s, ...style }}>
+    <span className="dressed-mascot" style={{ position: 'relative', display: 'inline-block', width: s, height: s, lineHeight: 1, fontSize: s, ...style }}>
       {isCustom
         ? <image-slot id="avatar-photo" shape="circle" style={{ width: s, height: s, display: 'block' }} placeholder="🐰" />
-        : (profile.avatar || '🐰')}
+        : lumiArt && lumiArt.src
+          ? <img className="lumi-portrait" src={lumiArt.src} alt="" width={s} height={s} />
+          : (profile.avatar || '🐰')}
       {hat && <span style={{ position: 'absolute', top: -s * 0.42, left: '50%', transform: 'translateX(-50%) rotate(-10deg)', fontSize: s * 0.55, pointerEvents: 'none' }}>{hat.emoji}</span>}
       {held && <span style={{ position: 'absolute', bottom: -s * 0.08, right: -s * 0.3, fontSize: s * 0.5, pointerEvents: 'none' }}>{held.emoji}</span>}
     </span>
@@ -88,11 +92,12 @@ function MascotBuddy({ tab }) {
     setHop(h => h + 1);
     say(MASCOT_TAPS[Math.floor(Math.random() * MASCOT_TAPS.length)], 3500);
   };
+  const mood = tab === 'rewards' ? 'excited' : tab === 'portfolio' ? 'happy' : tab === 'quests' ? 'thinking' : 'normal';
 
   return (
     <div className="mascot-wrap">
       {msg && <div className="mascot-bubble" key={msg}>{msg}</div>}
-      <button className="mascot" key={hop} onClick={tap} aria-label="เพื่อนคู่ใจ"><DressedMascot size={30} /></button>
+      <button className="mascot" key={hop} onClick={tap} aria-label="Lumi เพื่อนคู่ใจ"><DressedMascot size={42} mood={mood} /></button>
     </div>
   );
 }

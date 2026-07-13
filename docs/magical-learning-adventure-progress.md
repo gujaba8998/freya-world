@@ -373,3 +373,6 @@ Commit subject: `chore(ui): polish accessibility motion and release validation`
 - ทุกจุดยังมี SVG/CSS fallback หาก asset ไม่มีหรือ ID ไม่ตรง
 - ไม่ตัดพื้นหลังตัวละครแบบอัตโนมัติ เพราะ source ไม่มี alpha และขอบผม/วัสดุซับซ้อน; ใช้เฉพาะในกรอบภาพพื้นครีมจนกว่าจะมี transparent master
 - Service Worker bump เป็น `freya-world-v15`
+- Character visibility follow-up: เพิ่ม Freya เป็น portrait หลักใน Hero และใช้ Lumi expression artwork เป็นเพื่อนคู่ใจตามหน้า โดยคง custom avatar/wardrobe state และ fallback เดิม
+- Service Worker bump หลัง character integration เป็น `freya-world-v16`
+- ปรับ Hero text column หลัง visual review เพื่อไม่ให้ level/CTA ซ้อนกับ Freya portrait; final character cache `freya-world-v17`
