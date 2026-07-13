@@ -3,7 +3,7 @@
    (React/Babel/Firebase SDK). Firestore/Storage/Auth traffic is NEVER
    intercepted — it must go straight to the network or realtime sync breaks.
    Bump CACHE_VERSION when shipping a release to drop old caches. */
-const CACHE_VERSION = 'freya-world-v19';
+const CACHE_VERSION = 'freya-world-v20';
 
 const PRECACHE = [
   './',
@@ -32,6 +32,29 @@ const PRECACHE = [
   'public/assets/freya-world/worlds/wonder-garden.webp',
   'public/assets/freya-world/worlds/world-city.webp',
   'public/assets/freya-world/worlds/art-island.webp',
+  'public/assets/freya-world/scenes/home-hero-background.jpg',
+  'public/assets/freya-world/scenes/reward-shop-scene.jpg',
+  'public/assets/freya-world/scenes/portfolio-memory-book-scene.jpg',
+  'public/assets/freya-world/worlds/portal-island-locked.jpg',
+  'public/assets/freya-world/worlds/portal-island-unlocked-alt-03.jpg',
+  'public/assets/freya-world/characters/freya/freya-with-map.jpg',
+  'public/assets/freya-world/characters/freya/freya-painting.jpg',
+  'public/assets/freya-world/characters/freya/freya-science-experiment.jpg',
+  'public/assets/freya-world/characters/freya/freya-watering-plants.jpg',
+  'public/assets/freya-world/characters/lumi/lumi-cheerful-alt.jpg',
+  'public/assets/freya-world/characters/lumi/lumi-guide.jpg',
+  'public/assets/freya-world/characters/lumi/lumi-holding-star.jpg',
+  'public/assets/freya-world/characters/lumi/lumi-pointing.jpg',
+  'public/assets/freya-world/characters/lumi/lumi-sleeping.jpg',
+  'public/assets/freya-world/missions/mindfulness.jpg',
+  'public/assets/freya-world/missions/music.jpg',
+  'public/assets/freya-world/missions/nature-exploration.jpg',
+  'public/assets/freya-world/missions/science-experiment-alt.jpg',
+  'public/assets/freya-world/missions/social-friendship.jpg',
+  'public/assets/freya-world/rewards/moon-pillow.jpg',
+  'public/assets/freya-world/rewards/music-box.jpg',
+  'public/assets/freya-world/rewards/princess-crown.jpg',
+  'public/assets/freya-world/rewards/starry-telescope.jpg',
   'fw-dashboard.jsx',
   'fw-activity.jsx',
   'fw-portfolio.jsx',

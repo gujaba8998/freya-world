@@ -53,6 +53,7 @@ function Portfolio({ onRequestParent }) {
   const covered = GROUPS.filter(g => (progress[g.id] || 0) >= 50).length;
 
   const genSAR = () => { beep('reward'); setSarOpen(true); };
+  const memoryScene = window.FW_ASSETS && window.FW_ASSETS.scenes && window.FW_ASSETS.scenes.memory;
 
   return (
     <div className="tab-enter" style={{ padding: '16px 16px 28px', display: 'flex', flexDirection: 'column', gap: 18 }}>
@@ -70,8 +71,13 @@ function Portfolio({ onRequestParent }) {
 
       {!admin ? (
         <>
+          {memoryScene && memoryScene.src && (
+            <section className="memory-scene" style={{ backgroundImage: `linear-gradient(90deg, rgba(54,31,57,.86), rgba(54,31,57,.15)), url(${memoryScene.src})` }}>
+              <div><span>MY MAGICAL ARCHIVE</span><h2>ทุกการเรียนรู้มีเรื่องราว</h2><p>เก็บภาพ ความคิด และสิ่งที่ภูมิใจไว้ในสมุดของฉัน</p></div>
+            </section>
+          )}
           <div className="sec-h" style={{ marginBottom: 0 }}>
-            <h3>สมุดความทรงจำมหัศจรรย์</h3>
+            <h3>เรื่องราวของฉัน</h3>
             <span className="sub">{filtered.length} ชิ้น</span>
           </div>
 

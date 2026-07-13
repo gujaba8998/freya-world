@@ -398,6 +398,7 @@ function StarShop() {
   const [tab, setTab] = useStateR('room');
   const [preview, setPreview] = useStateR(null);   // { kind, item } being inspected
   const [won, setWon] = useStateR(null);           // { kind, item } just purchased
+  const shopScene = window.FW_ASSETS && window.FW_ASSETS.scenes && window.FW_ASSETS.scenes.shop;
 
   const entries = tab === 'room'
     ? ROOM_ITEMS.map(item => ({ kind: 'room', item, owned: room.owned.includes(item.id) }))
@@ -417,13 +418,16 @@ function StarShop() {
   return (
     <div className="shop-front">
       <div className="shop-awning" aria-hidden="true"></div>
-      <div className="shop-head">
-        <div className="shop-sign">⭐ ร้านดาวของเฟรยา<span>Freya's Star Shop</span></div>
-        <span className="shop-purse">⭐ {stars}</span>
-      </div>
-      <div className="shop-keeper">
-        <DressedMascot size={38} />
-        <span className="shop-keeper-bubble">ยินดีต้อนรับค่า~ วันนี้รับอะไรดีคะ?</span>
+      <div className={'shop-scene' + (shopScene && shopScene.src ? ' has-art' : '')}
+        style={shopScene && shopScene.src ? { backgroundImage: `linear-gradient(90deg, rgba(46,27,55,.82), rgba(46,27,55,.18)), url(${shopScene.src})` } : undefined}>
+        <div className="shop-head">
+          <div className="shop-sign">⭐ ร้านดาวของเฟรยา<span>Freya's Star Shop</span></div>
+          <span className="shop-purse">⭐ {stars}</span>
+        </div>
+        <div className="shop-keeper">
+          <DressedMascot size={46} mood="star" />
+          <span className="shop-keeper-bubble">ยินดีต้อนรับค่า~ วันนี้รับอะไรดีคะ?</span>
+        </div>
       </div>
       <div className="shop-tabs" role="tablist">
         {SHOP_TABS.map(t => (

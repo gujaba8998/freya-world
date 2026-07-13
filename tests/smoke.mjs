@@ -122,6 +122,26 @@ assert.match(rewardsUi, /wardrobe-owned-grid/, 'owned companion items must remai
 assert.match(read('fw-app.jsx'), /kid-head-name">Homeschool/, 'header must identify the learning context as Homeschool');
 assert.match(read('fw-parent.jsx'), /homeschoolName/, 'parent settings must allow editing the Homeschool display name');
 assert.match(read('fw-data.jsx'), /homeschoolName: 'Freya Homeschool'/, 'profile must provide a backwards-compatible Homeschool name default');
+assert.match(read('fw-assets.js'), /home-hero-background\.jpg/, 'home must register the new immersive scene');
+assert.match(read('fw-assets.js'), /portal-island-unlocked-alt-03\.jpg/, 'unlocked worlds must use a portal without a visible lock');
+assert.match(dashboard, /world-gate-status/, 'world detail must present its portal state');
+assert.match(rewardsUi, /shop-scene/, 'reward shop must present the new shop scene');
+assert.match(portfolioUi, /memory-scene/, 'portfolio must present the new memory-book scene');
+for (const asset of [
+  'scenes/home-hero-background.jpg',
+  'scenes/reward-shop-scene.jpg',
+  'scenes/portfolio-memory-book-scene.jpg',
+  'worlds/portal-island-locked.jpg',
+  'worlds/portal-island-unlocked-alt-03.jpg',
+  'characters/freya/freya-with-map.jpg',
+  'characters/lumi/lumi-holding-star.jpg',
+  'missions/social-friendship.jpg',
+  'missions/music.jpg',
+  'rewards/princess-crown.jpg',
+]) {
+  assert.ok(existsSync(resolve(root, `public/assets/freya-world/${asset}`)), `missing new production asset: ${asset}`);
+  assert.match(serviceWorker, new RegExp(asset.replaceAll('.', '\\.')), `new artwork must be available offline: ${asset}`);
+}
 for (const world of ['life-village', 'library-of-words', 'shape-town', 'sky-laboratory', 'wonder-garden', 'world-city', 'art-island']) {
   assert.ok(existsSync(resolve(root, `public/assets/freya-world/worlds/${world}.webp`)), `missing optimized world asset: ${world}`);
   assert.match(serviceWorker, new RegExp(`worlds/${world}\\.webp`), `world asset must be available in the offline shell: ${world}`);

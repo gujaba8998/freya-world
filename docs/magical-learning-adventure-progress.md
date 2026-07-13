@@ -392,3 +392,12 @@ Commit subject: `chore(ui): polish accessibility motion and release validation`
 - เพิ่มช่องแก้ชื่อ Homeschool ใน Parent Settings; field อยู่ใน profile เดิมจึงใช้ sync/backup serializer เดิมโดยไม่เพิ่ม schema ระดับบน
 - profile เก่า fallback เป็น `Freya Homeschool`; จำกัดชื่อ 50 ตัวอักษรและตัดด้วย ellipsis บนจอแคบ
 - Service Worker cache `freya-world-v19`
+
+### Expanded Artwork Integration
+
+- คัดเลือก production artwork ชุดวันที่ 13 กรกฎาคมเพิ่ม 23 ภาพ และลดขนาดรวมเหลือประมาณ 2 MB โดยไม่แก้ source master ใน `F:\Codex`
+- หน้าแรกใช้ฉากโลกเวทมนตร์และ Freya ถือแผนที่, ร้านดาวใช้ฉากร้านใหม่และ Lumi ถือดาว, สมุดความทรงจำใช้ scene เปิดเรื่อง
+- ภาพภารกิจเลือกตามคำสำคัญของกิจกรรมสำหรับดนตรี ธรรมชาติ สติ วิทยาศาสตร์ และสังคม โดยยังมีภาพกลุ่มเดิมเป็น fallback
+- ของในห้องและชุดเพื่อนคู่ใจใช้ภาพใหม่กับเตียง เปียโน มงกุฎ และกล้องดูดาว
+- รายละเอียดโลกแสดง portal locked/unlocked ตามความคืบหน้า โดยเลือก `portal-island-unlocked-alt-03` ซึ่งไม่มีแม่กุญแจ
+- เพิ่ม artwork ใหม่ใน offline cache และ bump Service Worker เป็น `freya-world-v20`

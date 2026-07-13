@@ -110,7 +110,9 @@ function MissionCard({ m, compact = false, onOpen }) {
   const [uploading, setUploading] = useStateDash(false);
   const hasEvidence = evidence.length > 0;
   const statusCopy = QUEST_STATUS[st] || QUEST_STATUS.available;
-  const questArt = window.FW_ASSETS && window.FW_ASSETS.missions && window.FW_ASSETS.missions[m.group];
+  const questArt = window.FW_ASSETS && window.FW_ASSETS.mission
+    ? window.FW_ASSETS.mission.item(m)
+    : window.FW_ASSETS && window.FW_ASSETS.missions && window.FW_ASSETS.missions[m.group];
 
   if (compact) return (
     <button type="button" className="quest-ledger-card" onClick={() => onOpen && onOpen(m)}
@@ -255,7 +257,9 @@ function HeroAdventure({ go }) {
   const doing = missions.find(m => m.status === 'inprogress');
   const avail = missions.find(m => (m.status || (m.done ? 'done' : 'available')) === 'available');
   const target = doing || avail;
-  const freyaArt = window.FW_ASSETS && window.FW_ASSETS.characters && window.FW_ASSETS.characters.freya.wave;
+  const assets = window.FW_ASSETS;
+  const freyaArt = assets && assets.characters && assets.characters.freya.map;
+  const homeScene = assets && assets.scenes && assets.scenes.home;
   const nDone = missions.filter(m => m.status === 'done').length;
   const nPending = missions.filter(m => m.status === 'pending').length;
   const scrollToQuests = () => {
@@ -266,8 +270,10 @@ function HeroAdventure({ go }) {
     el.scrollIntoView(reduce ? {} : { behavior: 'smooth', block: 'start' });
   };
   return (
-    <section className={'hero ' + period}>
-      <div className="hero-sky" aria-hidden="true">
+    <section className={'hero ' + period + (homeScene && homeScene.src ? ' has-scene' : '')}>
+      <div className="hero-sky" aria-hidden="true" style={homeScene && homeScene.src ? {
+        backgroundImage: `linear-gradient(90deg, rgba(255,249,243,.94) 0%, rgba(255,249,243,.78) 43%, rgba(255,249,243,.08) 74%), url(${homeScene.src})`,
+      } : undefined}>
         {period === 'night'
           ? <><span className="hero-moon" /><span className="hero-stars" /></>
           : <span className="hero-sun" />}
@@ -401,6 +407,8 @@ function AdventureMap() {
         const worldMissions = missions.filter(m => m.group === selected.id);
         const completed = worldMissions.filter(m => m.status === 'done' || m.done).length;
         const copy = WORLD_PRESENTATION[selected.id] || {};
+        const portalArt = window.FW_ASSETS && window.FW_ASSETS.portals &&
+          window.FW_ASSETS.portals[pct > 0 ? 'unlocked' : 'locked'];
         return (
           <AccessibleOverlay onClose={() => setSelected(null)} labelledBy="world-detail-title"
             describedBy="world-detail-description" surfaceClassName="sheet world-detail-sheet">
@@ -419,6 +427,13 @@ function AdventureMap() {
               <span><b>{completed}</b> ภารกิจสำเร็จ</span>
               <span><b>{worldMissions.length}</b> ภารกิจทั้งหมด</span>
             </div>
+            {portalArt && portalArt.src && (
+              <div className={'world-gate-status ' + (pct > 0 ? 'open' : 'locked')}>
+                <img src={portalArt.src} alt="" width="76" height="76" />
+                <span><b>{pct > 0 ? 'ประตูแห่งการเรียนรู้เปิดแล้ว' : 'ประตูนี้ยังรอการสำรวจ'}</b>
+                  {pct > 0 ? 'กลับมาทำภารกิจเพื่อทำให้พอร์ทัลสว่างขึ้น' : 'เริ่มภารกิจแรกเพื่อปลุกพลังของโลกนี้'}</span>
+              </div>
+            )}
             <button className="btn block" onClick={() => setSelected(null)}>กลับไปที่แผนที่</button>
           </AccessibleOverlay>
         );

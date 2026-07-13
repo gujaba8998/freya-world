@@ -621,3 +621,40 @@
   .hero-lvl-bar b, .k-switch, .k-switch::after { transition: none; }
   .app *, .app *::before, .app *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
 }
+
+/* Production artwork v20 — one immersive scene per destination. */
+.hero.has-scene .hero-sky { background-size: cover; background-position: center; }
+.hero.has-scene .hero-sun,
+.hero.has-scene .hero-moon,
+.hero.has-scene .hero-stars,
+.hero.has-scene .hero-cloud,
+.hero.has-scene .hero-hill { opacity: 0; }
+.hero.has-scene.night .hero-greet { color: #403653; }
+.hero.has-scene.night .hero-date,
+.hero.has-scene.night .hero-quote,
+.hero.has-scene.night .hero-lvl span { color: rgba(59,51,80,.72); }
+.hero.has-scene.night .hero-counts .k-chip { color: #5a4e75; background: rgba(255,255,255,.68); }
+
+.world-gate-status { display: grid; grid-template-columns: 76px 1fr; align-items: center; gap: 10px; margin: -2px 0 14px; padding: 8px 12px 8px 8px; border: 1px solid var(--line); border-radius: 16px; color: var(--ink-soft); background: var(--surface-2); text-align: left; font-size: 10px; line-height: 1.45; }
+.world-gate-status.open { border-color: color-mix(in oklab, var(--accent) 35%, var(--line)); background: linear-gradient(120deg, var(--accent-soft), var(--surface)); }
+.world-gate-status img { width: 76px; height: 76px; border-radius: 14px; object-fit: cover; }
+.world-gate-status b { display: block; margin-bottom: 2px; color: var(--ink); font-family: var(--font-display); font-size: 11px; }
+
+.shop-scene { position: relative; min-height: 126px; background: var(--surface); }
+.shop-scene.has-art { min-height: 162px; background-size: cover; background-position: center 52%; }
+.shop-scene.has-art .shop-sign { color: #fff; text-shadow: 0 2px 12px rgba(30,14,32,.55); }
+.shop-scene.has-art .shop-sign span { color: rgba(255,255,255,.82); }
+.shop-scene.has-art .shop-keeper-bubble { border: 1px solid rgba(255,255,255,.35); color: #fff; background: rgba(45,28,54,.58); backdrop-filter: blur(7px); }
+
+.memory-scene { min-height: 190px; display: flex; align-items: flex-end; overflow: hidden; padding: 20px; border-radius: var(--r-lg); color: #fff; background-size: cover; background-position: center; box-shadow: var(--sh-2); }
+.memory-scene > div { max-width: 290px; text-shadow: 0 2px 16px rgba(38,19,35,.55); }
+.memory-scene span { font-size: 8.5px; font-weight: 800; letter-spacing: .14em; opacity: .82; }
+.memory-scene h2 { margin: 4px 0 2px; font-family: var(--font-display); font-size: 21px; line-height: 1.25; }
+.memory-scene p { margin: 0; font-size: 10.5px; line-height: 1.45; opacity: .9; }
+
+@media (max-width: 420px) {
+  .memory-scene { min-height: 168px; padding: 16px; background-position: 58% center; }
+  .shop-scene.has-art { min-height: 150px; }
+  .world-gate-status { grid-template-columns: 64px 1fr; }
+  .world-gate-status img { width: 64px; height: 64px; }
+}
