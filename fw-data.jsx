@@ -189,6 +189,8 @@ function AppProvider({ children, variant, settings }) {
   const [profile, setProfile] = useState({
     name: 'เฟรยา', firstName: 'เฟรยา', lastName: '', nickname: '', avatar: '🐰', birthYear: 2016, birthMonth: 3,
     gradeAuto: true, grade: 'ป.5', pin: '1234',
+    // ชื่อบ้านเรียน — โปรไฟล์เก่าบนคลาวด์ไม่มี key นี้ ผู้อ่านทุกจุดต้อง fallback เอง
+    homeschoolName: 'Freya Homeschool',
   });
   const [parentMode, setParentMode] = useState(false);
 

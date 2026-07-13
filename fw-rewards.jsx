@@ -23,18 +23,18 @@ const ROOM_ITEMS = [
   // เฟอร์นิเจอร์หลัก
   { id: 'bed',      emoji: '🛏️', th: 'หมอนอิงพระจันทร์', en: 'Moon pillow',   cost: 60, img: fwArt('reward', 'bed') },
   { id: 'sofa',     emoji: '🛋️', th: 'โซฟา',            en: 'Sofa',          cost: 50 },
-  { id: 'chair',    emoji: '🪑', th: 'เก้าอี้',          en: 'Chair',         cost: 25 },
+  { id: 'chair',    emoji: '🪑', th: 'เก้าอี้แฟนตาซี',   en: 'Fantasy chair', cost: 25, img: fwArt('reward', 'chair') },
   { id: 'lamp',     emoji: '💡', th: 'กล้องส่องดาว',    en: 'Starry telescope', cost: 30, img: fwArt('reward', 'lamp') },
   { id: 'mirror',   emoji: '🪞', th: 'กระจกแต่งตัว',    en: 'Mirror',        cost: 35 },
   // ของตกแต่ง
-  { id: 'plant',    emoji: '🪴', th: 'ต้นไม้กระถาง',    en: 'Potted plant',  cost: 20 },
+  { id: 'plant',    emoji: '🪴', th: 'โคลเวอร์นำโชค',   en: 'Lucky clover',  cost: 20, img: fwArt('reward', 'plant') },
   { id: 'flowers',  emoji: '💐', th: 'แจกันดอกไม้',     en: 'Flowers',       cost: 20 },
   { id: 'picture',  emoji: '🖼️', th: 'กรอบรูป',         en: 'Picture frame', cost: 25 },
   { id: 'clock',    emoji: '⏰', th: 'นาฬิกาปลุก',      en: 'Alarm clock',   cost: 15 },
   { id: 'rainbow',  emoji: '🌈', th: 'สายรุ้งติดผนัง',  en: 'Rainbow decor', cost: 40, img: fwArt('reward', 'rainbow') },
   { id: 'stars',    emoji: '🌟', th: 'ดาวเรืองแสง',     en: 'Glow stars',    cost: 30, img: fwArt('reward', 'stars') },
   // มุมเล่น/มุมอ่าน
-  { id: 'books',    emoji: '📚', th: 'ชั้นหนังสือ',      en: 'Bookshelf',     cost: 45 },
+  { id: 'books',    emoji: '📚', th: 'ตำราเวทดวงดาว',   en: 'Celestial spellbook', cost: 45, img: fwArt('reward', 'books') },
   { id: 'teddy',    emoji: '🧸', th: 'ตุ๊กตาหมี',        en: 'Teddy bear',    cost: 35 },
   { id: 'piano',    emoji: '🎹', th: 'กล่องดนตรี',       en: 'Music box',     cost: 80, img: fwArt('reward', 'piano') },
   { id: 'easel',    emoji: '🎨', th: 'ขาตั้งวาดรูป',    en: 'Art easel',     cost: 55 },
@@ -449,7 +449,9 @@ function StarShop() {
           <span className="shop-purse">⭐ {stars}</span>
         </div>
         <div className="shop-keeper">
-          <DressedMascot size={38} />
+          {fwArt('character', 'lumiStar')
+            ? <img className="shop-keeper-img" src={fwArt('character', 'lumiStar')} alt="ลูมิ เจ้าของร้าน" />
+            : <DressedMascot size={38} />}
           <span className="shop-keeper-bubble">ยินดีต้อนรับค่า~ วันนี้รับอะไรดีคะ?</span>
         </div>
       </div>

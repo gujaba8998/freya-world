@@ -44,6 +44,7 @@ function Header({ onOpenAvatar, onOpenSettings }) {
     <header className="kid-head">
       <AvatarDisplay profile={profile} size={44} onClick={onOpenAvatar} />
       <div style={{ flex: 1, minWidth: 0 }}>
+        <div className="kid-head-school">{profile.homeschoolName || 'Freya Homeschool'}</div>
         <div className="kid-head-name">{profile.nickname || profile.firstName || profile.name}</div>
         <div className="kid-head-chips">
           <span className="k-chip" title={levelInto + '/100 ดาวสะสมในเลเวลนี้'}>

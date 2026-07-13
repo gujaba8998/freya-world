@@ -70,6 +70,18 @@ function ParentSheet({ onClose }) {
           <button className="x-btn" onClick={onClose}>✕</button>
         </div>
 
+        {/* homeschool identity */}
+        <div className="p-card">
+          <div style={fieldLabel}>🏫 ข้อมูล Homeschool</div>
+          <label className="p-row">
+            <span>ชื่อบ้านเรียน</span>
+            <input className="p-input" value={profile.homeschoolName || ''} maxLength={50}
+              placeholder="เช่น Freya Homeschool"
+              onChange={e => saveProfile({ homeschoolName: e.target.value })} />
+          </label>
+          <div className="p-hint">แสดงบนหัวแอปเหนือชื่อผู้เรียน · ซิงก์และสำรองข้อมูลพร้อมโปรไฟล์</div>
+        </div>
+
         {/* profile */}
         <div className="p-card">
           <div style={fieldLabel}>👧 ข้อมูลผู้เรียน</div>

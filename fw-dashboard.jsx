@@ -254,7 +254,7 @@ function HeroAdventure({ go }) {
       </div>
       <div className="hero-body">
         {settings.thaiDate !== false && <div className="hero-date">{thaiDate(now).full}</div>}
-        <h2 className="hero-greet">{HERO_GREET[period]} {name}!</h2>
+        <h2 className="hero-greet">{HERO_GREET[period]} <span style={{ whiteSpace: 'nowrap' }}>{name}!</span></h2>
         <p className="hero-quote">“{quote}”</p>
         <div className="hero-lvl">
           <div className="hero-lvl-bar"><b style={{ width: levelInto + '%' }}></b></div>
@@ -279,7 +279,14 @@ function HeroAdventure({ go }) {
           <div className="hero-wait">วันนี้ยังไม่มีภารกิจ รอคุณแม่ส่งมานะ 💌</div>
         )}
       </div>
-      <div className="hero-mascot"><DressedMascot size={58} /></div>
+      {fwArt('character', 'freya') ? (
+        <div className="hero-freya">
+          <img src={fwArt('character', 'freya')} alt="เฟรยา นักสำรวจตัวน้อย" />
+          <span className="hero-freya-tag">เฟรยา · นักสำรวจตัวน้อย</span>
+        </div>
+      ) : (
+        <div className="hero-mascot"><DressedMascot size={58} /></div>
+      )}
     </section>
   );
 }

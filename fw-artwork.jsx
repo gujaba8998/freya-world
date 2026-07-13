@@ -27,6 +27,13 @@ const FW_ART = {
     stars: 'assets/rewards/sparkling-stars.jpg',
     crown: 'assets/rewards/princess-crown.jpg',
     wand: 'assets/rewards/magic-wand.jpg',
+    chair: 'assets/rewards/fantasy-chair.jpg',
+    plant: 'assets/rewards/lucky-clover-pot.jpg',
+    books: 'assets/rewards/celestial-spellbook.jpg',
+  },
+  character: {
+    freya: 'assets/characters/freya-map.jpg',
+    lumiStar: 'assets/characters/lumi-star.jpg',
   },
 };
 
