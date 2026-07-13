@@ -385,3 +385,10 @@ Commit subject: `chore(ui): polish accessibility motion and release validation`
 - ของที่กำลังใส่แสดงภาพ ชื่อ และ action ถอดชัดเจน; owned items แสดงเป็น visual cards แทน emoji chip
 - ตัด unsupported emoji overlay บน Lumi artwork แต่คง wardrobe state และ fallback สำหรับ custom avatar
 - Service Worker cache `freya-world-v18`
+
+### Homeschool Identity Follow-up
+
+- Header แสดง `Homeschool` เป็นบริบทหลัก และแสดงชื่อบ้านเรียนจาก `profile.homeschoolName` เป็นบรรทัดรอง
+- เพิ่มช่องแก้ชื่อ Homeschool ใน Parent Settings; field อยู่ใน profile เดิมจึงใช้ sync/backup serializer เดิมโดยไม่เพิ่ม schema ระดับบน
+- profile เก่า fallback เป็น `Freya Homeschool`; จำกัดชื่อ 50 ตัวอักษรและตัดด้วย ellipsis บนจอแคบ
+- Service Worker cache `freya-world-v19`

@@ -118,9 +118,12 @@
 }
 .kid-head-name {
   font-family: var(--font-display); font-weight: 600;
-  font-size: var(--fs-title); color: var(--ink); line-height: 1.2;
+  font-size: 13px; color: var(--ink); line-height: 1.1;
 }
-.kid-head-chips { display: flex; align-items: center; gap: 5px; margin-top: 3px; flex-wrap: wrap; }
+.kid-head-school { max-width: 26ch; margin-top: 1px; overflow: hidden; color: var(--accent-deep); font-size: 10px; font-weight: 700; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
+.kid-head-chips { display: flex; align-items: center; gap: 5px; margin-top: 2px; flex-wrap: wrap; }
+.homeschool-settings-card { border-color: color-mix(in oklab, var(--accent) 28%, var(--line)); background: linear-gradient(145deg, var(--accent-soft), var(--surface) 68%); }
+@media (max-width: 390px) { .kid-head { gap: 7px; padding-inline: 10px; }.kid-head-school { max-width: 18ch; }.kid-head .star-counter { padding-inline: 8px; } }
 .k-chip {
   display: inline-flex; align-items: center; gap: 4px;
   font-size: 10.5px; font-weight: 700; color: var(--accent-deep);

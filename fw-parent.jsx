@@ -67,6 +67,18 @@ function ParentSheet({ onClose }) {
           <button className="x-btn" onClick={onClose} aria-label="ปิดการตั้งค่าผู้ปกครอง">✕</button>
         </div>
 
+        {/* homeschool identity */}
+        <div className="p-card homeschool-settings-card">
+          <div style={fieldLabel}>🏡 ข้อมูล Homeschool</div>
+          <label className="p-row">
+            <span>ชื่อ Homeschool · Display name</span>
+            <input className="p-input" value={profile.homeschoolName || ''} maxLength="50"
+              placeholder="เช่น บ้านเรียนสายรุ้ง หรือ Freya Homeschool"
+              onChange={e => saveProfile({ homeschoolName: e.target.value })} />
+          </label>
+          <div className="p-hint">ชื่อนี้จะแสดงใต้คำว่า <b>Homeschool</b> บนแถบด้านบน และบันทึกไปกับข้อมูลครอบครัว</div>
+        </div>
+
         {/* profile */}
         <div className="p-card">
           <div style={fieldLabel}>👧 ข้อมูลผู้เรียน</div>

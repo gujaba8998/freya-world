@@ -44,7 +44,10 @@ function Header({ onOpenAvatar, onOpenSettings }) {
     <header className="kid-head">
       <AvatarDisplay profile={profile} size={44} onClick={onOpenAvatar} />
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div className="kid-head-name">{profile.nickname || profile.firstName || profile.name}</div>
+        <div className="kid-head-name">Homeschool</div>
+        <div className="kid-head-school" title={profile.homeschoolName || 'Freya Homeschool'}>
+          {profile.homeschoolName || 'Freya Homeschool'}
+        </div>
         <div className="kid-head-chips">
           <LevelProgress level={level} value={levelInto} />
           {streak && streak.count > 0 && (

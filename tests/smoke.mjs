@@ -119,6 +119,9 @@ assert.match(dashboard, /hero-character/, 'kid home must visibly feature Freya')
 assert.match(rewardsUi, /room-stage/, 'room placement must render as an immersive room scene');
 assert.match(rewardsUi, /equipped-slot/, 'wardrobe must show explicit equipped item slots');
 assert.match(rewardsUi, /wardrobe-owned-grid/, 'owned companion items must remain actionable');
+assert.match(read('fw-app.jsx'), /kid-head-name">Homeschool/, 'header must identify the learning context as Homeschool');
+assert.match(read('fw-parent.jsx'), /homeschoolName/, 'parent settings must allow editing the Homeschool display name');
+assert.match(read('fw-data.jsx'), /homeschoolName: 'Freya Homeschool'/, 'profile must provide a backwards-compatible Homeschool name default');
 for (const world of ['life-village', 'library-of-words', 'shape-town', 'sky-laboratory', 'wonder-garden', 'world-city', 'art-island']) {
   assert.ok(existsSync(resolve(root, `public/assets/freya-world/worlds/${world}.webp`)), `missing optimized world asset: ${world}`);
   assert.match(serviceWorker, new RegExp(`worlds/${world}\\.webp`), `world asset must be available in the offline shell: ${world}`);
