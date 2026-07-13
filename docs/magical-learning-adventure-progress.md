@@ -357,3 +357,19 @@ Commit subject: `feat(parent): add a focused learning overview and review hub`
 Commit subject: `chore(ui): polish accessibility motion and release validation`
 
 สถานะ: Phase 0–7 เสร็จใน branch local และยังไม่ push GitHub ตามคำสั่งผู้ใช้
+
+---
+
+## Asset Integration — Production Artwork
+
+วันที่: 13 กรกฎาคม 2569 (2026-07-13)
+
+- ตรวจ individual artwork ชุดใหม่จาก `F:\Codex\freya-world\public\assets\freya-world`
+- เก็บ source PNG เดิมแบบ read-only และสร้าง WebP ภายใน repository 59 ไฟล์
+- ลดขนาดรวมจากประมาณ 84 MB เหลือประมาณ 1.3 MB
+- World 768 px, character 512–640 px, mission 512 px, reward/decorations 384 px; WebP quality 82
+- เปิด `FW_ASSETS.ready` และเพิ่ม mapping สำหรับ worlds, mission fallback by group, Freya/Lumi และ shop items
+- แผนที่และ territory detail ใช้ภาพโลกจริง, quest ledger ใช้ภาพภารกิจจริง และร้านดาวใช้ reward art เมื่อ ID ตรง
+- ทุกจุดยังมี SVG/CSS fallback หาก asset ไม่มีหรือ ID ไม่ตรง
+- ไม่ตัดพื้นหลังตัวละครแบบอัตโนมัติ เพราะ source ไม่มี alpha และขอบผม/วัสดุซับซ้อน; ใช้เฉพาะในกรอบภาพพื้นครีมจนกว่าจะมี transparent master
+- Service Worker bump เป็น `freya-world-v15`

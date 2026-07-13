@@ -52,6 +52,8 @@ function RoomItemArt({ item, size = 34 }) {
 }
 
 function RewardGlyph({ item, kind = 'room', size = 42 }) {
+  const mapped = window.FW_ASSETS && window.FW_ASSETS.shop.item(item.id);
+  if (mapped && mapped.src) return <img className="reward-art-img" src={mapped.src} alt="" width={size} height={size} loading="lazy" />;
   const icon = kind === 'fit' ? 'sparkle' : kind === 'real' ? 'rewards' : 'home';
   const letters = (item.en || item.th || '?').split(/\s+/).map(word => word[0]).join('').slice(0, 2).toUpperCase();
   return <span className={'reward-glyph ' + kind} style={{ width: size, height: size }} aria-hidden="true">

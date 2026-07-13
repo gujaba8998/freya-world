@@ -1,0 +1,71 @@
+﻿folder,filename,description_th,source_filename
+characters/freya,freya-standing-wave.png,Freya ยืนโบกมือทักทาย,สาวน_อยเวทมนตร_ในช_ดม_วง.png
+characters/freya,freya-opening-treasure.png,Freya เปิดหีบรางวัล,สาวน_อยเวทย_มนตร_และสมบ_ต_แห_งความส_ข.png
+characters/freya,freya-reading.png,Freya อ่านหนังสือ,เด_กหญ_งเวทมนตร_ก_าล_งอ_านหน_งส_อ.png
+characters/freya,freya-celebrating.png,Freya ฉลองความสำเร็จ,เด_กสาวพ_อมดแสนส_ขก_บช_ยชนะ.png
+characters/freya,freya-magic-wand.png,Freya ใช้ไม้กายสิทธิ์,แม_มดน_อยก_บไม_กายส_ทธ_ว_เศษ.png
+characters/lumi,lumi-normal.png,Lumi ท่าปกติ,กระต_ายน_อยในผ_าคล_มดาว.png
+characters/lumi,lumi-happy.png,Lumi อารมณ์ดี,กระต_ายน_อยน_าร_กในช_ดคล_มดาว.png
+characters/lumi,lumi-thinking.png,Lumi กำลังคิด,กระต_ายน_อยในเคปส_ม_วง.png
+characters/lumi,lumi-surprised.png,Lumi ประหลาดใจ,กระต_ายน_อยย_นน_งในความประหลาดใจ.png
+characters/lumi,lumi-excited.png,Lumi ตื่นเต้น,กระต_ายน_อยในช_ดคล_มม_วงส_ดน_าร_ก.png
+worlds,life-village.png,โลกทักษะชีวิต,หม_บ_านบนเกาะลอยฟ_าในฝ_น.png
+worlds,library-of-words.png,โลกภาษาและห้องสมุด,ห_องสม_ดเวทมนตร_บนเกาะลอยน_า.png
+worlds,shape-town.png,โลกคณิตศาสตร์และรูปทรง,เกาะลอยฟ_าก_บเม_องบล_อกส_พาสเทล.png
+worlds,sky-laboratory.png,โลกวิทยาศาสตร์,ห_องทดลองลอยฟ_ากลางเมฆ.png
+worlds,wonder-garden.png,โลกเกษตรและธรรมชาติ,สวนล_กล_บบนเกาะลอยฟ_า.png
+worlds,world-city.png,โลกสังคมและการสำรวจโลก,เกาะลอยฟ_ามหาว_ทยาล_ยแห_งเวทมนตร.png
+worlds,art-island.png,โลกศิลปะ,เกาะลอยฟ_าแห_งศ_ลปะส_ส_นสดใส.png
+missions,read-book.png,read book,magical_bedtime_storybook_with_fairy_tale_vibes.png
+missions,write-journal.png,write journal,magical_stationery_moment_with_quill.png
+missions,help-friend.png,help friend,helping_hands_in_a_magical_world.png
+missions,clean-room.png,clean room,a_magical_room_tidy_up_scene.png
+missions,water-plants.png,water plants,watering_the_plant_with_magic_sparkles.png
+missions,exercise.png,exercise,whimsical_pastel_workout_accessories.png
+missions,eat-healthy.png,eat healthy,healthy_salad_with_love_and_sparkles.png
+missions,learn-something-new.png,learn something new,whimsical_stack_of_books_and_light_bulb.png
+missions,be-kind.png,be kind,pastel_heart_with_angelic_wings.png
+missions,save-money.png,save money,kawaii_piggy_bank_with_golden_coins.png
+missions,planting.png,planting,whimsical_garden_with_sparkles_and_stars.png
+missions,science-experiment.png,science experiment,magical_alchemy_tabletop_setup.png
+missions,reading-study.png,reading study,magical_reading_nook_with_glowing_books.png
+missions,draw-picture.png,draw picture,magical_pastel_art_setup.png
+missions,baking.png,baking,whimsical_baking_magic_in_pastel_hues.png
+missions,mathematics.png,mathematics,whimsical_toy_learning_scene.png
+rewards,treasure-chest.png,treasure chest,กล_องสมบ_ต_เวทมนตร_ส_ม_วงทอง.png
+rewards,star-coins.png,star coins,เหร_ยญทองมงก_ฎดาวจ_นตภาพ.png
+rewards,star-badge.png,star badge,เหร_ยญรางว_ลดาวประกายเพชร.png
+rewards,magic-wand.png,magic wand,ไม_กายส_ทธ_เวทมนตร_ประกายดาว.png
+rewards,fairy-wings.png,fairy wings,ป_กแฟนตาซ_ส_ทองและม_วง.png
+rewards,witch-outfit.png,witch outfit,ช_ดแฟนตาซ_แม_มดส_ม_วงทอง.png
+rewards,fantasy-chair.png,fantasy chair,เก_าอ_แฟนตาซ_ส_ทองและม_วง.png
+rewards,snow-globe.png,snow globe,ล_กโลกห_มะส_ดล_าก_บต_นไม_เวทมนตร.png
+rewards,treasure-pouch.png,treasure pouch,magical_treasure_pouch_with_glowing_coins.png
+rewards,adventure-backpack.png,adventure backpack,whimsical_enchanted_adventurer_s_backpack.png
+rewards,celestial-spellbook.png,celestial spellbook,magical_spellbook_with_celestial_accents.png
+rewards,crystal-potion.png,crystal potion,magical_crystal_potion_with_glowing_ribbon.png
+rewards,golden-key.png,golden key,golden_key_with_enchanted_sparkles.png
+rewards,lucky-clover-pot.png,lucky clover pot,gold_filled_clover_charm_in_cauldron.png
+rewards,blue-gift-box.png,blue gift box,whimsical_blue_gift_box_with_stars.png
+rewards,envelope-bundle.png,envelope bundle,magical_pastel_envelope_bundle_with_ribbon.png
+rewards,glowing-star-charm.png,glowing star charm,cute_glowing_golden_star_charm.png
+rewards,magical-quill-set.png,magical quill set,magical_quill_and_ink_bottle_set.png
+decorations,cloud.png,cloud,เมฆว_เศษในโทนส_พาสเทล.png
+decorations,sparkling-stars.png,sparkling stars,ดวงดาวประกายสว_างในอวกาศ.png
+decorations,rainbow.png,rainbow,ร_งแห_งเวทมนตร_ในท_องฟ_า.png
+decorations,flower-bouquet.png,flower bouquet,ช_อดอกไม_สไตล_การ_ต_นน_าร_ก.png
+decorations,bush.png,bush,พ_มไม_สไตล_การ_ต_นส_ส_นสดใส.png
+decorations,star-tape.png,star tape,สต_กเกอร_เทปตกแต_งดวงดาวทอง.png
+decorations,wooden-sign.png,wooden sign,ป_ายไม_แฟนตาซ_แบบประด_บทอง.png
+decorations,fantasy-lantern.png,fantasy lantern,โคมไฟระย_าสไตล_แฟนตาซ.png
+references,key-visual.png,key visual,whimsical_fantasy_world_of_learning_and_magic.png
+references,style-guide.png,style guide,kawaii_fantasy_asset_collection.png
+references,ui-reference.png,ui reference,freya_s_world_magical_learning_adventure_ui.png
+references,character-pose-sheet.png,character pose sheet,cute_witch_character_pose_lineup.png
+references,lumi-expression-sheet.png,lumi expression sheet,kawaii_bunny_expression_set.png
+references,world-reference-sheet.png,world reference sheet,whimsical_floating_islands_in_pastel_hues.png
+references,mission-reference-sheet.png,mission reference sheet,a_clean_colorful_illustration_sheet_asset_sheet.png
+references,reward-reference-sheet-01.png,reward reference sheet 01,a_collection_of_fourteen_separate_digital_illustra.png
+references,reward-reference-sheet-02.png,reward reference sheet 02,a_collection_of_twelve_digital_illustrations_showc.png
+references,magical-learning-moments.png,magical learning moments,magical_learning_moments_with_a_young_witch.png
+references,item-collection-sheet.png,item collection sheet,whimsical_fantasy_item_collection_grid.png

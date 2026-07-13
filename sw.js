@@ -3,7 +3,7 @@
    (React/Babel/Firebase SDK). Firestore/Storage/Auth traffic is NEVER
    intercepted — it must go straight to the network or realtime sync breaks.
    Bump CACHE_VERSION when shipping a release to drop old caches. */
-const CACHE_VERSION = 'freya-world-v14';
+const CACHE_VERSION = 'freya-world-v15';
 
 const PRECACHE = [
   './',
@@ -25,6 +25,13 @@ const PRECACHE = [
   'fw-firebase.jsx',
   'fw-data.jsx',
   'fw-ui.jsx',
+  'public/assets/freya-world/worlds/life-village.webp',
+  'public/assets/freya-world/worlds/library-of-words.webp',
+  'public/assets/freya-world/worlds/shape-town.webp',
+  'public/assets/freya-world/worlds/sky-laboratory.webp',
+  'public/assets/freya-world/worlds/wonder-garden.webp',
+  'public/assets/freya-world/worlds/world-city.webp',
+  'public/assets/freya-world/worlds/art-island.webp',
   'fw-dashboard.jsx',
   'fw-activity.jsx',
   'fw-portfolio.jsx',

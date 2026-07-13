@@ -112,5 +112,10 @@ assert.match(parentHubUi, /Pending reviews/, 'parent overview must expose pendin
 assert.match(parentHubUi, /Needs revision/, 'parent overview must expose revision status');
 assert.match(sharedUi, /function ErrorState/, 'shared UI must provide a reusable error state');
 assert.doesNotMatch(rewardsUi, /fw-walk-cycle/, 'reward room must not run ambient walking motion');
+assert.match(read('fw-assets.js'), /ready: true/, 'prepared production artwork must be enabled');
+for (const world of ['life-village', 'library-of-words', 'shape-town', 'sky-laboratory', 'wonder-garden', 'world-city', 'art-island']) {
+  assert.ok(existsSync(resolve(root, `public/assets/freya-world/worlds/${world}.webp`)), `missing optimized world asset: ${world}`);
+  assert.match(serviceWorker, new RegExp(`worlds/${world}\\.webp`), `world asset must be available in the offline shell: ${world}`);
+}
 
 console.log(`Smoke checks passed (${requiredFiles.length} required files, ${localScripts.length} local scripts).`);

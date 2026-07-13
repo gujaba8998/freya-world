@@ -110,11 +110,14 @@ function MissionCard({ m, compact = false, onOpen }) {
   const [uploading, setUploading] = useStateDash(false);
   const hasEvidence = evidence.length > 0;
   const statusCopy = QUEST_STATUS[st] || QUEST_STATUS.available;
+  const questArt = window.FW_ASSETS && window.FW_ASSETS.missions && window.FW_ASSETS.missions[m.group];
 
   if (compact) return (
     <button type="button" className="quest-ledger-card" onClick={() => onOpen && onOpen(m)}
       style={{ '--quest-color': g.c }} aria-label={`${m.th} สถานะ${statusCopy.th} ดูรายละเอียด`}>
-      <span className="quest-ledger-mark"><AppIcon name="quests" size={20} /></span>
+      <span className="quest-ledger-mark">{questArt && questArt.src
+        ? <img src={questArt.src} alt="" width="40" height="40" loading="lazy" />
+        : <AppIcon name="quests" size={20} />}</span>
       <span className="quest-ledger-copy">
         <b>{m.th}</b><small>{m.en} · {g.th}</small>
       </span>
@@ -365,6 +368,7 @@ function AdventureMap() {
         const pct = progress[g.id] || 0;
         const locked = pct === 0;
         const done = pct >= 100;
+        const worldArt = window.FW_ASSETS && window.FW_ASSETS.worlds[g.id];
         return (
           <button type="button" key={g.id} className={'adv-node' + (locked ? ' locked' : '')}
             onClick={() => { beep('pop'); setSelected(g); }}
@@ -374,7 +378,9 @@ function AdventureMap() {
               background: g.c + (locked ? isleAlpha.locked : isleAlpha.open),
               boxShadow: done ? `0 0 0 3px ${g.c}, 0 0 16px ${g.c}88` : `0 0 0 2px ${g.c}55`,
             }}>
-              <span className="adv-landmark" aria-hidden="true"><AppIcon name={(WORLD_PRESENTATION[g.id] || {}).mark || 'world'} size={24} /></span>
+              <span className="adv-landmark" aria-hidden="true">{worldArt && worldArt.src
+                ? <img src={worldArt.src} alt="" width="54" height="54" loading="lazy" />
+                : <AppIcon name={(WORLD_PRESENTATION[g.id] || {}).mark || 'world'} size={24} />}</span>
               {done && <span className="adv-crown" aria-label="พิชิตแล้ว"><AppIcon name="check" size={12} /></span>}
               {i === curIdx && <span className="adv-me"><DressedMascot size={20} /></span>}
             </div>
@@ -394,7 +400,9 @@ function AdventureMap() {
             describedBy="world-detail-description" surfaceClassName="sheet world-detail-sheet">
             <button className="x-btn" aria-label="ปิดรายละเอียดโลก" onClick={() => setSelected(null)}>×</button>
             <div className="world-detail-art" style={{ '--world-color': selected.c }} aria-hidden="true">
-              <AppIcon name={copy.mark || 'world'} size={38} />
+              {window.FW_ASSETS && window.FW_ASSETS.worlds[selected.id].src
+                ? <img src={window.FW_ASSETS.worlds[selected.id].src} alt="" width="180" height="180" />
+                : <AppIcon name={copy.mark || 'world'} size={38} />}
             </div>
             <span className="world-detail-kicker">บันทึกพื้นที่สำรวจ · {pct}%</span>
             <h2 id="world-detail-title">{(TERRITORY[selected.id] || {}).th || selected.th}</h2>
