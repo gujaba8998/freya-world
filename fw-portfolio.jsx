@@ -139,7 +139,8 @@ function Portfolio({ onRequestParent }) {
       {!admin ? (
         <>
           {/* journal cover */}
-          <div className="j-cover">
+          <div className={'j-cover' + (fwArt('scene', 'journal') ? ' has-art' : '')}>
+            {fwArt('scene', 'journal') && <img className="j-cover-art" src={fwArt('scene', 'journal')} alt="" aria-hidden="true" />}
             <div className="j-cover-in">
               <h2><FwIcon name="book-open" style={{ verticalAlign: '-3px', color: 'var(--accent-deep)' }} /> สมุดบันทึกการผจญภัย</h2>
               <p>Adventure Journal · บันทึกแล้ว {filtered.length} ความทรงจำ</p>

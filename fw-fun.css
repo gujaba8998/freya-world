@@ -24,6 +24,7 @@
 .adv-isle {
   position: relative; width: 54px; height: 54px; border-radius: 38%;
   display: grid; place-items: center; font-size: 26px; transition: all .3s;
+  overflow: hidden;
 }
 .adv-node.locked .adv-isle { filter: grayscale(.55); opacity: .75; }
 .adv-crown { position: absolute; top: -14px; right: -7px; font-size: 16px; transform: rotate(18deg); }

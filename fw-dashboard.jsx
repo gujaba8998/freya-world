@@ -240,15 +240,18 @@ function HeroAdventure({ go }) {
     const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     el.scrollIntoView(reduce ? {} : { behavior: 'smooth', block: 'start' });
   };
+  const heroArt = fwArt('scene', 'hero');
   return (
     <section className={'hero ' + period}>
+      {heroArt
+        ? <img className="hero-art" src={heroArt} alt="" aria-hidden="true" />
+        : <div className="hero-hill" aria-hidden="true" />}
       <div className="hero-sky" aria-hidden="true">
         {period === 'night'
           ? <><span className="hero-moon" /><span className="hero-stars" /></>
           : <span className="hero-sun" />}
-        <span className="hero-cloud c1" /><span className="hero-cloud c2" />
+        {!heroArt && <><span className="hero-cloud c1" /><span className="hero-cloud c2" /></>}
       </div>
-      <div className="hero-hill" aria-hidden="true" />
       <div className="hero-body">
         {settings.thaiDate !== false && <div className="hero-date">{thaiDate(now).full}</div>}
         <h2 className="hero-greet">{HERO_GREET[period]} {name}!</h2>
@@ -334,14 +337,18 @@ function AdventureMap() {
         const pct = progress[g.id] || 0;
         const locked = pct === 0;
         const done = pct >= 100;
+        const art = fwArt('world', g.id);
         return (
           <div key={g.id} className={'adv-node' + (locked ? ' locked' : '')}
             style={{ left: MAP_POS[i].x + '%', top: MAP_POS[i].y + '%' }}>
             <div className="adv-isle" style={{
-              background: g.c + (locked ? isleAlpha.locked : isleAlpha.open),
+              background: art ? undefined : g.c + (locked ? isleAlpha.locked : isleAlpha.open),
               boxShadow: done ? `0 0 0 3px ${g.c}, 0 0 16px ${g.c}88` : `0 0 0 2px ${g.c}55`,
             }}>
-              <span>{locked ? '☁️' : g.emoji}</span>
+              {art
+                ? <img className="adv-isle-art" src={art} alt="" loading="lazy" />
+                : <span>{locked ? '☁️' : g.emoji}</span>}
+              {locked && art && <span className="adv-isle-veil">☁️</span>}
               {done && <span className="adv-crown">👑</span>}
               {i === curIdx && <span className="adv-me"><DressedMascot size={20} /></span>}
             </div>

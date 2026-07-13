@@ -29,12 +29,12 @@ const MASCOT_TAPS = [
    Catalog lives client-side; only owned/worn item IDs sync to Firestore.
    slot 'hat' sits on the head, slot 'held' floats at the mascot's side. */
 const MASCOT_ITEMS = [
-  { id: 'crown',    emoji: '👑', th: 'มงกุฎ',         en: 'Crown',       slot: 'hat',  cost: 80 },
+  { id: 'crown',    emoji: '👑', th: 'มงกุฎเจ้าหญิง', en: 'Princess crown', slot: 'hat', cost: 80, img: fwArt('reward', 'crown') },
   { id: 'bow',      emoji: '🎀', th: 'โบว์',           en: 'Bow',         slot: 'hat',  cost: 30 },
   { id: 'cap',      emoji: '🧢', th: 'หมวกแก๊ป',      en: 'Cap',         slot: 'hat',  cost: 35 },
   { id: 'tophat',   emoji: '🎩', th: 'หมวกวิเศษ',     en: 'Magic hat',   slot: 'hat',  cost: 55 },
   { id: 'flower',   emoji: '🌸', th: 'ดอกไม้ทัดหู',   en: 'Flower',      slot: 'hat',  cost: 25 },
-  { id: 'wand',     emoji: '🪄', th: 'ไม้กายสิทธิ์',  en: 'Magic wand',  slot: 'held', cost: 45 },
+  { id: 'wand',     emoji: '🪄', th: 'ไม้กายสิทธิ์',  en: 'Magic wand',  slot: 'held', cost: 45, img: fwArt('reward', 'wand') },
   { id: 'balloon',  emoji: '🎈', th: 'ลูกโป่ง',        en: 'Balloon',     slot: 'held', cost: 25 },
   { id: 'guitar',   emoji: '🎸', th: 'กีตาร์จิ๋ว',     en: 'Mini guitar', slot: 'held', cost: 60 },
   { id: 'flag',     emoji: '🚩', th: 'ธงเชียร์',       en: 'Cheer flag',  slot: 'held', cost: 20 },

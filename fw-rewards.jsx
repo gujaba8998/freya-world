@@ -21,22 +21,22 @@ function formatWalletDay(w) {
    ========================================================= */
 const ROOM_ITEMS = [
   // เฟอร์นิเจอร์หลัก
-  { id: 'bed',      emoji: '🛏️', th: 'เตียงนุ่มนิ่ม',   en: 'Cozy bed',      cost: 60 },
+  { id: 'bed',      emoji: '🛏️', th: 'หมอนอิงพระจันทร์', en: 'Moon pillow',   cost: 60, img: fwArt('reward', 'bed') },
   { id: 'sofa',     emoji: '🛋️', th: 'โซฟา',            en: 'Sofa',          cost: 50 },
   { id: 'chair',    emoji: '🪑', th: 'เก้าอี้',          en: 'Chair',         cost: 25 },
-  { id: 'lamp',     emoji: '💡', th: 'โคมไฟ',           en: 'Lamp',          cost: 30 },
+  { id: 'lamp',     emoji: '💡', th: 'กล้องส่องดาว',    en: 'Starry telescope', cost: 30, img: fwArt('reward', 'lamp') },
   { id: 'mirror',   emoji: '🪞', th: 'กระจกแต่งตัว',    en: 'Mirror',        cost: 35 },
   // ของตกแต่ง
   { id: 'plant',    emoji: '🪴', th: 'ต้นไม้กระถาง',    en: 'Potted plant',  cost: 20 },
   { id: 'flowers',  emoji: '💐', th: 'แจกันดอกไม้',     en: 'Flowers',       cost: 20 },
   { id: 'picture',  emoji: '🖼️', th: 'กรอบรูป',         en: 'Picture frame', cost: 25 },
   { id: 'clock',    emoji: '⏰', th: 'นาฬิกาปลุก',      en: 'Alarm clock',   cost: 15 },
-  { id: 'rainbow',  emoji: '🌈', th: 'สายรุ้งติดผนัง',  en: 'Rainbow decor', cost: 40 },
-  { id: 'stars',    emoji: '🌟', th: 'ดาวเรืองแสง',     en: 'Glow stars',    cost: 30 },
+  { id: 'rainbow',  emoji: '🌈', th: 'สายรุ้งติดผนัง',  en: 'Rainbow decor', cost: 40, img: fwArt('reward', 'rainbow') },
+  { id: 'stars',    emoji: '🌟', th: 'ดาวเรืองแสง',     en: 'Glow stars',    cost: 30, img: fwArt('reward', 'stars') },
   // มุมเล่น/มุมอ่าน
   { id: 'books',    emoji: '📚', th: 'ชั้นหนังสือ',      en: 'Bookshelf',     cost: 45 },
   { id: 'teddy',    emoji: '🧸', th: 'ตุ๊กตาหมี',        en: 'Teddy bear',    cost: 35 },
-  { id: 'piano',    emoji: '🎹', th: 'เปียโนจิ๋ว',       en: 'Mini piano',    cost: 80 },
+  { id: 'piano',    emoji: '🎹', th: 'กล่องดนตรี',       en: 'Music box',     cost: 80, img: fwArt('reward', 'piano') },
   { id: 'easel',    emoji: '🎨', th: 'ขาตั้งวาดรูป',    en: 'Art easel',     cost: 55 },
   { id: 'fishtank', emoji: '🐠', th: 'ตู้ปลา',           en: 'Fish tank',     cost: 70 },
 ];
@@ -353,7 +353,7 @@ function ItemPreviewSheet({ p, onClose, onBuy }) {
       <div className="overlay" onClick={onClose}>
         <div className="sheet" onClick={e => e.stopPropagation()}>
           <div className="sheet-grab"></div>
-          <div className="pv-art">{item.emoji}</div>
+          <div className="pv-art">{item.img ? <img className="pv-art-img" src={item.img} alt="" /> : item.emoji}</div>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 17, color: 'var(--ink)' }}>{item.th}</div>
             <div style={{ fontSize: 11, color: 'var(--ink-soft)' }}>{item.en}</div>
@@ -438,16 +438,20 @@ function StarShop() {
     setWon(p);
   };
 
+  const shopArt = fwArt('scene', 'shop');
   return (
     <div className="shop-front">
       <div className="shop-awning" aria-hidden="true"></div>
-      <div className="shop-head">
-        <div className="shop-sign">⭐ ร้านดาวของเฟรยา<span>Freya's Star Shop</span></div>
-        <span className="shop-purse">⭐ {stars}</span>
-      </div>
-      <div className="shop-keeper">
-        <DressedMascot size={38} />
-        <span className="shop-keeper-bubble">ยินดีต้อนรับค่า~ วันนี้รับอะไรดีคะ?</span>
+      <div className={'shop-scene' + (shopArt ? '' : ' none')}>
+        {shopArt && <img className="shop-scene-art" src={shopArt} alt="" aria-hidden="true" />}
+        <div className="shop-head">
+          <div className="shop-sign">⭐ ร้านดาวของเฟรยา<span>Freya's Star Shop</span></div>
+          <span className="shop-purse">⭐ {stars}</span>
+        </div>
+        <div className="shop-keeper">
+          <DressedMascot size={38} />
+          <span className="shop-keeper-bubble">ยินดีต้อนรับค่า~ วันนี้รับอะไรดีคะ?</span>
+        </div>
       </div>
       <div className="shop-tabs" role="tablist">
         {SHOP_TABS.map(t => (
@@ -478,7 +482,9 @@ function StarShop() {
                 if (owned) { showToast('มีชิ้นนี้แล้ว · Already owned', item.emoji); beep('tab'); return; }
                 setPreview({ kind, item }); beep('tab');
               }}>
-              <span className="shelf-art">{item.emoji}</span>
+              {item.img
+                ? <img className="shelf-art-img" src={item.img} alt="" />
+                : <span className="shelf-art">{item.emoji}</span>}
               <span className="shelf-name">{item.th}</span>
               {owned
                 ? <span className="shelf-state ok">✓ มีแล้ว</span>
