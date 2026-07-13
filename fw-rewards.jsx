@@ -40,7 +40,14 @@ const ROOM_ITEMS = [
   { id: 'easel',    emoji: '🎨', th: 'ขาตั้งวาดรูป',    en: 'Art easel',     cost: 55 },
   { id: 'fishtank', emoji: '🐠', th: 'ตู้ปลา',           en: 'Fish tank',     cost: 70 },
 ];
-const ROOM_SLOTS = ['w1','w2','w3','w4','f1','f2','f3','f4','g1','g2','g3','g4']; // wall row · floor row · ground row
+const ROOM_SLOTS = [
+  { id: 'w1', x: 9, y: 13, zone: 'ผนัง' }, { id: 'w2', x: 37, y: 12, zone: 'ผนัง' },
+  { id: 'w3', x: 65, y: 13, zone: 'ผนัง' }, { id: 'w4', x: 82, y: 34, zone: 'ชั้นวาง' },
+  { id: 'f1', x: 8, y: 42, zone: 'มุมอ่าน' }, { id: 'f2', x: 34, y: 43, zone: 'กลางห้อง' },
+  { id: 'f3', x: 60, y: 43, zone: 'โต๊ะทำงาน' }, { id: 'f4', x: 80, y: 61, zone: 'ข้างหน้าต่าง' },
+  { id: 'g1', x: 8, y: 69, zone: 'พื้นห้อง' }, { id: 'g2', x: 31, y: 70, zone: 'บนพรม' },
+  { id: 'g3', x: 55, y: 70, zone: 'บนพรม' }, { id: 'g4', x: 78, y: 78, zone: 'พื้นห้อง' },
+];
 const roomItemById = (id) => ROOM_ITEMS.find(i => i.id === id);
 
 function RoomItemArt({ item, size = 34 }) {
@@ -62,22 +69,7 @@ function RewardGlyph({ item, kind = 'room', size = 42 }) {
 }
 
 function RoomWalker() {
-  const { profile } = useApp();
-  const isCustom = profile.avatar === 'custom';
-  return (
-    <>
-      <div style={{
-        position: 'absolute', bottom: 8, left: '6%', zIndex: 5, pointerEvents: 'none',
-        filter: 'drop-shadow(0 3px 3px rgba(0,0,0,.28))',
-      }}>
-        <div>
-          {isCustom
-            ? <image-slot id="avatar-photo" shape="circle" style={{ width: 30, height: 30, display: 'block' }} placeholder="📷" />
-            : <span style={{ fontSize: 30, lineHeight: 1 }}>{profile.avatar || '🐰'}</span>}
-        </div>
-      </div>
-    </>
-  );
+  return <div className="room-lumi" aria-hidden="true"><DressedMascot size={48} mood="happy" /></div>;
 }
 
 function FreyaRoom() {
@@ -87,31 +79,26 @@ function FreyaRoom() {
   const ownedItems = room.owned.map(roomItemById).filter(Boolean);
 
   return (
-    <div className="card" style={{ padding: 14 }}>
-      {/* the room: wall / floor / ground rows */}
-      <div style={{
-        borderRadius: 16, overflow: 'hidden', border: '1px solid var(--line)', position: 'relative',
-        background: 'linear-gradient(180deg, #ffeef7 0%, #ffeef7 55%, #ffe3c9 55%, #ffd9b8 100%)',
-      }}>
+    <div className="card room-shell">
+      <div className="room-stage">
+        <div className="room-window" aria-hidden="true"><i></i><b></b></div>
+        <div className="room-shelf" aria-hidden="true"></div>
+        <div className="room-rug" aria-hidden="true"></div>
         <RoomWalker />
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, padding: 12 }}>
-          {ROOM_SLOTS.map(slotId => {
-            const item = roomItemById(room.placed[slotId]);
+          {ROOM_SLOTS.map(slot => {
+            const item = roomItemById(room.placed[slot.id]);
             return (
-              <button key={slotId} onClick={() => { setPickSlot(slotId); beep('tab'); }}
-                style={{
-                  aspectRatio: '1', borderRadius: 12, display: 'grid', placeItems: 'center',
-                  border: item ? 'none' : '2px dashed rgba(0,0,0,.12)',
-                  background: item ? 'rgba(255,255,255,.4)' : 'transparent', cursor: 'pointer',
-                }}>
-                {item ? <RoomItemArt item={item} /> : <span style={{ fontSize: 14, opacity: .3 }}>＋</span>}
+              <button key={slot.id} className={'room-slot' + (item ? ' filled' : '')}
+                style={{ '--slot-x': slot.x + '%', '--slot-y': slot.y + '%' }}
+                aria-label={item ? `${slot.zone}: ${item.th} กดเพื่อเปลี่ยน` : `${slot.zone}: กดเพื่อวางของ`}
+                onClick={() => { setPickSlot(slot.id); beep('tab'); }}>
+                {item ? <><RoomItemArt item={item} size={54} /><small>{item.th}</small></> : <><span>＋</span><small>{slot.zone}</small></>}
               </button>
             );
           })}
-        </div>
       </div>
-      <div style={{ fontSize: 11, color: 'var(--ink-soft)', marginTop: 8, textAlign: 'center' }}>
-        แตะช่องเพื่อวาง/ย้าย/เก็บของ · ซื้อของใหม่ได้ที่ร้านด้านล่าง
+      <div className="room-hint">
+        แตะตำแหน่งในห้องเพื่อวาง ย้าย หรือเก็บของ · ของแต่ละชิ้นจะอยู่ในมุมที่เลือก
       </div>
 
       {/* slot item picker */}
@@ -282,30 +269,35 @@ function StickerAlbum() {
 function MascotWardrobe() {
   const { level, mascotFit, wearMascotItem } = useApp();
   const ownedItems = MASCOT_ITEMS.filter(i => mascotFit.owned.includes(i.id));
+  const worn = mascotFit.worn || {};
+  const wornHat = MASCOT_ITEM[worn.hat];
+  const wornHeld = MASCOT_ITEM[worn.held];
+  const Equipped = ({ item, slot, label }) => <button className={'equipped-slot' + (item ? ' has-item' : '')}
+    onClick={() => item && wearMascotItem(item)} disabled={!item} aria-label={item ? `ถอด${item.th}` : `${label}ยังว่าง`}>
+    {item ? <RewardGlyph item={item} kind="fit" size={48} /> : <AppIcon name={slot === 'hat' ? 'sparkle' : 'rewards'} size={23} />}
+    <span><small>{label}</small><b>{item ? item.th : 'ยังไม่ได้ใส่'}</b>{item && <em>แตะเพื่อถอด</em>}</span>
+  </button>;
   return (
-    <div className="card" style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>
-      {/* preview */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-        <div style={{ width: 92, height: 92, borderRadius: 24, display: 'grid', placeItems: 'center', background: 'var(--accent-soft)' }}>
-          <DressedMascot size={54} />
-        </div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15, color: 'var(--ink)' }}>เพื่อนคู่ใจของเฟรยา</div>
-          <div style={{ fontSize: 11.5, color: 'var(--ink-soft)' }}>โตขึ้นตามเลเวล · ตอนนี้ Level {level}</div>
-          <div style={{ fontSize: 11.5, color: 'var(--ink-soft)' }}>มีชุดแล้ว {ownedItems.length}/{MASCOT_ITEMS.length} ชิ้น</div>
+    <div className="card wardrobe-card">
+      <div className="wardrobe-stage">
+        <div className="wardrobe-portrait"><DressedMascot size={132} mood={wornHat || wornHeld ? 'excited' : 'happy'} /></div>
+        <div className="wardrobe-title"><span>ห้องแต่งตัวของ Lumi</span><b>เพื่อนคู่ใจ Level {level}</b><small>มีของแต่งแล้ว {ownedItems.length}/{MASCOT_ITEMS.length} ชิ้น</small></div>
+        <div className="equipped-grid">
+          <Equipped item={wornHat} slot="hat" label="เครื่องประดับ" />
+          <Equipped item={wornHeld} slot="held" label="ของคู่กาย" />
         </div>
       </div>
 
       {/* owned: tap to wear / take off */}
       {ownedItems.length > 0 ? (
         <div>
-          <div style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--ink-soft)', marginBottom: 7 }}>แตะเพื่อใส่/ถอด</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
+          <div className="wardrobe-owned-label">ของที่มี · แตะเพื่อใส่หรือเปลี่ยน</div>
+          <div className="wardrobe-owned-grid">
             {ownedItems.map(item => {
-              const on = mascotFit.worn[item.slot] === item.id;
+              const on = worn[item.slot] === item.id;
               return (
                 <button key={item.id} className={'fit-chip' + (on ? ' on' : '')} onClick={() => wearMascotItem(item)}>
-                  {item.emoji} {item.th}{on ? ' ✓' : ''}
+                  <RewardGlyph item={item} kind="fit" size={38} /><span>{item.th}<small>{on ? 'กำลังใส่' : item.slot === 'hat' ? 'เครื่องประดับ' : 'ของคู่กาย'}</small></span>{on && <AppIcon name="check" size={15} />}
                 </button>
               );
             })}

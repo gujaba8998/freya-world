@@ -116,6 +116,9 @@ assert.match(read('fw-assets.js'), /ready: true/, 'prepared production artwork m
 assert.match(read('fw-assets.js'), /freya-standing-wave\.webp/, 'Freya hero artwork must be registered');
 assert.match(read('fw-mascot.jsx'), /lumi-portrait/, 'Lumi artwork must replace the operating-system mascot identity');
 assert.match(dashboard, /hero-character/, 'kid home must visibly feature Freya');
+assert.match(rewardsUi, /room-stage/, 'room placement must render as an immersive room scene');
+assert.match(rewardsUi, /equipped-slot/, 'wardrobe must show explicit equipped item slots');
+assert.match(rewardsUi, /wardrobe-owned-grid/, 'owned companion items must remain actionable');
 for (const world of ['life-village', 'library-of-words', 'shape-town', 'sky-laboratory', 'wonder-garden', 'world-city', 'art-island']) {
   assert.ok(existsSync(resolve(root, `public/assets/freya-world/worlds/${world}.webp`)), `missing optimized world asset: ${world}`);
   assert.match(serviceWorker, new RegExp(`worlds/${world}\\.webp`), `world asset must be available in the offline shell: ${world}`);

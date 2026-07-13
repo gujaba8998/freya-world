@@ -59,8 +59,8 @@ function DressedMascot({ size = 30, style, mood = 'happy' }) {
         : lumiArt && lumiArt.src
           ? <img className="lumi-portrait" src={lumiArt.src} alt="" width={s} height={s} />
           : (profile.avatar || '🐰')}
-      {hat && <span style={{ position: 'absolute', top: -s * 0.42, left: '50%', transform: 'translateX(-50%) rotate(-10deg)', fontSize: s * 0.55, pointerEvents: 'none' }}>{hat.emoji}</span>}
-      {held && <span style={{ position: 'absolute', bottom: -s * 0.08, right: -s * 0.3, fontSize: s * 0.5, pointerEvents: 'none' }}>{held.emoji}</span>}
+      {!lumiArt && hat && <span style={{ position: 'absolute', top: -s * 0.42, left: '50%', transform: 'translateX(-50%) rotate(-10deg)', fontSize: s * 0.55, pointerEvents: 'none' }}>{hat.emoji}</span>}
+      {!lumiArt && held && <span style={{ position: 'absolute', bottom: -s * 0.08, right: -s * 0.3, fontSize: s * 0.5, pointerEvents: 'none' }}>{held.emoji}</span>}
     </span>
   );
 }

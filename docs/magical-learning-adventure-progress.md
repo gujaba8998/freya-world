@@ -376,3 +376,12 @@ Commit subject: `chore(ui): polish accessibility motion and release validation`
 - Character visibility follow-up: เพิ่ม Freya เป็น portrait หลักใน Hero และใช้ Lumi expression artwork เป็นเพื่อนคู่ใจตามหน้า โดยคง custom avatar/wardrobe state และ fallback เดิม
 - Service Worker bump หลัง character integration เป็น `freya-world-v16`
 - ปรับ Hero text column หลัง visual review เพื่อไม่ให้ level/CTA ซ้อนกับ Freya portrait; final character cache `freya-world-v17`
+
+### Room and Companion Presentation Follow-up
+
+- เปลี่ยน room placement จาก 4×3 inventory grid เป็นฉากห้องที่มีผนัง หน้าต่าง ชั้นวาง พรม และตำแหน่งวางของ 12 จุด โดยคง slot IDs/placement actions เดิม
+- เพิ่มชื่อ zone และ accessible label ต่อจุดวางของ; ของที่วางแล้วแสดงภาพ/ชื่อชัดขึ้น
+- เปลี่ยน Mascot Wardrobe เป็น Lumi dressing stage ขนาดใหญ่ พร้อม equipped slots แยกเครื่องประดับ/ของคู่กาย
+- ของที่กำลังใส่แสดงภาพ ชื่อ และ action ถอดชัดเจน; owned items แสดงเป็น visual cards แทน emoji chip
+- ตัด unsupported emoji overlay บน Lumi artwork แต่คง wardrobe state และ fallback สำหรับ custom avatar
+- Service Worker cache `freya-world-v18`
