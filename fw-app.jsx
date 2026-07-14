@@ -131,18 +131,20 @@ function KidSettingsSheet({ onClose, onOpenGate, onOpenParentSheet }) {
 }
 
 const TABS = [
-  { id: 'home',      icon: 'home',  th: 'หน้าหลัก' },
-  { id: 'portfolio', icon: 'image', th: 'ผลงาน' },
-  { id: 'rewards',   icon: 'gift',  th: 'รางวัล' },
+  { id: 'home',      icon: 'home',   th: 'หน้าหลัก' },
+  { id: 'quests',    icon: 'target', th: 'ภารกิจ' },
+  { id: 'world',     icon: 'map',    th: 'โลกของฉัน' },
+  { id: 'portfolio', icon: 'image',  th: 'ผลงาน' },
+  { id: 'rewards',   icon: 'gift',   th: 'รางวัล' },
 ];
 const ACTIVITY_TAB = { id: 'activity', icon: 'pencil', th: 'สร้าง' };
 const PARENT_TAB = { id: 'parent', icon: 'user', th: 'คุณแม่' };
 
 function BottomNav({ tab, setTab }) {
   const { beep, parentMode, submissions } = useApp();
-  // แท็บ "สร้าง" และ "คุณแม่" แสดงเฉพาะโหมดคุณแม่
+  // โหมดคุณแม่สลับ "ภารกิจ/โลกของฉัน" เป็น "สร้าง/คุณแม่" (คุมไว้ที่ 5 ช่องเสมอ)
   const tabs = parentMode
-    ? [TABS[0], ACTIVITY_TAB, TABS[1], TABS[2], PARENT_TAB]
+    ? [TABS[0], ACTIVITY_TAB, TABS[3], TABS[4], PARENT_TAB]
     : TABS;
   return (
     <div style={{
@@ -183,8 +185,11 @@ function Shell() {
   const [kidSet, setKidSet] = useStateS(false);
   const [avOpen, setAvOpen] = useStateS(false);
   const requestParent = () => { if (parentMode) setSheet(true); else setGate(true); };
-  // ถ้าออกจากโหมดคุณแม่ และอยู่ที่แท็บเฉพาะแม่ → เด้งกลับหน้าหลัก
-  useEffectS(() => { if (!parentMode && (tab === 'parent' || tab === 'activity')) setTab('home'); }, [parentMode, tab]);
+  // สลับโหมดแล้วแท็บปัจจุบันไม่อยู่ใน nav ของโหมดนั้น → เด้งกลับหน้าหลัก
+  useEffectS(() => {
+    if (!parentMode && (tab === 'parent' || tab === 'activity')) setTab('home');
+    if (parentMode && (tab === 'quests' || tab === 'world')) setTab('home');
+  }, [parentMode, tab]);
   return (
     <div className={'app' + (dark ? ' is-dark' : '') + (parentMode ? ' parent-on' : '')} style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column' }}>
       <div className="bg-doodles" aria-hidden="true">
@@ -193,6 +198,8 @@ function Shell() {
       <div className="app-scroll" style={{ paddingBottom: 76 }}>
         <Header onOpenAvatar={() => setAvOpen(true)} onOpenSettings={() => { setKidSet(true); beep('tab'); }} />
         {tab === 'home' && <Dashboard go={setTab} />}
+        {tab === 'quests' && <QuestsPage />}
+        {tab === 'world' && <WorldPage />}
         {tab === 'activity' && <ActivityBuilder go={setTab} />}
         {tab === 'portfolio' && <Portfolio onRequestParent={requestParent} />}
         {tab === 'rewards' && <Rewards />}

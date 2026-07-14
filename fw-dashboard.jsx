@@ -421,4 +421,115 @@ function Dashboard({ go }) {
   );
 }
 
-Object.assign(window, { Dashboard, AdventureMap, HeroAdventure, AchievementPreview });
+/* =========================================================
+   PageHead — editorial header: eyebrow · big title · subtitle
+   ========================================================= */
+function PageHead({ eyebrow, title, sub }) {
+  return (
+    <div className="page-head">
+      <div className="ph-eyebrow">{eyebrow}</div>
+      <h2 className="ph-title">{title}</h2>
+      {sub && <div className="ph-sub">{sub}</div>}
+    </div>
+  );
+}
+
+/* =========================================================
+   QuestsPage — ภารกิจทั้งหมด พร้อมตัวกรองสถานะภาษาเด็ก
+   Reuses MissionCard + state as-is; the filter is pure presentation.
+   ========================================================= */
+const QUEST_FILTERS = [
+  { id: 'all',        th: 'ทั้งหมด' },
+  { id: 'available',  th: 'พร้อมเริ่ม' },
+  { id: 'inprogress', th: 'กำลังผจญภัย' },
+  { id: 'pending',    th: 'รอคุณแม่' },
+  { id: 'done',       th: 'สำเร็จ' },
+];
+const questStatus = (m) => m.status || (m.done ? 'done' : 'available');
+
+function QuestsPage() {
+  const { missions, beep } = useApp();
+  const [filter, setFilter] = useStateDash('all');
+  const counts = { all: missions.length };
+  QUEST_FILTERS.slice(1).forEach(f => { counts[f.id] = missions.filter(m => questStatus(m) === f.id).length; });
+  const shown = filter === 'all' ? missions : missions.filter(m => questStatus(m) === filter);
+  return (
+    <div className="tab-enter" style={{ padding: '16px 16px 28px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <PageHead eyebrow="บันทึกการเดินทางวันนี้ · Quest Log" title="ภารกิจของฉัน"
+        sub={missions.length ? `${missions.length} ภารกิจ · สำเร็จแล้ว ${counts.done}` : 'ยังไม่มีภารกิจในบันทึก'} />
+
+      <div className="qf-row" role="tablist" aria-label="กรองตามสถานะ">
+        {QUEST_FILTERS.map(f => (
+          <button key={f.id} role="tab" aria-selected={filter === f.id}
+            className={'qf-chip' + (filter === f.id ? ' on' : '')}
+            onClick={() => { setFilter(f.id); beep('tab'); }}>
+            {f.th}{counts[f.id] > 0 && <b>{counts[f.id]}</b>}
+          </button>
+        ))}
+      </div>
+
+      {shown.length === 0 ? (
+        <div className="hub-empty">
+          <div style={{ fontSize: 38 }}>🗺️</div>
+          <div style={{ fontWeight: 700, color: 'var(--ink)' }}>
+            {missions.length === 0 ? 'ยังไม่มีภารกิจ' : 'ไม่มีภารกิจในหมวดนี้'}
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>
+            {missions.length === 0 ? 'รอคุณแม่ส่งภารกิจใหม่มานะ' : 'ลองเลือกหมวดอื่นดูสิ'}
+          </div>
+        </div>
+      ) : (
+        <div className="missions-list" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {shown.map(m => <MissionCard key={m.id} m={m} />)}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* =========================================================
+   WorldPage — โลกการเรียนรู้ 7 ดินแดน แบบไทล์ใหญ่บนเส้นทางจุดไข่ปลา
+   ========================================================= */
+function WorldPage() {
+  const { progress, planItemsFor, planDone, profile } = useApp();
+  const overall = Math.round(GROUPS.reduce((s, g) => s + (progress[g.id] || 0), 0) / GROUPS.length);
+  const plan = planItemsFor(profile.grade);
+  return (
+    <div className="tab-enter" style={{ padding: '16px 16px 28px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <PageHead eyebrow="แผนที่นักสำรวจ · Explorer Map" title="โลกการเรียนรู้ของฉัน"
+        sub={`สำรวจรวมแล้ว ${overall}% · ${GROUPS.filter(g => (progress[g.id] || 0) >= 100).length}/7 ดินแดนพิชิตแล้ว`} />
+
+      <div className="world-path">
+        {GROUPS.map((g, i) => {
+          const pct = progress[g.id] || 0;
+          const locked = pct === 0;
+          const done = pct >= 100;
+          const terr = TERRITORY[g.id] || {};
+          const groupPlan = plan.filter(it => it.group === g.id);
+          const planDoneN = groupPlan.filter(it => planDone.has(it.key)).length;
+          const art = fwArt('world', g.id);
+          return (
+            <div key={g.id} className={'w-row' + (i % 2 ? ' flip' : '') + (locked ? ' locked' : '')}>
+              <div className="w-tile">
+                {art ? <img src={art} alt={terr.th || g.th} loading="lazy" /> : <span>{g.emoji}</span>}
+                {locked && <span className="w-veil" aria-hidden="true">☁️</span>}
+                {done && <span className="w-crown" aria-hidden="true">👑</span>}
+              </div>
+              <div className="w-info">
+                <div className="w-terr">{terr.th || g.th}</div>
+                <div className="w-group">{g.emoji} {g.th} · {terr.en || g.en}</div>
+                <div className="w-bar"><b style={{ width: pct + '%', background: g.c }}></b></div>
+                <div className="w-status" style={{ color: locked ? 'var(--ink-soft)' : g.c }}>
+                  {locked ? 'ยังไม่สำรวจ' : done ? 'พิชิตแล้ว!' : `สำรวจแล้ว ${pct}%`}
+                  {groupPlan.length > 0 && <> · แผน {planDoneN}/{groupPlan.length}</>}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { Dashboard, AdventureMap, HeroAdventure, AchievementPreview, PageHead, QuestsPage, WorldPage });
