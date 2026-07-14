@@ -96,6 +96,9 @@ function AccessibleOverlay({
 }) {
   const surfaceRef = useRefUI(null);
   const openerRef = useRefUI(null);
+  // Keep the latest close handler without restarting focus management while typing.
+  const onCloseRef = useRefUI(onClose);
+  onCloseRef.current = onClose;
 
   useEffectUI(() => {
     openerRef.current = document.activeElement;
@@ -107,7 +110,7 @@ function AccessibleOverlay({
     const first = focusables()[0];
     requestAnimationFrame(() => (first || surface).focus());
     const onKeyDown = (event) => {
-      if (event.key === 'Escape') { event.preventDefault(); onClose(); return; }
+      if (event.key === 'Escape') { event.preventDefault(); onCloseRef.current(); return; }
       if (event.key !== 'Tab') return;
       const items = focusables();
       if (!items.length) { event.preventDefault(); surface.focus(); return; }
@@ -120,11 +123,11 @@ function AccessibleOverlay({
       document.removeEventListener('keydown', onKeyDown);
       if (openerRef.current && document.contains(openerRef.current)) openerRef.current.focus();
     };
-  }, [onClose]);
+  }, []);
 
   const node = (
     <div className={className} onClick={(event) => {
-      if (closeOnBackdrop && event.target === event.currentTarget) onClose();
+      if (closeOnBackdrop && event.target === event.currentTarget) onCloseRef.current();
     }}>
       <div ref={surfaceRef} className={surfaceClassName} style={surfaceStyle} role="dialog" aria-modal="true"
         aria-labelledby={labelledBy} aria-describedby={describedBy} tabIndex="-1">
