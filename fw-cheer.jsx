@@ -9,7 +9,7 @@ function CheerPopup() {
   const [th, en] = (cheer.phrase || '').split(' · ');
 
   return (
-    <div className="cheer-layer" onClick={() => setCheer(null)}>
+    <div className="cheer-layer" onClick={() => setCheer(null)} role="status" aria-live="assertive">
       <div className="cheer-card" key={cheer.id}>
         <div className="cheer-sparkle s1">✨</div>
         <div className="cheer-sparkle s2">⭐</div>

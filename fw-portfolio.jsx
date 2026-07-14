@@ -1,104 +1,36 @@
 /* fw-portfolio.jsx — Digital Portfolio & Reports tab */
 const { useState: useStateP } = React;
 
-function Polaroid({ item, i }) {
+function MemoryCard({ item, i }) {
   const g = GROUP[item.group];
-  const rot = [-2.5, 1.8, -1.4, 2.2, -2][i % 5];
   const video = (item.evidence || []).find(e => e.type === 'video');
   const audio = (item.evidence || []).find(e => e.type === 'audio');
   return (
-    <div style={{
-      background: '#fff', padding: '10px 10px 0', borderRadius: 8, transform: `rotate(${rot}deg)`,
-      boxShadow: '0 8px 18px -8px rgba(0,0,0,0.35)', border: '1px solid rgba(0,0,0,0.05)',
-    }}>
-      <div style={{ position: 'relative' }}>
+    <article className="memory-card" style={{ '--memory-color': g.c }}>
+      <div className="memory-index" aria-hidden="true">{String(i + 1).padStart(2, '0')}</div>
+      <div className="memory-media">
         {item.thumb ? (
-          <img src={item.thumb} alt={item.en} style={{ width: '100%', height: 104, objectFit: 'cover', borderRadius: 4, display: 'block' }} />
+          <img src={item.thumb} alt={`ผลงาน ${item.th}`} />
         ) : video ? (
-          <video src={video.url} controls playsInline style={{ width: '100%', height: 104, objectFit: 'cover', borderRadius: 4, display: 'block' }} />
+          <video src={video.url} controls playsInline aria-label={`วิดีโอผลงาน ${item.th}`} />
         ) : (
-          <PhImg label={`📷 ${item.en}`} h={104} style={{ borderRadius: 4 }} />
+          <div className="memory-media-fallback"><AppIcon name="memory" size={34} /><span>บันทึกการเรียนรู้</span></div>
         )}
-        <span style={{ position: 'absolute', top: -8, right: -8, fontSize: 26, filter: 'drop-shadow(0 2px 3px rgba(0,0,0,.25))' }}>{item.badge}</span>
-        <span style={{ position: 'absolute', bottom: 6, left: 6, background: g.c + 'ee', color: '#fff', fontSize: 9.5, fontWeight: 700, padding: '2px 7px', borderRadius: 999 }}>{g.emoji} {g.th}</span>
+        <span className="memory-category">{g.th}</span>
       </div>
-      {audio && audio.url && (
-        <audio controls src={audio.url} style={{ width: '100%', height: 26, marginTop: 6 }} />
-      )}
-      {item.praise && <div className="praise-note">💬 คุณแม่: {item.praise}</div>}
-      {item.praiseAudio && (
-        <audio controls src={item.praiseAudio} style={{ width: '100%', height: 26, marginTop: 4 }} title="เสียงชมจากคุณแม่" />
-      )}
-      <div style={{ padding: '8px 4px 12px', textAlign: 'center' }}>
-        <div style={{ fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: 13, color: '#4a3d4e' }}>{item.th}</div>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 3, fontSize: 10.5, color: '#9a8ba0' }}>
-          <span>{item.date}</span><span>·</span><span style={{ color: '#d99000', fontWeight: 700 }}>⭐ {item.stars}</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* =========================================================
-   Adventure Journal — หนึ่งหน้าความทรงจำต่อหนึ่งผลงาน
-   masking tape + paper card + สิ่งที่ได้เรียนรู้ + คำชมคุณแม่
-   ========================================================= */
-function JournalEntry({ item, i }) {
-  const g = GROUP[item.group];
-  const video = (item.evidence || []).find(e => e.type === 'video');
-  const audio = (item.evidence || []).find(e => e.type === 'audio');
-  const learned = (item.inds || []).slice(0, 3);
-  return (
-    <article className="mem-card">
-      <span className={'mem-tape t' + (i % 3)} aria-hidden="true"></span>
-      {i % 4 === 1 && <span className="mem-sticker" aria-hidden="true">⭐</span>}
-      {i % 4 === 3 && <span className="mem-sticker" aria-hidden="true">🌸</span>}
-
-      {item.thumb ? (
-        <img className="mem-photo" src={item.thumb} alt={item.th} loading="lazy" />
-      ) : video && video.url ? (
-        <video className="mem-photo" src={video.url} controls playsInline preload="metadata" />
-      ) : null}
-
-      <div className="mem-title-row">
-        <h4 className="mem-title">{item.th}</h4>
-        <span className="mem-badge" style={{ background: g.c }}>{g.emoji} {g.th}</span>
-      </div>
-      {item.desc && <p className="mem-desc">{item.desc}</p>}
-
-      {audio && audio.url && (
-        <audio controls src={audio.url} style={{ width: '100%', height: 28, marginTop: 8 }} />
-      )}
-
-      {learned.length > 0 && (
-        <div className="mem-learn">
-          {learned.map((ind, k) => <span key={k} className="mem-skill">✓ {ind.split(' · ')[0]}</span>)}
-        </div>
-      )}
-
-      {item.praise && <div className="praise-note">💬 คุณแม่บอกว่า: {item.praise}</div>}
-      {item.praiseAudio && (
-        <audio controls src={item.praiseAudio} style={{ width: '100%', height: 26, marginTop: 4 }} title="เสียงชมจากคุณแม่" />
-      )}
-
-      <div className="mem-foot">
-        <span>{item.date}</span>
-        <span className="mem-star">⭐ {item.stars}</span>
+      <div className="memory-copy">
+        <div className="memory-meta"><span>{item.date}</span><StarCounter value={item.stars} /></div>
+        <h3>{item.th}</h3><p className="memory-en">{item.en}</p>
+        {(item.reflection || item.desc) && <p className="memory-reflection"><b>สิ่งที่ฉันค้นพบ</b>{item.reflection || item.desc}</p>}
+        {item.praise && <blockquote><AppIcon name="sparkle" size={15} /><span><b>ข้อความจากผู้ปกครอง</b>{item.praise}</span></blockquote>}
+        {audio && audio.url && <audio controls src={audio.url} aria-label={`เสียงประกอบผลงาน ${item.th}`} />}
+        {item.praiseAudio && <audio controls src={item.praiseAudio} aria-label="เสียงชมจากผู้ปกครอง" />}
+        {item.indicators && item.indicators.length > 0 && (
+          <div className="memory-indicators">{item.indicators.slice(0, 3).map(code => <span key={code}>{code}</span>)}</div>
+        )}
       </div>
     </article>
   );
-}
-
-/* จัดกลุ่มผลงานตามวัน (ใหม่→เก่า ตามลำดับใน state ซึ่ง prepend อยู่แล้ว) */
-function journalDays(items) {
-  const days = [];
-  const byDate = new Map();
-  items.forEach(p => {
-    const key = p.date || 'ไม่ระบุวัน';
-    if (!byDate.has(key)) { byDate.set(key, []); days.push(key); }
-    byDate.get(key).push(p);
-  });
-  return days.map(d => ({ date: d, items: byDate.get(d) }));
 }
 
 function Portfolio({ onRequestParent }) {
@@ -121,12 +53,13 @@ function Portfolio({ onRequestParent }) {
   const covered = GROUPS.filter(g => (progress[g.id] || 0) >= 50).length;
 
   const genSAR = () => { beep('reward'); setSarOpen(true); };
+  const memoryScene = window.FW_ASSETS && window.FW_ASSETS.scenes && window.FW_ASSETS.scenes.memory;
 
   return (
     <div className="tab-enter" style={{ padding: '16px 16px 28px', display: 'flex', flexDirection: 'column', gap: 18 }}>
       {/* mode card */}
       <div className="card" style={{ padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 12 }}>
-        <span style={{ fontSize: 22 }}>{admin ? '👩‍🏫' : '🐰'}</span>
+        <span className="page-intro-icon"><AppIcon name={admin ? 'parent' : 'memory'} size={22} /></span>
         <div style={{ flex: 1 }}>
           <div style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--ink)', fontFamily: 'var(--font-display)' }}>{admin ? 'มุมมองคุณแม่ (Admin)' : 'มุมมองเฟรยา'}</div>
           <div style={{ fontSize: 11, color: 'var(--ink-soft)' }}>{admin ? 'Curriculum & reports · ' + profile.grade : 'Freya\'s gallery'}</div>
@@ -138,13 +71,14 @@ function Portfolio({ onRequestParent }) {
 
       {!admin ? (
         <>
-          {/* journal cover */}
-          <div className={'j-cover' + (fwArt('scene', 'journal') ? ' has-art' : '')}>
-            {fwArt('scene', 'journal') && <img className="j-cover-art" src={fwArt('scene', 'journal')} alt="" aria-hidden="true" />}
-            <div className="j-cover-in">
-              <h2><FwIcon name="book-open" style={{ verticalAlign: '-3px', color: 'var(--accent-deep)' }} /> สมุดบันทึกการผจญภัย</h2>
-              <p>Adventure Journal · บันทึกแล้ว {filtered.length} ความทรงจำ</p>
-            </div>
+          {memoryScene && memoryScene.src && (
+            <section className="memory-scene" style={{ backgroundImage: `linear-gradient(90deg, rgba(54,31,57,.86), rgba(54,31,57,.15)), url(${memoryScene.src})` }}>
+              <div><span>MY MAGICAL ARCHIVE</span><h2>ทุกการเรียนรู้มีเรื่องราว</h2><p>เก็บภาพ ความคิด และสิ่งที่ภูมิใจไว้ในสมุดของฉัน</p></div>
+            </section>
+          )}
+          <div className="sec-h" style={{ marginBottom: 0 }}>
+            <h3>เรื่องราวของฉัน</h3>
+            <span className="sub">{filtered.length} ชิ้น</span>
           </div>
 
           {/* academic-year range picker */}
@@ -162,26 +96,15 @@ function Portfolio({ onRequestParent }) {
           </div>
 
           {filtered.length === 0 ? (
-            <div className="hub-empty">
-              <div style={{ fontSize: 38 }}>📖</div>
-              <div style={{ fontWeight: 700, color: 'var(--ink)' }}>หน้าแรกของสมุดยังว่างอยู่</div>
-              <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>ทำภารกิจแรกให้สำเร็จ แล้วความทรงจำจะถูกบันทึกที่นี่</div>
-            </div>
+            <EmptyState icon="memory" title="ยังไม่มีผลงานในช่วงนี้" description="ทำภารกิจแล้วส่งให้ผู้ปกครองอนุมัติ เรื่องราวการเรียนรู้จะถูกบันทึกไว้ตรงนี้" />
           ) : (
-            <div className="journal">
-              {journalDays(filtered).map(day => (
-                <div key={day.date}>
-                  <div className="j-day">📌 {day.date}</div>
-                  <div className="j-entries">
-                    {day.items.map((p, i) => <JournalEntry key={p.id} item={p} i={i} />)}
-                  </div>
-                </div>
-              ))}
+            <div className="portfolio-grid memory-book">
+              {filtered.map((p, i) => <MemoryCard key={p.id} item={p} i={i} />)}
             </div>
           )}
 
           {/* badges */}
-          <div className="sec-h"><h3 style={{ fontSize: 15 }}><FwIcon name="award" /> เหรียญรางวัล</h3><span className="sub">Badges</span></div>
+          <div className="sec-h"><h3 style={{ fontSize: 15 }}>🏅 เหรียญรางวัล</h3><span className="sub">Badges</span></div>
           <div className="card" style={{ padding: 16, display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12 }}>
             {BADGES.map(b => (
               <div key={b.en} style={{ textAlign: 'center', opacity: b.got ? 1 : 0.4 }}>
@@ -238,4 +161,4 @@ function Portfolio({ onRequestParent }) {
   );
 }
 
-Object.assign(window, { Portfolio });
+Object.assign(window, { Portfolio, MemoryCard });

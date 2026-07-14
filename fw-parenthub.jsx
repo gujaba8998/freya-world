@@ -203,15 +203,11 @@ function ApprovalQueue() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <WeeklySummary />
       <div className="sec-h" style={{ marginBottom: 0 }}>
-        <h3 style={{ fontSize: 16 }}><FwIcon name="inbox" /> ตะกร้าตรวจงาน</h3>
+        <h3 style={{ fontSize: 16 }}>📥 ตะกร้าตรวจงาน</h3>
         <span className="sub">{submissions.length} รอตรวจ</span>
       </div>
       {submissions.length === 0 ? (
-        <div className="hub-empty">
-          <div style={{ fontSize: 38 }}>🎉</div>
-          <div style={{ fontWeight: 700, color: 'var(--ink)' }}>ตรวจงานครบแล้ว!</div>
-          <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>ไม่มีกิจกรรมรออนุมัติในขณะนี้</div>
-        </div>
+        <EmptyState icon="check" title="ตรวจงานครบแล้ว" description="ไม่มีกิจกรรมรออนุมัติในขณะนี้" />
       ) : submissions.map(s => <ApprovalCard key={s.id} sub={s} />)}
 
       {/* reviewed history */}
@@ -239,17 +235,16 @@ function GroupGuideModal({ groupId, grade, onClose }) {
   if (!guide) return null;
   const examples = guideExamples(groupId, grade);
   return (
-    <AppOverlayPortal>
-    <div className="overlay" onClick={onClose}>
-      <div className="sheet" onClick={e => e.stopPropagation()} style={{ maxHeight: '78vh', overflowY: 'auto' }}>
+    <AccessibleOverlay onClose={onClose} labelledBy="group-guide-title"
+      surfaceStyle={{ maxHeight: '78vh', overflowY: 'auto' }}>
         <div className="sheet-grab"></div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
           <GroupDot id={groupId} size={40} />
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 16, color: 'var(--ink)' }}>{g.th} · {g.en}</div>
+            <div id="group-guide-title" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 16, color: 'var(--ink)' }}>{g.th} · {g.en}</div>
             <div style={{ fontSize: 10.5, color: 'var(--ink-soft)' }}>{guide.full}</div>
           </div>
-          <button className="x-btn" onClick={onClose}>✕</button>
+          <button className="x-btn" onClick={onClose} aria-label="ปิดคู่มือกลุ่มประสบการณ์">✕</button>
         </div>
         <div style={{ fontSize: 12.5, color: 'var(--ink)', lineHeight: 1.6, marginBottom: 12 }}>{guide.desc}</div>
 
@@ -271,9 +266,7 @@ function GroupGuideModal({ groupId, grade, onClose }) {
           ))}
         </div>
         <button className="btn block" onClick={onClose}>เข้าใจแล้ว</button>
-      </div>
-    </div>
-    </AppOverlayPortal>
+    </AccessibleOverlay>
   );
 }
 
@@ -316,7 +309,7 @@ function YearlyTracker() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <div className="sec-h" style={{ marginBottom: 0 }}>
-        <h3 style={{ fontSize: 16 }}><FwIcon name="list" /> เช็กลิสต์แผนรายปี</h3>
+        <h3 style={{ fontSize: 16 }}>🗂️ เช็กลิสต์แผนรายปี</h3>
         <span className="sub">Yearly Tracker</span>
       </div>
 
@@ -442,7 +435,7 @@ function SARSection({ onOpen }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <div className="sec-h" style={{ marginBottom: 0 }}>
-        <h3 style={{ fontSize: 16 }}><FwIcon name="file" /> รายงาน SAR ประจำปี</h3>
+        <h3 style={{ fontSize: 16 }}>📄 รายงาน SAR ประจำปี</h3>
         <span className="sub">Self-Assessment Report</span>
       </div>
 
@@ -472,82 +465,82 @@ function SARSection({ onOpen }) {
   );
 }
 
-/* ---------------- 0.5 Parent Dashboard — งานค้าง + ทางลัด ---------------- */
-function ParentDashboard({ go, setSub }) {
-  const { submissions, missions, portfolio, beep } = useApp();
-  const returned = missions.filter(m => m.status === 'inprogress' && m.returned).length;
-  const unstarted = missions.filter(m => (m.status || (m.done ? 'done' : 'available')) === 'available').length;
-  const ws = weekStart().getTime();
-  const wkDone = portfolio.filter(p => p.ts && p.ts >= ws).length;
+/* ---------------- Parent Hub shell ---------------- */
+const HUB_TABS = [
+  { id: 'overview', icon: 'home', th: 'ภาพรวม' },
+  { id: 'approve', icon: 'check', th: 'ตรวจงาน' },
+  { id: 'tracker', icon: 'quests', th: 'แผนรายปี' },
+  { id: 'sar', icon: 'memory', th: 'รายงาน' },
+];
+
+function ParentOverview({ openSection }) {
+  const { submissions, missions, reviewed, progress, portfolio } = useApp();
+  const revisions = missions.filter(m => m.returned && (m.status || 'available') === 'inprogress').length;
+  const notStarted = missions.filter(m => (m.status || (m.done ? 'done' : 'available')) === 'available').length;
+  const complete = missions.filter(m => (m.status || (m.done ? 'done' : 'available')) === 'done').length;
+  const overall = Math.round(GROUPS.reduce((sum, group) => sum + (progress[group.id] || 0), 0) / GROUPS.length);
+  const metrics = [
+    { label: 'รอตรวจ', value: submissions.length, note: 'Pending reviews', tone: 'peach', icon: 'check' },
+    { label: 'รอแก้ไข', value: revisions, note: 'Needs revision', tone: 'coral', icon: 'quests' },
+    { label: 'ยังไม่เริ่ม', value: notStarted, note: 'Not started', tone: 'violet', icon: 'world' },
+    { label: 'สำเร็จแล้ว', value: complete, note: 'Completed', tone: 'mint', icon: 'star' },
+  ];
   return (
-    <div style={{ display: 'flex', flexDirection: 'column' }}>
-      <div className="pd-grid">
-        <button className="pd-tile hot" onClick={() => { setSub('approve'); beep('tab'); }}>
-          <b>{submissions.length}</b><span>รอตรวจ</span>
-        </button>
-        <button className="pd-tile warn" onClick={() => { go('home'); beep('tab'); }}>
-          <b>{returned}</b><span>ส่งกลับแก้</span>
-        </button>
-        <button className="pd-tile" onClick={() => { go('home'); beep('tab'); }}>
-          <b>{unstarted}</b><span>ยังไม่เริ่มทำ</span>
-        </button>
-        <button className="pd-tile ok" onClick={() => { setSub('approve'); beep('tab'); }}>
-          <b>{wkDone}</b><span>สำเร็จสัปดาห์นี้</span>
-        </button>
-      </div>
-      <div className="pd-actions">
-        <button className="pd-act" onClick={() => { go('activity'); beep('tab'); }}><FwIcon name="plus" size={16} />สร้างภารกิจ</button>
-        <button className="pd-act" onClick={() => { setSub('tracker'); beep('tab'); }}><FwIcon name="list" size={16} />แผนรายปี</button>
-        <button className="pd-act" onClick={() => { setSub('sar'); beep('tab'); }}><FwIcon name="file" size={16} />รายงาน SAR</button>
-      </div>
+    <div className="parent-overview">
+      <section className="parent-metrics" aria-label="สรุปสถานะภารกิจ">
+        {metrics.map(metric => <div key={metric.label} className={'parent-metric ' + metric.tone}>
+          <AppIcon name={metric.icon} size={19} /><b>{metric.value}</b><span>{metric.label}<small>{metric.note}</small></span>
+        </div>)}
+      </section>
+      <section className="card parent-learning-summary">
+        <div><span>ความคืบหน้าการเรียนรู้</span><b>{overall}%</b></div>
+        <Bar value={overall} color="var(--accent)" />
+        <p>บันทึกผลงานแล้ว {portfolio.length} ชิ้น · ตรวจย้อนหลัง {reviewed.length} รายการ</p>
+      </section>
+      <section className="parent-quick-actions" aria-label="งานด่วน">
+        <button onClick={() => openSection('approve')}><AppIcon name="check" size={20} /><span><b>ตรวจงานที่ส่งมา</b><small>{submissions.length ? `${submissions.length} งานกำลังรอ` : 'ไม่มีงานค้าง'}</small></span><AppIcon name="chevron" size={15} /></button>
+        <button onClick={() => openSection('tracker')}><AppIcon name="quests" size={20} /><span><b>ดูแผนรายปี</b><small>ติดตามกิจกรรมและตัวชี้วัด</small></span><AppIcon name="chevron" size={15} /></button>
+        <button onClick={() => openSection('sar')}><AppIcon name="memory" size={20} /><span><b>เตรียมรายงาน</b><small>ตรวจตัวอย่างก่อนสร้าง SAR</small></span><AppIcon name="chevron" size={15} /></button>
+      </section>
     </div>
   );
 }
 
-/* ---------------- Parent Hub shell ---------------- */
-const HUB_TABS = [
-  { id: 'approve', icon: 'inbox', th: 'ตรวจงาน' },
-  { id: 'tracker', icon: 'list',  th: 'แผนรายปี' },
-  { id: 'sar',     icon: 'file',  th: 'รายงาน' },
-];
-
-function ParentHub({ onOpenSettings, go }) {
+function ParentHub({ onOpenSettings }) {
   const { submissions, beep } = useApp();
-  const [sub, setSub] = useStateH('approve');
+  const [sub, setSub] = useStateH('overview');
   const [sarOpen, setSarOpen] = useStateH(false);
 
   return (
-    <div className="tab-enter pro-zone" style={{ padding: '16px 16px 28px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+    <main className="tab-enter" aria-labelledby="parent-hub-title" style={{ padding: '16px 16px 28px', display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* hub header */}
       <div className="card hub-head">
-        <span style={{ fontSize: 24 }}>👩‍🏫</span>
+        <span className="page-intro-icon"><AppIcon name="parent" size={24} /></span>
         <div style={{ flex: 1 }}>
-          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 16, color: 'var(--ink)' }}>โหมดคุณแม่</div>
+          <h2 id="parent-hub-title" style={{ margin: 0, fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 16, color: 'var(--ink)' }}>โหมดคุณแม่</h2>
           <div style={{ fontSize: 11.5, color: 'var(--ink-soft)' }}>จัดการหลักสูตร · ตรวจงาน · ออกรายงาน</div>
         </div>
-        <button className="btn ghost" style={{ padding: '8px 12px', fontSize: 12.5 }} onClick={onOpenSettings}>⚙️ ตั้งค่า</button>
+        <button className="btn ghost" style={{ padding: '8px 12px', fontSize: 12.5 }} onClick={onOpenSettings}><AppIcon name="settings" size={15} /> ตั้งค่า</button>
       </div>
-
-      {/* dashboard: pending work + quick actions */}
-      <ParentDashboard go={go || (() => {})} setSub={setSub} />
 
       {/* sub-tab switcher */}
       <div className="hub-tabs">
         {HUB_TABS.map(t => (
           <button key={t.id} className={'hub-tab' + (sub === t.id ? ' on' : '')} onClick={() => { setSub(t.id); beep('tab'); }}>
-            <FwIcon name={t.icon} size={14} style={{ verticalAlign: '-2px' }} /> {t.th}
+            <AppIcon name={t.icon} size={17} /> {t.th}
             {t.id === 'approve' && submissions.length > 0 && <span className="hub-dot">{submissions.length}</span>}
           </button>
         ))}
       </div>
 
+      {sub === 'overview' && <ParentOverview openSection={(id) => { setSub(id); beep('tab'); }} />}
       {sub === 'approve' && <ApprovalQueue />}
       {sub === 'tracker' && <YearlyTracker />}
       {sub === 'sar' && <SARSection onOpen={() => { setSarOpen(true); beep('reward'); }} />}
 
       {sarOpen && <SARModal onClose={() => setSarOpen(false)} />}
-    </div>
+    </main>
   );
 }
 
-Object.assign(window, { ParentHub });
+Object.assign(window, { ParentHub, ParentOverview });

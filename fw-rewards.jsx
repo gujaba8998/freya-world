@@ -21,66 +21,55 @@ function formatWalletDay(w) {
    ========================================================= */
 const ROOM_ITEMS = [
   // เฟอร์นิเจอร์หลัก
-  { id: 'bed',      emoji: '🛏️', th: 'หมอนอิงพระจันทร์', en: 'Moon pillow',   cost: 60, img: fwArt('reward', 'bed') },
+  { id: 'bed',      emoji: '🛏️', th: 'เตียงนุ่มนิ่ม',   en: 'Cozy bed',      cost: 60 },
   { id: 'sofa',     emoji: '🛋️', th: 'โซฟา',            en: 'Sofa',          cost: 50 },
-  { id: 'chair',    emoji: '🪑', th: 'เก้าอี้แฟนตาซี',   en: 'Fantasy chair', cost: 25, img: fwArt('reward', 'chair') },
-  { id: 'lamp',     emoji: '💡', th: 'กล้องส่องดาว',    en: 'Starry telescope', cost: 30, img: fwArt('reward', 'lamp') },
+  { id: 'chair',    emoji: '🪑', th: 'เก้าอี้',          en: 'Chair',         cost: 25 },
+  { id: 'lamp',     emoji: '💡', th: 'โคมไฟ',           en: 'Lamp',          cost: 30 },
   { id: 'mirror',   emoji: '🪞', th: 'กระจกแต่งตัว',    en: 'Mirror',        cost: 35 },
   // ของตกแต่ง
-  { id: 'plant',    emoji: '🪴', th: 'โคลเวอร์นำโชค',   en: 'Lucky clover',  cost: 20, img: fwArt('reward', 'plant') },
+  { id: 'plant',    emoji: '🪴', th: 'ต้นไม้กระถาง',    en: 'Potted plant',  cost: 20 },
   { id: 'flowers',  emoji: '💐', th: 'แจกันดอกไม้',     en: 'Flowers',       cost: 20 },
   { id: 'picture',  emoji: '🖼️', th: 'กรอบรูป',         en: 'Picture frame', cost: 25 },
   { id: 'clock',    emoji: '⏰', th: 'นาฬิกาปลุก',      en: 'Alarm clock',   cost: 15 },
-  { id: 'rainbow',  emoji: '🌈', th: 'สายรุ้งติดผนัง',  en: 'Rainbow decor', cost: 40, img: fwArt('reward', 'rainbow') },
-  { id: 'stars',    emoji: '🌟', th: 'ดาวเรืองแสง',     en: 'Glow stars',    cost: 30, img: fwArt('reward', 'stars') },
+  { id: 'rainbow',  emoji: '🌈', th: 'สายรุ้งติดผนัง',  en: 'Rainbow decor', cost: 40 },
+  { id: 'stars',    emoji: '🌟', th: 'ดาวเรืองแสง',     en: 'Glow stars',    cost: 30 },
   // มุมเล่น/มุมอ่าน
-  { id: 'books',    emoji: '📚', th: 'ตำราเวทดวงดาว',   en: 'Celestial spellbook', cost: 45, img: fwArt('reward', 'books') },
+  { id: 'books',    emoji: '📚', th: 'ชั้นหนังสือ',      en: 'Bookshelf',     cost: 45 },
   { id: 'teddy',    emoji: '🧸', th: 'ตุ๊กตาหมี',        en: 'Teddy bear',    cost: 35 },
-  { id: 'piano',    emoji: '🎹', th: 'กล่องดนตรี',       en: 'Music box',     cost: 80, img: fwArt('reward', 'piano') },
+  { id: 'piano',    emoji: '🎹', th: 'เปียโนจิ๋ว',       en: 'Mini piano',    cost: 80 },
   { id: 'easel',    emoji: '🎨', th: 'ขาตั้งวาดรูป',    en: 'Art easel',     cost: 55 },
   { id: 'fishtank', emoji: '🐠', th: 'ตู้ปลา',           en: 'Fish tank',     cost: 70 },
 ];
-const ROOM_SLOTS = ['w1','w2','w3','w4','f1','f2','f3','f4','g1','g2','g3','g4']; // wall row · floor row · ground row
+const ROOM_SLOTS = [
+  { id: 'w1', x: 9, y: 13, zone: 'ผนัง' }, { id: 'w2', x: 37, y: 12, zone: 'ผนัง' },
+  { id: 'w3', x: 65, y: 13, zone: 'ผนัง' }, { id: 'w4', x: 82, y: 34, zone: 'ชั้นวาง' },
+  { id: 'f1', x: 8, y: 42, zone: 'มุมอ่าน' }, { id: 'f2', x: 34, y: 43, zone: 'กลางห้อง' },
+  { id: 'f3', x: 60, y: 43, zone: 'โต๊ะทำงาน' }, { id: 'f4', x: 80, y: 61, zone: 'ข้างหน้าต่าง' },
+  { id: 'g1', x: 8, y: 69, zone: 'พื้นห้อง' }, { id: 'g2', x: 31, y: 70, zone: 'บนพรม' },
+  { id: 'g3', x: 55, y: 70, zone: 'บนพรม' }, { id: 'g4', x: 78, y: 78, zone: 'พื้นห้อง' },
+];
 const roomItemById = (id) => ROOM_ITEMS.find(i => i.id === id);
 
 function RoomItemArt({ item, size = 34 }) {
   if (!item) return null;
-  return item.img
-    ? <img src={item.img} alt={item.th} style={{ width: size, height: size, objectFit: 'contain' }} />
-    : <span style={{ fontSize: size, lineHeight: 1 }}>{item.emoji}</span>;
+  const mapped = window.FW_ASSETS && window.FW_ASSETS.shop.item(item.id);
+  return item.img || (mapped && mapped.src)
+    ? <img src={item.img || mapped.src} alt={item.th} width={size} height={size} style={{ objectFit: 'contain' }} />
+    : <RewardGlyph item={item} size={size} />;
+}
+
+function RewardGlyph({ item, kind = 'room', size = 42 }) {
+  const mapped = window.FW_ASSETS && window.FW_ASSETS.shop.item(item.id);
+  if (mapped && mapped.src) return <img className="reward-art-img" src={mapped.src} alt="" width={size} height={size} loading="lazy" />;
+  const icon = kind === 'fit' ? 'sparkle' : kind === 'real' ? 'rewards' : 'home';
+  const letters = (item.en || item.th || '?').split(/\s+/).map(word => word[0]).join('').slice(0, 2).toUpperCase();
+  return <span className={'reward-glyph ' + kind} style={{ width: size, height: size }} aria-hidden="true">
+    <AppIcon name={icon} size={Math.max(16, Math.round(size * .42))} /><b>{letters}</b>
+  </span>;
 }
 
 function RoomWalker() {
-  const { profile } = useApp();
-  const isCustom = profile.avatar === 'custom';
-  return (
-    <>
-      <style>{`
-        @keyframes fw-walk-cycle {
-          0%   { left: 6%;  transform: scaleX(1); }
-          45%  { left: 80%; transform: scaleX(1); }
-          50%  { left: 80%; transform: scaleX(-1); }
-          95%  { left: 6%;  transform: scaleX(-1); }
-          100% { left: 6%;  transform: scaleX(1); }
-        }
-        @keyframes fw-walk-bob {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-4px); }
-        }
-      `}</style>
-      <div style={{
-        position: 'absolute', bottom: 8, left: '6%', zIndex: 5, pointerEvents: 'none',
-        animation: 'fw-walk-cycle 16s ease-in-out infinite',
-        filter: 'drop-shadow(0 3px 3px rgba(0,0,0,.28))',
-      }}>
-        <div style={{ animation: 'fw-walk-bob 0.55s ease-in-out infinite' }}>
-          {isCustom
-            ? <image-slot id="avatar-photo" shape="circle" style={{ width: 30, height: 30, display: 'block' }} placeholder="📷" />
-            : <span style={{ fontSize: 30, lineHeight: 1 }}>{profile.avatar || '🐰'}</span>}
-        </div>
-      </div>
-    </>
-  );
+  return <div className="room-lumi" aria-hidden="true"><DressedMascot size={48} mood="happy" /></div>;
 }
 
 function FreyaRoom() {
@@ -90,40 +79,34 @@ function FreyaRoom() {
   const ownedItems = room.owned.map(roomItemById).filter(Boolean);
 
   return (
-    <div className="card" style={{ padding: 14 }}>
-      {/* the room: wall / floor / ground rows */}
-      <div style={{
-        borderRadius: 16, overflow: 'hidden', border: '1px solid var(--line)', position: 'relative',
-        background: 'linear-gradient(180deg, #ffeef7 0%, #ffeef7 55%, #ffe3c9 55%, #ffd9b8 100%)',
-      }}>
+    <div className="card room-shell">
+      <div className="room-stage">
+        <div className="room-window" aria-hidden="true"><i></i><b></b></div>
+        <div className="room-shelf" aria-hidden="true"></div>
+        <div className="room-rug" aria-hidden="true"></div>
         <RoomWalker />
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, padding: 12 }}>
-          {ROOM_SLOTS.map(slotId => {
-            const item = roomItemById(room.placed[slotId]);
+          {ROOM_SLOTS.map(slot => {
+            const item = roomItemById(room.placed[slot.id]);
             return (
-              <button key={slotId} onClick={() => { setPickSlot(slotId); beep('tab'); }}
-                style={{
-                  aspectRatio: '1', borderRadius: 12, display: 'grid', placeItems: 'center',
-                  border: item ? 'none' : '2px dashed rgba(0,0,0,.12)',
-                  background: item ? 'rgba(255,255,255,.4)' : 'transparent', cursor: 'pointer',
-                }}>
-                {item ? <RoomItemArt item={item} /> : <span style={{ fontSize: 14, opacity: .3 }}>＋</span>}
+              <button key={slot.id} className={'room-slot' + (item ? ' filled' : '')}
+                style={{ '--slot-x': slot.x + '%', '--slot-y': slot.y + '%' }}
+                aria-label={item ? `${slot.zone}: ${item.th} กดเพื่อเปลี่ยน` : `${slot.zone}: กดเพื่อวางของ`}
+                onClick={() => { setPickSlot(slot.id); beep('tab'); }}>
+                {item ? <><RoomItemArt item={item} size={54} /><small>{item.th}</small></> : <><span>＋</span><small>{slot.zone}</small></>}
               </button>
             );
           })}
-        </div>
       </div>
-      <div style={{ fontSize: 11, color: 'var(--ink-soft)', marginTop: 8, textAlign: 'center' }}>
-        แตะช่องเพื่อวาง/ย้าย/เก็บของ · ซื้อของใหม่ได้ที่ร้านด้านล่าง
+      <div className="room-hint">
+        แตะตำแหน่งในห้องเพื่อวาง ย้าย หรือเก็บของ · ของแต่ละชิ้นจะอยู่ในมุมที่เลือก
       </div>
 
       {/* slot item picker */}
       {pickSlot && (
-        <AppOverlayPortal>
-        <div className="overlay" onClick={() => setPickSlot(null)}>
-          <div className="sheet" onClick={e => e.stopPropagation()} style={{ maxHeight: '70vh', overflowY: 'auto' }}>
+        <AccessibleOverlay onClose={() => setPickSlot(null)} labelledBy="room-item-picker-title"
+          surfaceStyle={{ maxHeight: '70vh', overflowY: 'auto' }}>
             <div className="sheet-grab"></div>
-            <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--ink)', marginBottom: 10 }}>เลือกของมาวางตรงนี้</div>
+            <div id="room-item-picker-title" style={{ fontWeight: 700, fontSize: 15, color: 'var(--ink)', marginBottom: 10 }}>เลือกของมาวางตรงนี้</div>
             {ownedItems.length === 0 ? (
               <div style={{ fontSize: 12.5, color: 'var(--ink-soft)', padding: '14px 0', textAlign: 'center' }}>
                 ยังไม่มีของเลย — สะสมดาวไปซื้อที่ร้านด้านล่างก่อนนะ 🛒
@@ -145,9 +128,7 @@ function FreyaRoom() {
                 เก็บของชิ้นนี้ออก
               </button>
             )}
-          </div>
-        </div>
-        </AppOverlayPortal>
+        </AccessibleOverlay>
       )}
     </div>
   );
@@ -243,17 +224,14 @@ function LootBox() {
       {ready && <button className="btn" style={{ flex: 'none', padding: '10px 16px' }} onClick={open}>เปิด!</button>}
 
       {reveal && (
-        <AppOverlayPortal>
-        <div className="loot-reveal" onClick={() => setReveal(null)}>
-          <div className="loot-reveal-card" onClick={e => e.stopPropagation()}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink-soft)' }}>ได้สติกเกอร์ใหม่!</div>
+        <AccessibleOverlay onClose={() => setReveal(null)} labelledBy="loot-reveal-title"
+          className="loot-reveal" surfaceClassName="loot-reveal-card">
+            <div id="loot-reveal-title" style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink-soft)' }}>ได้สติกเกอร์ใหม่!</div>
             <span className="loot-sticker">{reveal.emoji}</span>
             <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 17, color: 'var(--ink)' }}>{reveal.th}</div>
             <span className="rarity-chip" style={{ background: RARITY[reveal.rarity].color }}>{RARITY[reveal.rarity].th}</span>
             <button className="btn" style={{ marginTop: 8, padding: '9px 22px' }} onClick={() => setReveal(null)}>เก็บเข้าอัลบั้ม 📒</button>
-          </div>
-        </div>
-        </AppOverlayPortal>
+        </AccessibleOverlay>
       )}
     </div>
   );
@@ -291,30 +269,35 @@ function StickerAlbum() {
 function MascotWardrobe() {
   const { level, mascotFit, wearMascotItem } = useApp();
   const ownedItems = MASCOT_ITEMS.filter(i => mascotFit.owned.includes(i.id));
+  const worn = mascotFit.worn || {};
+  const wornHat = MASCOT_ITEM[worn.hat];
+  const wornHeld = MASCOT_ITEM[worn.held];
+  const Equipped = ({ item, slot, label }) => <button className={'equipped-slot' + (item ? ' has-item' : '')}
+    onClick={() => item && wearMascotItem(item)} disabled={!item} aria-label={item ? `ถอด${item.th}` : `${label}ยังว่าง`}>
+    {item ? <RewardGlyph item={item} kind="fit" size={48} /> : <AppIcon name={slot === 'hat' ? 'sparkle' : 'rewards'} size={23} />}
+    <span><small>{label}</small><b>{item ? item.th : 'ยังไม่ได้ใส่'}</b>{item && <em>แตะเพื่อถอด</em>}</span>
+  </button>;
   return (
-    <div className="card" style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>
-      {/* preview */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-        <div style={{ width: 92, height: 92, borderRadius: 24, display: 'grid', placeItems: 'center', background: 'var(--accent-soft)' }}>
-          <DressedMascot size={54} />
-        </div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 15, color: 'var(--ink)' }}>เพื่อนคู่ใจของเฟรยา</div>
-          <div style={{ fontSize: 11.5, color: 'var(--ink-soft)' }}>โตขึ้นตามเลเวล · ตอนนี้ Level {level}</div>
-          <div style={{ fontSize: 11.5, color: 'var(--ink-soft)' }}>มีชุดแล้ว {ownedItems.length}/{MASCOT_ITEMS.length} ชิ้น</div>
+    <div className="card wardrobe-card">
+      <div className="wardrobe-stage">
+        <div className="wardrobe-portrait"><DressedMascot size={132} mood={wornHat || wornHeld ? 'excited' : 'happy'} /></div>
+        <div className="wardrobe-title"><span>ห้องแต่งตัวของ Lumi</span><b>เพื่อนคู่ใจ Level {level}</b><small>มีของแต่งแล้ว {ownedItems.length}/{MASCOT_ITEMS.length} ชิ้น</small></div>
+        <div className="equipped-grid">
+          <Equipped item={wornHat} slot="hat" label="เครื่องประดับ" />
+          <Equipped item={wornHeld} slot="held" label="ของคู่กาย" />
         </div>
       </div>
 
       {/* owned: tap to wear / take off */}
       {ownedItems.length > 0 ? (
         <div>
-          <div style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--ink-soft)', marginBottom: 7 }}>แตะเพื่อใส่/ถอด</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
+          <div className="wardrobe-owned-label">ของที่มี · แตะเพื่อใส่หรือเปลี่ยน</div>
+          <div className="wardrobe-owned-grid">
             {ownedItems.map(item => {
-              const on = mascotFit.worn[item.slot] === item.id;
+              const on = worn[item.slot] === item.id;
               return (
                 <button key={item.id} className={'fit-chip' + (on ? ' on' : '')} onClick={() => wearMascotItem(item)}>
-                  {item.emoji} {item.th}{on ? ' ✓' : ''}
+                  <RewardGlyph item={item} kind="fit" size={38} /><span>{item.th}<small>{on ? 'กำลังใส่' : item.slot === 'hat' ? 'เครื่องประดับ' : 'ของคู่กาย'}</small></span>{on && <AppIcon name="check" size={15} />}
                 </button>
               );
             })}
@@ -335,9 +318,9 @@ function MascotWardrobe() {
    pure presentation: shelves → preview sheet (confirm) → chest celebration.
    ========================================================= */
 const SHOP_TABS = [
-  { id: 'room', th: 'ของแต่งห้อง', icon: 'bed' },
-  { id: 'fit',  th: 'ชุดมาสคอต',  icon: 'shirt' },
-  { id: 'real', th: 'รางวัลจริง',  icon: 'gift' },
+  { id: 'room', th: 'ของแต่งห้อง', icon: '🛋️' },
+  { id: 'fit',  th: 'ชุดมาสคอต',  icon: '🎀' },
+  { id: 'real', th: 'รางวัลจริง',  icon: '🎁' },
 ];
 
 function ItemPreviewSheet({ p, onClose, onBuy }) {
@@ -349,13 +332,11 @@ function ItemPreviewSheet({ p, onClose, onBuy }) {
     : kind === 'fit' ? `ชุดของเพื่อนคู่ใจ (${item.slot === 'hat' ? 'สวมบนหัว' : 'ของถือคู่กาย'}) · ซื้อแล้วใส่ให้ทันที`
     : 'รางวัลพิเศษจากคุณแม่ · แลกแล้วไปบอกคุณแม่ได้เลยนะ';
   return (
-    <AppOverlayPortal>
-      <div className="overlay" onClick={onClose}>
-        <div className="sheet" onClick={e => e.stopPropagation()}>
+    <AccessibleOverlay onClose={onClose} labelledBy="shop-item-preview-title">
           <div className="sheet-grab"></div>
-          <div className="pv-art">{item.img ? <img className="pv-art-img" src={item.img} alt="" /> : item.emoji}</div>
+          <div className="pv-art"><RewardGlyph item={item} kind={kind} size={72} /></div>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 17, color: 'var(--ink)' }}>{item.th}</div>
+            <div id="shop-item-preview-title" style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 17, color: 'var(--ink)' }}>{item.th}</div>
             <div style={{ fontSize: 11, color: 'var(--ink-soft)' }}>{item.en}</div>
           </div>
           <div style={{ fontSize: 12, color: 'var(--ink)', textAlign: 'center', lineHeight: 1.55 }}>{desc}</div>
@@ -372,9 +353,7 @@ function ItemPreviewSheet({ p, onClose, onBuy }) {
               <button className="btn ghost block" onClick={onClose}>ไว้มาใหม่</button>
             </>
           )}
-        </div>
-      </div>
-    </AppOverlayPortal>
+    </AccessibleOverlay>
   );
 }
 
@@ -389,18 +368,17 @@ function PurchaseCelebration({ p, onClose }) {
     el.scrollIntoView(reduce ? {} : { behavior: 'smooth', block: 'start' });
   };
   return (
-    <AppOverlayPortal>
-      <div className="loot-reveal" onClick={onClose}>
-        <div className="loot-reveal-card" onClick={e => e.stopPropagation()}>
+    <AccessibleOverlay onClose={onClose} labelledBy="purchase-celebration-title"
+      className="loot-reveal" surfaceClassName="loot-reveal-card">
           <div className="chest-scene" aria-hidden="true">
             <span className="chest-glow" />
-            <span className="chest-item">{item.emoji}</span>
+            <span className="chest-item"><RewardGlyph item={item} kind={kind} size={48} /></span>
             <div className="chest">
               <div className="chest-lid" />
               <div className="chest-base" />
             </div>
           </div>
-          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 17, color: 'var(--ink)' }}>
+          <div id="purchase-celebration-title" style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 17, color: 'var(--ink)' }}>
             ได้ {item.th} มาแล้ว!
           </div>
           {kind === 'fit' && <div style={{ fontSize: 11.5, color: 'var(--ink-soft)' }}>ใส่ให้เพื่อนคู่ใจเรียบร้อยแล้วนะ</div>}
@@ -411,9 +389,7 @@ function PurchaseCelebration({ p, onClose }) {
               {kind === 'room' ? 'เก็บไว้ก่อน' : 'เย้! 🎉'}
             </button>
           </div>
-        </div>
-      </div>
-    </AppOverlayPortal>
+    </AccessibleOverlay>
   );
 }
 
@@ -422,6 +398,7 @@ function StarShop() {
   const [tab, setTab] = useStateR('room');
   const [preview, setPreview] = useStateR(null);   // { kind, item } being inspected
   const [won, setWon] = useStateR(null);           // { kind, item } just purchased
+  const shopScene = window.FW_ASSETS && window.FW_ASSETS.scenes && window.FW_ASSETS.scenes.shop;
 
   const entries = tab === 'room'
     ? ROOM_ITEMS.map(item => ({ kind: 'room', item, owned: room.owned.includes(item.id) }))
@@ -438,20 +415,17 @@ function StarShop() {
     setWon(p);
   };
 
-  const shopArt = fwArt('scene', 'shop');
   return (
     <div className="shop-front">
       <div className="shop-awning" aria-hidden="true"></div>
-      <div className={'shop-scene' + (shopArt ? '' : ' none')}>
-        {shopArt && <img className="shop-scene-art" src={shopArt} alt="" aria-hidden="true" />}
+      <div className={'shop-scene' + (shopScene && shopScene.src ? ' has-art' : '')}
+        style={shopScene && shopScene.src ? { backgroundImage: `linear-gradient(90deg, rgba(46,27,55,.82), rgba(46,27,55,.18)), url(${shopScene.src})` } : undefined}>
         <div className="shop-head">
           <div className="shop-sign">⭐ ร้านดาวของเฟรยา<span>Freya's Star Shop</span></div>
           <span className="shop-purse">⭐ {stars}</span>
         </div>
         <div className="shop-keeper">
-          {fwArt('character', 'lumiStar')
-            ? <img className="shop-keeper-img" src={fwArt('character', 'lumiStar')} alt="ลูมิ เจ้าของร้าน" />
-            : <DressedMascot size={38} />}
+          <DressedMascot size={46} mood="star" />
           <span className="shop-keeper-bubble">ยินดีต้อนรับค่า~ วันนี้รับอะไรดีคะ?</span>
         </div>
       </div>
@@ -460,7 +434,7 @@ function StarShop() {
           <button key={t.id} role="tab" aria-selected={tab === t.id}
             className={'shop-tab' + (tab === t.id ? ' on' : '')}
             onClick={() => { setTab(t.id); beep('tab'); }}>
-            <FwIcon name={t.icon} size={14} /> {t.th}
+            {t.icon} {t.th}
           </button>
         ))}
       </div>
@@ -484,9 +458,7 @@ function StarShop() {
                 if (owned) { showToast('มีชิ้นนี้แล้ว · Already owned', item.emoji); beep('tab'); return; }
                 setPreview({ kind, item }); beep('tab');
               }}>
-              {item.img
-                ? <img className="shelf-art-img" src={item.img} alt="" />
-                : <span className="shelf-art">{item.emoji}</span>}
+              <span className="shelf-art"><RewardGlyph item={item} kind={kind} size={50} /></span>
               <span className="shelf-name">{item.th}</span>
               {owned
                 ? <span className="shelf-state ok">✓ มีแล้ว</span>
@@ -512,9 +484,9 @@ function RewardCard({ r }) {
   return (
     <div className="card reward-card" style={{ padding: 14, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, textAlign: 'center', position: 'relative' }}>
       {parentMode && (
-        <button className="rw-del" title="ลบรางวัล" onClick={() => removeReward(r.id)}>✕</button>
+        <button className="rw-del" title="ลบรางวัล" aria-label={`ลบรางวัล ${r.th}`} onClick={() => removeReward(r.id)}>✕</button>
       )}
-      <div style={{ fontSize: 38, lineHeight: 1 }}>{r.emoji}</div>
+      <RewardGlyph item={r} kind="real" size={54} />
       <div style={{ width: '100%' }}>
         {parentMode && editing ? (
           <input className="rw-name-input" value={r.th} autoFocus
@@ -586,7 +558,7 @@ function Rewards() {
 
       <div>
         <div className="sec-h">
-          <h3><FwIcon name="package" /> กล่องสุ่มรางวัล</h3>
+          <h3>🎁 กล่องสุ่มรางวัล</h3>
           <span className="sub">Weekly Surprise Box</span>
         </div>
         <LootBox />
@@ -594,7 +566,7 @@ function Rewards() {
 
       <div id="freya-room">
         <div className="sec-h">
-          <h3><FwIcon name="bed" /> ห้องของเฟรยา</h3>
+          <h3>🏠 ห้องของเฟรยา</h3>
           <span className="sub">My Room · ของที่ซื้อมาวางที่นี่</span>
         </div>
         <FreyaRoom />
@@ -602,7 +574,7 @@ function Rewards() {
 
       <div>
         <div className="sec-h">
-          <h3><FwIcon name="shirt" /> เพื่อนคู่ใจ</h3>
+          <h3>🐰 เพื่อนคู่ใจ</h3>
           <span className="sub">Mascot Wardrobe</span>
         </div>
         <MascotWardrobe />
@@ -610,14 +582,14 @@ function Rewards() {
 
       <div>
         <div className="sec-h">
-          <h3><FwIcon name="star" /> อัลบั้มสติกเกอร์</h3>
+          <h3>📒 อัลบั้มสติกเกอร์</h3>
           <span className="sub">Sticker Album</span>
         </div>
         <StickerAlbum />
       </div>
 
       <div>
-        <div className="sec-h"><h3><FwIcon name="wallet" /> กระเป๋าเงิน</h3><span className="sub">Wallet · เรียนรู้การออม</span></div>
+        <div className="sec-h"><h3>👛 กระเป๋าเงิน</h3><span className="sub">Wallet · เรียนรู้การออม</span></div>
         <Wallet />
       </div>
     </div>

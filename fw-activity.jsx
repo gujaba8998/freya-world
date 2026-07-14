@@ -44,18 +44,16 @@ function IndicatorSelector({ initialGroup, grade, selected, onToggle, onClose })
   );
 
   return (
-    <AppOverlayPortal>
-    <div className="overlay" onClick={onClose}>
-      <div className="sheet sel-sheet" onClick={e => e.stopPropagation()}>
+    <AccessibleOverlay onClose={onClose} labelledBy="indicator-selector-title" surfaceClassName="sheet sel-sheet">
         <div className="sheet-grab"></div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
           <span style={{ fontSize: 22 }}>🏷️</span>
           <div style={{ flex: 1 }}>
-            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 16, color: 'var(--ink)' }}>เลือกตัวชี้วัด</div>
+            <div id="indicator-selector-title" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 16, color: 'var(--ink)' }}>เลือกตัวชี้วัด</div>
             <div style={{ fontSize: 11, color: 'var(--ink-soft)' }}>ตามหลักสูตรบ้านเรียน · {grade}</div>
           </div>
           <span style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--accent-deep)', background: 'var(--accent-soft)', padding: '4px 10px', borderRadius: 999 }}>{selected.length} เลือก</span>
-          <button className="x-btn" onClick={onClose}>✕</button>
+          <button className="x-btn" onClick={onClose} aria-label="ปิดตัวเลือกตัวชี้วัด">✕</button>
         </div>
         <Crumb />
 
@@ -110,9 +108,7 @@ function IndicatorSelector({ initialGroup, grade, selected, onToggle, onClose })
         )}
 
         <button className="btn block" style={{ marginTop: 14 }} onClick={onClose}>เสร็จสิ้น · เลือกแล้ว {selected.length} ตัวชี้วัด</button>
-      </div>
-    </div>
-    </AppOverlayPortal>
+    </AccessibleOverlay>
   );
 }
 

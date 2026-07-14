@@ -95,13 +95,39 @@ function EvidencePicker({ items, setItems, accent }) {
    pending    → muted, hourglass badge
    done       → strikethrough, green check
    ========================================================= */
-function MissionCard({ m }) {
+const QUEST_STATUS = {
+  available: { th: 'พร้อมเริ่ม', en: 'Ready', tone: 'ready' },
+  inprogress: { th: 'กำลังผจญภัย', en: 'In progress', tone: 'active' },
+  pending: { th: 'รอผู้ปกครอง', en: 'Waiting for review', tone: 'pending' },
+  done: { th: 'สำเร็จแล้ว', en: 'Complete', tone: 'done' },
+};
+
+function MissionCard({ m, compact = false, onOpen }) {
   const { acceptMission, submitMission, toggleMission, repeatMission, parentMode, beep, showToast } = useApp();
   const g = GROUP[m.group];
   const st = m.status || (m.done ? 'done' : 'available');
   const [evidence, setEvidence] = useStateDash([]); // attached files
   const [uploading, setUploading] = useStateDash(false);
   const hasEvidence = evidence.length > 0;
+  const statusCopy = QUEST_STATUS[st] || QUEST_STATUS.available;
+  const questArt = window.FW_ASSETS && window.FW_ASSETS.mission
+    ? window.FW_ASSETS.mission.item(m)
+    : window.FW_ASSETS && window.FW_ASSETS.missions && window.FW_ASSETS.missions[m.group];
+
+  if (compact) return (
+    <button type="button" className="quest-ledger-card" onClick={() => onOpen && onOpen(m)}
+      style={{ '--quest-color': g.c }} aria-label={`${m.th} สถานะ${statusCopy.th} ดูรายละเอียด`}>
+      <span className="quest-ledger-mark">{questArt && questArt.src
+        ? <img src={questArt.src} alt="" width="40" height="40" loading="lazy" />
+        : <AppIcon name="quests" size={20} />}</span>
+      <span className="quest-ledger-copy">
+        <b>{m.th}</b><small>{m.en} · {g.th}</small>
+      </span>
+      <span className={'quest-state ' + statusCopy.tone}>{statusCopy.th}<small>{statusCopy.en}</small></span>
+      <StarCounter value={m.stars} />
+      <AppIcon name="chevron" size={16} />
+    </button>
+  );
 
   const handleSubmit = async () => {
     setUploading(true);
@@ -231,6 +257,9 @@ function HeroAdventure({ go }) {
   const doing = missions.find(m => m.status === 'inprogress');
   const avail = missions.find(m => (m.status || (m.done ? 'done' : 'available')) === 'available');
   const target = doing || avail;
+  const assets = window.FW_ASSETS;
+  const freyaArt = assets && assets.characters && assets.characters.freya.map;
+  const homeScene = assets && assets.scenes && assets.scenes.home;
   const nDone = missions.filter(m => m.status === 'done').length;
   const nPending = missions.filter(m => m.status === 'pending').length;
   const scrollToQuests = () => {
@@ -240,21 +269,20 @@ function HeroAdventure({ go }) {
     const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     el.scrollIntoView(reduce ? {} : { behavior: 'smooth', block: 'start' });
   };
-  const heroArt = fwArt('scene', 'hero');
   return (
-    <section className={'hero ' + period}>
-      {heroArt
-        ? <img className="hero-art" src={heroArt} alt="" aria-hidden="true" />
-        : <div className="hero-hill" aria-hidden="true" />}
-      <div className="hero-sky" aria-hidden="true">
+    <section className={'hero ' + period + (homeScene && homeScene.src ? ' has-scene' : '')}>
+      <div className="hero-sky" aria-hidden="true" style={homeScene && homeScene.src ? {
+        backgroundImage: `linear-gradient(90deg, rgba(255,249,243,.94) 0%, rgba(255,249,243,.78) 43%, rgba(255,249,243,.08) 74%), url(${homeScene.src})`,
+      } : undefined}>
         {period === 'night'
           ? <><span className="hero-moon" /><span className="hero-stars" /></>
           : <span className="hero-sun" />}
-        {!heroArt && <><span className="hero-cloud c1" /><span className="hero-cloud c2" /></>}
+        <span className="hero-cloud c1" /><span className="hero-cloud c2" />
       </div>
+      <div className="hero-hill" aria-hidden="true" />
       <div className="hero-body">
         {settings.thaiDate !== false && <div className="hero-date">{thaiDate(now).full}</div>}
-        <h2 className="hero-greet">{HERO_GREET[period]} <span style={{ whiteSpace: 'nowrap' }}>{name}!</span></h2>
+        <h2 className="hero-greet">{HERO_GREET[period]} {name}!</h2>
         <p className="hero-quote">“{quote}”</p>
         <div className="hero-lvl">
           <div className="hero-lvl-bar"><b style={{ width: levelInto + '%' }}></b></div>
@@ -279,14 +307,12 @@ function HeroAdventure({ go }) {
           <div className="hero-wait">วันนี้ยังไม่มีภารกิจ รอคุณแม่ส่งมานะ 💌</div>
         )}
       </div>
-      {fwArt('character', 'freya') ? (
-        <div className="hero-freya">
-          <img src={fwArt('character', 'freya')} alt="เฟรยา นักสำรวจตัวน้อย" />
-          <span className="hero-freya-tag">เฟรยา · นักสำรวจตัวน้อย</span>
-        </div>
-      ) : (
-        <div className="hero-mascot"><DressedMascot size={58} /></div>
-      )}
+      <div className="hero-character" aria-hidden="true">
+        {freyaArt && freyaArt.src
+          ? <img src={freyaArt.src} alt="" width="150" height="188" />
+          : <DressedMascot size={58} />}
+        <span>Freya · นักสำรวจตัวน้อย</span>
+      </div>
     </section>
   );
 }
@@ -303,7 +329,7 @@ function AchievementPreview({ go }) {
   return (
     <div>
       <div className="sec-h">
-        <h3><FwIcon name="award" /> ความสำเร็จล่าสุด</h3>
+        <h3>🏅 ความสำเร็จล่าสุด</h3>
         <span className="sub">Achievements</span>
       </div>
       <div className="card ach-strip">
@@ -325,8 +351,18 @@ const MAP_POS = [
   { x: 20, y: 8 }, { x: 68, y: 20 }, { x: 24, y: 34 }, { x: 70, y: 48 },
   { x: 24, y: 62 }, { x: 68, y: 76 }, { x: 36, y: 90 },
 ];
+const WORLD_PRESENTATION = {
+  life:     { en: 'Life Village',       hint: 'ฝึกดูแลตัวเองและคนรอบข้าง', mark: 'home' },
+  language: { en: 'Library of Words',   hint: 'เปิดประตูสู่เรื่องเล่าและภาษา', mark: 'book' },
+  math:     { en: 'Shape Town',         hint: 'ค้นหารูปแบบ ตัวเลข และเหตุผล', mark: 'shapes' },
+  science:  { en: 'Sky Laboratory',     hint: 'ทดลอง ตั้งคำถาม และมองท้องฟ้า', mark: 'science' },
+  agri:     { en: 'Wonder Garden',      hint: 'เรียนรู้จากดิน น้ำ และการเติบโต', mark: 'leaf' },
+  social:   { en: 'World City',         hint: 'เข้าใจผู้คน ชุมชน และโลกกว้าง', mark: 'world' },
+  art:      { en: 'Art Island',         hint: 'สร้างสรรค์สี เสียง และจินตนาการ', mark: 'sparkle' },
+};
 function AdventureMap() {
-  const { progress, dark } = useApp();
+  const { progress, dark, missions, beep } = useApp();
+  const [selected, setSelected] = useStateDash(null);
   const firstOpen = GROUPS.findIndex(g => (progress[g.id] || 0) < 100);
   const curIdx = firstOpen === -1 ? GROUPS.length - 1 : firstOpen;
   const pathD = MAP_POS.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
@@ -344,28 +380,159 @@ function AdventureMap() {
         const pct = progress[g.id] || 0;
         const locked = pct === 0;
         const done = pct >= 100;
-        const art = fwArt('world', g.id);
+        const worldArt = window.FW_ASSETS && window.FW_ASSETS.worlds[g.id];
         return (
-          <div key={g.id} className={'adv-node' + (locked ? ' locked' : '')}
+          <button type="button" key={g.id} className={'adv-node' + (locked ? ' locked' : '')}
+            onClick={() => { beep('pop'); setSelected(g); }}
+            aria-label={`${(TERRITORY[g.id] || {}).th || g.th} ${pct}% กดเพื่อดูรายละเอียด`}
             style={{ left: MAP_POS[i].x + '%', top: MAP_POS[i].y + '%' }}>
             <div className="adv-isle" style={{
-              background: art ? undefined : g.c + (locked ? isleAlpha.locked : isleAlpha.open),
+              background: g.c + (locked ? isleAlpha.locked : isleAlpha.open),
               boxShadow: done ? `0 0 0 3px ${g.c}, 0 0 16px ${g.c}88` : `0 0 0 2px ${g.c}55`,
             }}>
-              {art
-                ? <img className="adv-isle-art" src={art} alt="" loading="lazy" />
-                : <span>{locked ? '☁️' : g.emoji}</span>}
-              {locked && art && <span className="adv-isle-veil">☁️</span>}
-              {done && <span className="adv-crown">👑</span>}
+              <span className="adv-landmark" aria-hidden="true">{worldArt && worldArt.src
+                ? <img src={worldArt.src} alt="" width="54" height="54" loading="lazy" />
+                : <AppIcon name={(WORLD_PRESENTATION[g.id] || {}).mark || 'world'} size={24} />}</span>
+              {done && <span className="adv-crown" aria-label="พิชิตแล้ว"><AppIcon name="check" size={12} /></span>}
               {i === curIdx && <span className="adv-me"><DressedMascot size={20} /></span>}
             </div>
             <span className="adv-terr">{(TERRITORY[g.id] || {}).th || g.th}</span>
-            <span className="adv-name">{g.th}</span>
+            <span className="adv-name">{(WORLD_PRESENTATION[g.id] || {}).en || g.en || g.th}</span>
             <span className="adv-pct" style={{ color: g.c }}>{locked ? 'ยังไม่สำรวจ' : done ? 'พิชิตแล้ว!' : 'สำรวจแล้ว ' + pct + '%'}</span>
-          </div>
+          </button>
         );
       })}
+      {selected && (() => {
+        const pct = progress[selected.id] || 0;
+        const worldMissions = missions.filter(m => m.group === selected.id);
+        const completed = worldMissions.filter(m => m.status === 'done' || m.done).length;
+        const copy = WORLD_PRESENTATION[selected.id] || {};
+        const portalArt = window.FW_ASSETS && window.FW_ASSETS.portals &&
+          window.FW_ASSETS.portals[pct > 0 ? 'unlocked' : 'locked'];
+        return (
+          <AccessibleOverlay onClose={() => setSelected(null)} labelledBy="world-detail-title"
+            describedBy="world-detail-description" surfaceClassName="sheet world-detail-sheet">
+            <button className="x-btn" aria-label="ปิดรายละเอียดโลก" onClick={() => setSelected(null)}>×</button>
+            <div className="world-detail-art" style={{ '--world-color': selected.c }} aria-hidden="true">
+              {window.FW_ASSETS && window.FW_ASSETS.worlds[selected.id].src
+                ? <img src={window.FW_ASSETS.worlds[selected.id].src} alt="" width="180" height="180" />
+                : <AppIcon name={copy.mark || 'world'} size={38} />}
+            </div>
+            <span className="world-detail-kicker">บันทึกพื้นที่สำรวจ · {pct}%</span>
+            <h2 id="world-detail-title">{(TERRITORY[selected.id] || {}).th || selected.th}</h2>
+            <p className="world-detail-en">{copy.en}</p>
+            <p id="world-detail-description">{copy.hint}</p>
+            <div className="world-detail-progress"><Bar value={pct} color={selected.c} /></div>
+            <div className="world-detail-stats">
+              <span><b>{completed}</b> ภารกิจสำเร็จ</span>
+              <span><b>{worldMissions.length}</b> ภารกิจทั้งหมด</span>
+            </div>
+            {portalArt && portalArt.src && (
+              <div className={'world-gate-status ' + (pct > 0 ? 'open' : 'locked')}>
+                <img src={portalArt.src} alt="" width="76" height="76" />
+                <span><b>{pct > 0 ? 'ประตูแห่งการเรียนรู้เปิดแล้ว' : 'ประตูนี้ยังรอการสำรวจ'}</b>
+                  {pct > 0 ? 'กลับมาทำภารกิจเพื่อทำให้พอร์ทัลสว่างขึ้น' : 'เริ่มภารกิจแรกเพื่อปลุกพลังของโลกนี้'}</span>
+              </div>
+            )}
+            <button className="btn block" onClick={() => setSelected(null)}>กลับไปที่แผนที่</button>
+          </AccessibleOverlay>
+        );
+      })()}
     </div>
+  );
+}
+
+/* Direct shell destinations reuse the same mission/map components and state.
+   They intentionally add no new workflow logic; Phase 3 will own quest detail. */
+function QuestsPage({ go }) {
+  const { missions, parentMode, beep } = useApp();
+  const [filter, setFilter] = useStateDash('active');
+  const [selectedMission, setSelectedMission] = useStateDash(null);
+  const active = missions.filter(m => ['available', 'inprogress', 'pending'].includes(m.status || 'available')).length;
+  const visible = missions.filter(m => {
+    const status = m.status || (m.done ? 'done' : 'available');
+    if (filter === 'all') return true;
+    if (filter === 'active') return status !== 'done';
+    return status === filter;
+  });
+  return (
+    <main className="tab-enter shell-page" aria-labelledby="quests-page-title">
+      <header className="page-intro">
+        <span className="page-intro-icon"><AppIcon name="quests" size={24} /></span>
+        <div>
+          <p>บันทึกการเดินทางวันนี้</p>
+          <h2 id="quests-page-title">ภารกิจของฉัน</h2>
+          <span>{active} ภารกิจกำลังรอการสำรวจ</span>
+        </div>
+      </header>
+      {missions.length > 0 && (
+        <div className="quest-filters" role="group" aria-label="กรองภารกิจ">
+          {[
+            ['active', 'กำลังทำ'], ['available', 'พร้อมเริ่ม'], ['pending', 'รอตรวจ'], ['done', 'สำเร็จ'], ['all', 'ทั้งหมด'],
+          ].map(([id, label]) => (
+            <button key={id} className={filter === id ? 'on' : ''} aria-pressed={filter === id}
+              onClick={() => setFilter(id)}>{label}</button>
+          ))}
+        </div>
+      )}
+      {missions.length === 0 ? (
+        <EmptyState icon="quests" title="ยังไม่มีภารกิจ"
+          description={parentMode ? 'เพิ่มกิจกรรมแรกจากแผนการเรียนหรือสร้างภารกิจใหม่' : 'เมื่อผู้ปกครองส่งภารกิจมา รายการจะปรากฏตรงนี้'}
+          action={parentMode ? <button className="btn" onClick={() => { beep('pop'); go('activity'); }}>เพิ่มภารกิจแรก</button> : null} />
+      ) : visible.length ? (
+        <div className="quest-ledger-list">
+          {visible.map(m => <MissionCard key={m.id} m={m} compact onOpen={setSelectedMission} />)}
+        </div>
+      ) : <EmptyState icon="quests" title="ไม่มีภารกิจในหมวดนี้" description="เลือกสถานะอื่นเพื่อดูภารกิจที่เหลือ" />}
+      {parentMode && missions.length > 0 && (
+        <button className="btn ghost block" onClick={() => { beep('pop'); go('activity'); }}>เพิ่มกิจกรรม</button>
+      )}
+      {selectedMission && (
+        <AccessibleOverlay onClose={() => setSelectedMission(null)} labelledBy="quest-detail-title"
+          surfaceClassName="sheet quest-detail-sheet">
+          <div className="quest-detail-head">
+            <div><span>บันทึกภารกิจ</span><h2 id="quest-detail-title">{selectedMission.th}</h2></div>
+            <button className="x-btn" aria-label="ปิดรายละเอียดภารกิจ" onClick={() => setSelectedMission(null)}>×</button>
+          </div>
+          {selectedMission.desc && <p className="quest-detail-desc">{selectedMission.desc}</p>}
+          <MissionCard m={selectedMission} />
+        </AccessibleOverlay>
+      )}
+    </main>
+  );
+}
+
+function WorldPage() {
+  const { progress } = useApp();
+  const overall = Math.round(GROUPS.reduce((sum, group) => sum + (progress[group.id] || 0), 0) / GROUPS.length);
+  return (
+    <main className="tab-enter shell-page" aria-labelledby="world-page-title">
+      <header className="page-intro">
+        <span className="page-intro-icon"><AppIcon name="world" size={24} /></span>
+        <div>
+          <p>แผนที่นักสำรวจ</p>
+          <h2 id="world-page-title">โลกการเรียนรู้ของฉัน</h2>
+          <span>สำรวจรวมแล้ว {overall}%</span>
+        </div>
+      </header>
+      <AdventureMap />
+      <section className="world-ledger" aria-label="ความก้าวหน้าแต่ละโลก">
+        {GROUPS.map(group => {
+          const value = progress[group.id] || 0;
+          return (
+            <div className="world-ledger-row" key={group.id}>
+              <span className="world-ledger-mark" style={{ '--world-color': group.c }} aria-hidden="true" />
+              <div>
+                <strong>{(TERRITORY[group.id] || {}).th || group.th}</strong>
+                <span>{group.th}</span>
+              </div>
+              <div className="world-ledger-progress"><Bar value={value} color={group.c} /></div>
+              <b>{value}%</b>
+            </div>
+          );
+        })}
+      </section>
+    </main>
   );
 }
 
@@ -382,17 +549,12 @@ function Dashboard({ go }) {
       {/* quests */}
       <div id="quests">
         <div className="sec-h">
-          <h3><FwIcon name="target" /> ภารกิจวันนี้</h3>
+          <h3>🎯 ภารกิจวันนี้</h3>
           <span className="sub">Today's Quests</span>
         </div>
         {missions.length === 0 ? (
-          <div className="hub-empty">
-            <div style={{ fontSize: 38 }}>🗓️</div>
-            <div style={{ fontWeight: 700, color: 'var(--ink)' }}>ยังไม่มีภารกิจ</div>
-            <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>
-              {parentMode ? 'กดปุ่มด้านล่างเพื่อเพิ่มกิจกรรมแรก' : 'รอคุณแม่เพิ่มภารกิจให้นะ'}
-            </div>
-          </div>
+          <EmptyState icon="quests" title="ยังไม่มีภารกิจ"
+            description={parentMode ? 'เพิ่มกิจกรรมแรกจากแผนการเรียนได้เลย' : 'เมื่อผู้ปกครองส่งภารกิจมา รายการจะปรากฏตรงนี้'} />
         ) : (
           <div className="missions-list" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {missions.map(m => <MissionCard key={m.id} m={m} />)}
@@ -408,7 +570,7 @@ function Dashboard({ go }) {
       {/* adventure map — progress across the 7 groups as unlockable islands */}
       <div>
         <div className="sec-h">
-          <h3><FwIcon name="map" /> แผนที่ผจญภัย</h3>
+          <h3>🗺️ แผนที่ผจญภัย</h3>
           <span className="sub">Adventure Map · รวม {overall}%</span>
         </div>
         <AdventureMap />
@@ -421,115 +583,4 @@ function Dashboard({ go }) {
   );
 }
 
-/* =========================================================
-   PageHead — editorial header: eyebrow · big title · subtitle
-   ========================================================= */
-function PageHead({ eyebrow, title, sub }) {
-  return (
-    <div className="page-head">
-      <div className="ph-eyebrow">{eyebrow}</div>
-      <h2 className="ph-title">{title}</h2>
-      {sub && <div className="ph-sub">{sub}</div>}
-    </div>
-  );
-}
-
-/* =========================================================
-   QuestsPage — ภารกิจทั้งหมด พร้อมตัวกรองสถานะภาษาเด็ก
-   Reuses MissionCard + state as-is; the filter is pure presentation.
-   ========================================================= */
-const QUEST_FILTERS = [
-  { id: 'all',        th: 'ทั้งหมด' },
-  { id: 'available',  th: 'พร้อมเริ่ม' },
-  { id: 'inprogress', th: 'กำลังผจญภัย' },
-  { id: 'pending',    th: 'รอคุณแม่' },
-  { id: 'done',       th: 'สำเร็จ' },
-];
-const questStatus = (m) => m.status || (m.done ? 'done' : 'available');
-
-function QuestsPage() {
-  const { missions, beep } = useApp();
-  const [filter, setFilter] = useStateDash('all');
-  const counts = { all: missions.length };
-  QUEST_FILTERS.slice(1).forEach(f => { counts[f.id] = missions.filter(m => questStatus(m) === f.id).length; });
-  const shown = filter === 'all' ? missions : missions.filter(m => questStatus(m) === filter);
-  return (
-    <div className="tab-enter" style={{ padding: '16px 16px 28px', display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <PageHead eyebrow="บันทึกการเดินทางวันนี้ · Quest Log" title="ภารกิจของฉัน"
-        sub={missions.length ? `${missions.length} ภารกิจ · สำเร็จแล้ว ${counts.done}` : 'ยังไม่มีภารกิจในบันทึก'} />
-
-      <div className="qf-row" role="tablist" aria-label="กรองตามสถานะ">
-        {QUEST_FILTERS.map(f => (
-          <button key={f.id} role="tab" aria-selected={filter === f.id}
-            className={'qf-chip' + (filter === f.id ? ' on' : '')}
-            onClick={() => { setFilter(f.id); beep('tab'); }}>
-            {f.th}{counts[f.id] > 0 && <b>{counts[f.id]}</b>}
-          </button>
-        ))}
-      </div>
-
-      {shown.length === 0 ? (
-        <div className="hub-empty">
-          <div style={{ fontSize: 38 }}>🗺️</div>
-          <div style={{ fontWeight: 700, color: 'var(--ink)' }}>
-            {missions.length === 0 ? 'ยังไม่มีภารกิจ' : 'ไม่มีภารกิจในหมวดนี้'}
-          </div>
-          <div style={{ fontSize: 12, color: 'var(--ink-soft)' }}>
-            {missions.length === 0 ? 'รอคุณแม่ส่งภารกิจใหม่มานะ' : 'ลองเลือกหมวดอื่นดูสิ'}
-          </div>
-        </div>
-      ) : (
-        <div className="missions-list" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {shown.map(m => <MissionCard key={m.id} m={m} />)}
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* =========================================================
-   WorldPage — โลกการเรียนรู้ 7 ดินแดน แบบไทล์ใหญ่บนเส้นทางจุดไข่ปลา
-   ========================================================= */
-function WorldPage() {
-  const { progress, planItemsFor, planDone, profile } = useApp();
-  const overall = Math.round(GROUPS.reduce((s, g) => s + (progress[g.id] || 0), 0) / GROUPS.length);
-  const plan = planItemsFor(profile.grade);
-  return (
-    <div className="tab-enter" style={{ padding: '16px 16px 28px', display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <PageHead eyebrow="แผนที่นักสำรวจ · Explorer Map" title="โลกการเรียนรู้ของฉัน"
-        sub={`สำรวจรวมแล้ว ${overall}% · ${GROUPS.filter(g => (progress[g.id] || 0) >= 100).length}/7 ดินแดนพิชิตแล้ว`} />
-
-      <div className="world-path">
-        {GROUPS.map((g, i) => {
-          const pct = progress[g.id] || 0;
-          const locked = pct === 0;
-          const done = pct >= 100;
-          const terr = TERRITORY[g.id] || {};
-          const groupPlan = plan.filter(it => it.group === g.id);
-          const planDoneN = groupPlan.filter(it => planDone.has(it.key)).length;
-          const art = fwArt('world', g.id);
-          return (
-            <div key={g.id} className={'w-row' + (i % 2 ? ' flip' : '') + (locked ? ' locked' : '')}>
-              <div className="w-tile">
-                {art ? <img src={art} alt={terr.th || g.th} loading="lazy" /> : <span>{g.emoji}</span>}
-                {locked && <span className="w-veil" aria-hidden="true">☁️</span>}
-                {done && <span className="w-crown" aria-hidden="true">👑</span>}
-              </div>
-              <div className="w-info">
-                <div className="w-terr">{terr.th || g.th}</div>
-                <div className="w-group">{g.emoji} {g.th} · {terr.en || g.en}</div>
-                <div className="w-bar"><b style={{ width: pct + '%', background: g.c }}></b></div>
-                <div className="w-status" style={{ color: locked ? 'var(--ink-soft)' : g.c }}>
-                  {locked ? 'ยังไม่สำรวจ' : done ? 'พิชิตแล้ว!' : `สำรวจแล้ว ${pct}%`}
-                  {groupPlan.length > 0 && <> · แผน {planDoneN}/{groupPlan.length}</>}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-Object.assign(window, { Dashboard, AdventureMap, HeroAdventure, AchievementPreview, PageHead, QuestsPage, WorldPage });
+Object.assign(window, { Dashboard, AdventureMap, HeroAdventure, AchievementPreview, QuestsPage, WorldPage });

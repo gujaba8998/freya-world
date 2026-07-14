@@ -32,11 +32,11 @@ const AVATAR_PRESETS = [
 function AvatarDisplay({ profile, size = 50, onClick }) {
   const isCustom = profile.avatar === 'custom';
   return (
-    <div onClick={onClick} style={{
+    <button type="button" onClick={onClick} aria-label={onClick ? 'เปลี่ยนรูปประจำตัว' : undefined} style={{
       width: size, height: size, borderRadius: '50%', flex: 'none', cursor: onClick ? 'pointer' : 'default',
       background: 'rgba(255,255,255,0.92)', display: 'grid', placeItems: 'center',
       fontSize: size * 0.55, boxShadow: '0 4px 10px -3px rgba(0,0,0,.25)',
-      overflow: 'hidden', position: 'relative',
+      overflow: 'hidden', position: 'relative', border: 'none', padding: 0, font: 'inherit',
     }}>
       {isCustom ? (
         <image-slot id="avatar-photo" shape="circle"
@@ -52,7 +52,7 @@ function AvatarDisplay({ profile, size = 50, onClick }) {
           fontSize: size * 0.19, boxShadow: '0 2px 4px rgba(0,0,0,.25)', color: '#fff',
         }}>✎</div>
       )}
-    </div>
+    </button>
   );
 }
 
@@ -73,15 +73,14 @@ function AvatarPicker({ onClose }) {
   };
 
   return (
-    <div className="overlay" onClick={onClose}>
-      <div className="sheet av-sheet" onClick={e => e.stopPropagation()}>
+    <AccessibleOverlay onClose={onClose} labelledBy="avatar-picker-title" surfaceClassName="sheet av-sheet">
         <div className="sheet-grab"></div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
           <div style={{ flex: 1 }}>
-            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 17, color: 'var(--ink)' }}>เลือกไอคอนตัวเอง</div>
+            <div id="avatar-picker-title" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 17, color: 'var(--ink)' }}>เลือกไอคอนตัวเอง</div>
             <div style={{ fontSize: 11.5, color: 'var(--ink-soft)' }}>Choose your avatar</div>
           </div>
-          <button className="x-btn" onClick={onClose}>✕</button>
+          <button className="x-btn" onClick={onClose} aria-label="ปิดตัวเลือกรูปประจำตัว">✕</button>
         </div>
 
         {/* tab switcher */}
@@ -133,8 +132,7 @@ function AvatarPicker({ onClose }) {
         <button className="btn block" style={{ marginTop: 14 }} onClick={onClose}>
           เสร็จแล้ว! บันทึกไอคอน ✓
         </button>
-      </div>
-    </div>
+    </AccessibleOverlay>
   );
 }
 
